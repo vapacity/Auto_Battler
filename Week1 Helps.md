@@ -8,6 +8,19 @@
 
 代码阅读顺序：GridNode.h -> GridNode.cpp -> HexNode.h -> HexNode.cpp -> GridMap.h -> GridMap.cpp
 
+## UE中的基类字母表示
+
+A（Actor）: 表示继承自 AActor 类的类，通常用于表示在场景中的物体或角色。
+U（Object）: 表示继承自 UObject 类的类，用于表示 Unreal Engine 中的对象。
+F（Struct）: 表示一个结构体，用于组织和存储数据，而不包含行为。
+E（Enum）: 表示一个枚举类型，用于定义一组命名的整数值。
+I（Interface）: 表示一个接口，用于定义一组抽象的方法，可以被其他类实现。
+G（Global）: 表示全局变量或单例模式中的全局实例。
+S（Widget）: 在 Unreal Engine 中，用于表示用户界面的 Slate Widget。
+T（Template）: 表示模板类或模板函数，允许编写通用的代码。
+
+
+
 ### UCLASS
 
 `UCLASS` 是 Unreal Engine 4 (UE4) 中的一个宏，用于声明一个类，并为其添加一些元信息，以便 UE4 能够正确地处理和管理这个类。它通常用于声明蓝图可用的类、Actor 类、GameMode 类等。
@@ -233,3 +246,366 @@ void ExampleFunction(AActor* ActorInstance)
 ```
 
 这个示例中，`ActorInstance` 是一个指向 `AActor` 类实例的指针。通过使用 `Cast<AMyCharacter>(ActorInstance)`，我们尝试将其转换为 `AMyCharacter` 类型。如果转换成功，`CharacterInstance` 将是一个有效的指针，可以在代码中使用。如果转换失败，`CharacterInstance` 将是 `nullptr`，你可以据此进行相应的处理。
+
+
+
+### GridNode::DrawNode参数解释：
+
+- `TArray<FVector>& InVertices`：顶点数组，描述节点的三维空间位置。
+- `TArray<int32>& InIndices`：索引数组，定义顶点之间的连接关系，用于构建节点的三角形网格。
+- `TArray<FVector>& InNormals`：法线数组，描述节点表面的法线方向，用于光照计算。
+- `TArray<FVector2D>& InUV`：UV 数组，表示节点表面上每个顶点的二维纹理坐标。
+- `TArray<FColor>& InVertexColors`：顶点颜色数组，定义节点各个顶点的颜色信息。
+- `TArray<FVector>& InTangents`：切线数组，描述节点表面的切线方向，通常与法线一起用于光照计算。
+- `FVector InOffset`：偏移向量，用于对节点进行位置调整。
+
+### TArray
+
+#### 一，TArray 的创建、初始化、赋值
+
+TArray 的创建、初始化、赋值的主要形式如下。其中，列表既可以用作构造函数的参数，也可以用来初始化和赋值。Init() 可以在TArray 在放置若干个相同元素。
+
+```cpp
+TArray<FString> Arr;
+//Arr is []
+
+TArray<FString> SecArr({ TEXT("Are"), TEXT("you"), TEXT("OK") });
+//SecArr is [Are you OK]
+
+TArray<FString> ThirdArr = { TEXT("Are"), TEXT("you"), TEXT("OK") };
+//ThirdArr is [Are you OK]
+
+ThirdArr.Init(TEXT("Hello"), 3);
+//ThirdArr is [Hello Hello Hello]
+
+Arr = { TEXT("Hello"), TEXT("World") };
+//Arr is [Hello World]
+```
+
+#### 二，TArray 的元素添加
+
+###### 添加单个元素
+
+向TArray 中添加单个元素，有很多中方法：Add、Push、Emplace、AddUnique、Insert。在具体使用上，它们也有一些差别，归纳如下：
+
+1. 前四种是在数组尾部追加元素，Insert 可在数组的任意位置插入元素；
+2. Add 和 Push类似，但是将元素复制或移动到数组中，而Emplace 则使用给定参数构建元素类型的新实例；通常来说，Emplace 的效率高于Add；
+3. 如果不存在相同元素（用运算符=判断），AddUnique 才会向数组中添加元素。
+
+各个函数的使用方式如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") };
+Arr.Add(TEXT(","));
+//Arr is [Are you OK ,]
+
+Arr.Push(TEXT("Hello"));
+//Arr is [Are you OK , Hello]
+
+Arr.Emplace(TEXT("World"));
+//Arr is [Are you OK , Hello World]
+
+Arr.AddUnique(TEXT(","));
+//Arr is [Are you OK , Hello World]
+Arr.AddUnique(TEXT("I"));
+//Arr is [Are you OK , Hello World I]
+
+Arr.Insert(TEXT("Head"), 0);
+//Arr is [Head Are you OK , Hello World I]
+```
+
+###### 添加多个元素
+
+向数组中添加多个元素，可采用Append() 方法或 += 操作符完成，使用方法如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") };
+
+TArray<FString> SecArr({ TEXT("How"), TEXT("Do"), TEXT("You") });
+Arr.Append(SecArr);
+//Arr is [Are you OK How Do You]
+
+TArray<FString> ThirdArr({ TEXT("I"), TEXT("Am"), TEXT("Fine") });
+Arr += ThirdArr;
+//Arr is [Are you OK How Do You I Am Fine]
+```
+
+#### 三，TArray 的三种遍历
+
+TArray 的遍历一共有三种形式：范围for 循环、索引、迭代器，这一点上和vector 类似。下面展示了这几种遍历的使用方法。
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") };
+
+for (auto& s : Arr)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *s);
+}
+
+for (int i = 0; i < Arr.Num(); i++)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%d: %s"), i, *Arr[i]);
+}
+
+for (auto It = Arr.CreateIterator(); It; ++It)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *(*It));
+}
+```
+
+#### 四，TArray 的三种排序
+
+TArry的排序方法也有三种：Sort、HeapSort、StableSort。他们的简单使用方法如下：
+
+```cpp
+Arr.Sort();
+Arr.HeapSort();
+Arr.StableSort();
+```
+
+三者并不相同，存在如下差异：
+
+1. Sort 基于快速排序，是不稳定的排序；
+2. HeapSort 基于堆排序，是不稳定的排序；
+3. StableSort 基于归并排序，是稳定的排序。
+
+默认情况下，上述三种排序方法都是使用元素类型的 < 运算符进行排序。我们可以使用lambda 自定义排序规则，如下，我们根据字符串长度对FString 排序。
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") ,TEXT("Hello"), TEXT("World") };
+
+Arr.StableSort(
+	[](const FString& A, const FString& B) {return A.Len() < B.Len(); }
+);
+//Arr is [OK Are you Hello World]
+```
+
+#### 五，TArray 的元素删除
+
+删除元素的方法比较多，有Remove()、RemoveSingle()、RemoveAll()、RemoveAt()、Empty()。总结下来，它们的用法如下：
+
+1. Remove(Str)： 删除数组中所有与 Str 相同的元素，是否相同用 == 运算符判断；
+2. RemoveSingle(Str)：删除数组中第一个与 Str 相同的元素，是否相同用 == 运算符判断；
+3. RemoveAll(lambda)：删除数组中的多个元素，删除规则由lambda 表达式指定；
+4. RemoveAt(i)：删除数组中索引为 i 的元素；
+5. Empty()：并不是判断数组为空，而是清空所有元素；
+6. Remove(Str) 与 RemoveSingle(Str) 的区别在于是删除单个元素，还是所有元素；
+7. Remove(Str) 与 RemoveAll(lambda) 的区别在于删除规则的不同。
+
+代码演示如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+Arr.Remove(TEXT("OK"));
+//Arr is [Are you]
+
+Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+Arr.RemoveSingle(TEXT("OK"));
+//Arr is [Are you OK]
+
+Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+Arr.RemoveAll([](const FString& Str) {return Str.Len() == 2; });
+//Arr is [Are you]
+
+Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+Arr.RemoveAt(0);
+//Arr is [you OK OK]
+
+Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+Arr.Empty();
+//Arr is []
+```
+
+#### 六，TArray 的查询
+
+###### 根据索引获取元素对象的引用：[] 运算符、Last()、Top()
+
+使用 [] 运算符、Last()、Top()都可以根据索引获取数组中的元素，并且获取的都是元素的引用，也就是说我们可以直接修改数组中的元素。如下代码所示，执行 Arr[0] = Arr[1] 之后，第 0 个元素的值也变成第 1 个元素的了；执行 Arr.Top() = Arr[1] 之后，最后一个元素的值也变成第 1 个元素的了。这三个方法的联系与区别如下：
+
+1. Arr[i] 获取的是顺数第 i 个元素；
+2. Last(i) 获取的是倒数第 i 个元素 ；
+3. Top() 不能带参数，实际效果完全和 Last()一样。
+
+三个方法的具体用法如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") ,TEXT("Hello"), TEXT("World") };
+Arr[0] = Arr[1];
+// Arr is [you you OK Hello World]
+
+UE_LOG(LogTemp, Warning, TEXT("%s"), *Arr.Last());	//Output: World
+UE_LOG(LogTemp, Warning, TEXT("%s"), *Arr.Last(1));	//Output: Hello
+UE_LOG(LogTemp, Warning, TEXT("%s"), *Arr.Top());	//Output: World
+
+Arr.Top() = Arr[1];
+// Arr [you you OK Hello you]
+```
+
+###### 判断元素是否存在：Contains()、ContainsByPredicate()
+
+判断数组中是否存在某元素，使用的方法是Contains() 及其变体ContainsByPredicate()。ContainsByPredicate() 允许使用一元谓词指定判断规则。具体用法如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK") ,TEXT("Hello"), TEXT("World") };
+bool bExist = Arr.Contains(TEXT("Are"));
+bool bContain = Arr.ContainsByPredicate(
+	[](const FString& Str) {return Str.Len() == 3; }
+);
+```
+
+###### 查找元素所在的索引：Find()、FindLast()、IndexOfByKey()、IndexOfByPredicate()
+
+查找元素所在的索引，使用的方法是Find()、FindLast()、IndexOfByKey()、IndexOfByPredicate()。如果查找成功，则返回元素所在的索引；查找失败，则返回 INDEX_NONE（值为-1的宏）。他们的用法总结如下：
+
+1. Find(Str)：返回数组中第一个与 Str 相同的元素的索引，是否相同用 == 运算符判断；
+2. FindLast(Str)：返回数组中最后一个与 Str 相同的元素的索引，是否相同用 == 运算符判断；
+3. IndexOfByKey(Str)：与 Find(Str) 一样；
+4. IndexOfByPredicate(lambda)：IndexOfByKey 的lambda 版，用lambda 表达式来指定查找元素的规则。
+
+代码示例如下：
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+int Index = Arr.Find(TEXT("OK"));
+//Index is 2
+
+Index = Arr.Find(TEXT("I"));
+//Index is INDEX_NONE
+
+Index = Arr.FindLast(TEXT("OK"));
+//Index is 3
+
+Index = Arr.IndexOfByKey(TEXT("OK"));
+//Index is 2
+
+Index = Arr.IndexOfByPredicate([](const FString& Str) {return Str.Len() == 3; });
+//Index is 0
+```
+
+###### 查找元素对象：FindByKey()、FindByPredicate()、FilterByPredicate()
+
+FindByKey()、FindByPredicate()、FilterByPredicate() 可用来获取数组中的元素对象。FindByKey()、FindByPredicate() 获取的都是指向元素的指针，FilterByPredicate() 获取的是所有符合条件的元素，用法总结如下：
+
+1. FindByKey(Str)：获取数组中第一个与 Str 相同的元素的指针，获取失败返回nullptr；
+2. FindByPredicate(lambda)：FindByKey 的lambda 版，用lambda 表达式来指定查找元素的规则；
+3. FilterByPredicate(lambda)：获取数组中所有使lambda 表达式为true 的元素，但这些元素都是拷贝，返回一个数组。
+
+```cpp
+TArray<FString> Arr = { TEXT("Are"), TEXT("you"), TEXT("OK"), TEXT("OK") };
+FString* StrPtr = Arr.FindByKey(TEXT("OK"));
+//StrPtr 是一个指向字符串"OK"的指针
+
+StrPtr = Arr.FindByPredicate([](const FString& Str) {return Str.Len() == 3; });
+//StrPtr 是一个指向字符串"Are"的指针
+
+TArray<FString> StrArr = Arr.FilterByPredicate([](const FString& Str) {return Str.Len() == 3; });
+//StrArr is [Are you]
+```
+
+
+
+### UMeshComponent
+
+ 是 Unreal Engine 中用于表示和管理静态或动态网格的基类。具体的方法和功能可能会依赖于特定的 `UMeshComponent` 子类，例如 `UStaticMeshComponent` 或 `USkeletalMeshComponent`。以下是一些 `UMeshComponent` 常见的方法，注意具体的子类可能还包括其他特定于其类型的方法：
+
+1. **`SetMaterial`**：
+
+   ```cpp
+   cppCopy code
+   void UMeshComponent::SetMaterial(int32 ElementIndex, UMaterialInterface* Material);
+   ```
+
+   用于设置组件上指定索引处的材质。
+
+2. **`SetMaterialByName`**：
+
+   ```cpp
+   cppCopy code
+   void UMeshComponent::SetMaterialByName(FName MaterialSlotName, UMaterialInterface* Material);
+   ```
+
+   根据材质槽名称设置材质。
+
+3. **`SetScalarParameterValueOnMaterials`**：
+
+   ```cpp
+   cppCopy code
+   void UMeshComponent::SetScalarParameterValueOnMaterials(FName ParameterName, float ParameterValue);
+   ```
+
+   在关联的材质上设置标量参数的值。
+
+4. **`SetVectorParameterValueOnMaterials`**：
+
+   ```cpp
+   cppCopy code
+   void UMeshComponent::SetVectorParameterValueOnMaterials(FName ParameterName, FLinearColor ParameterValue);
+   ```
+
+   在关联的材质上设置向量参数的值。
+
+5. **`GetMaterials`**：
+
+   ```cpp
+   cppCopy code
+   TArray<UMaterialInterface*> UMeshComponent::GetMaterials();
+   ```
+
+   返回组件上所有的材质。
+
+6. **`SetCastShadow`**：
+
+   ```cpp
+   cppCopy code
+   void UMeshComponent::SetCastShadow(bool bNewCastShadow);
+   ```
+
+   设置组件是否投射阴影。
+
+7. **`OnComponentHit`**：
+
+   ```cpp
+   cppCopy codevoid UMeshComponent::OnComponentHit(
+       UPrimitiveComponent* HitComponent,
+       AActor* OtherActor,
+       UPrimitiveComponent* OtherComp,
+       FVector NormalImpulse,
+       const FHitResult& Hit);
+   ```
+
+   当组件被击中时触发的事件。
+
+8. **`OnComponentBeginOverlap`**：
+
+   ```cpp
+   cppCopy codevoid UMeshComponent::OnComponentBeginOverlap(
+       UPrimitiveComponent* OverlappedComponent,
+       AActor* OtherActor,
+       UPrimitiveComponent* OtherComp,
+       int32 OtherBodyIndex,
+       bool bFromSweep,
+       const FHitResult& SweepResult);
+   ```
+
+   当组件开始与其他组件重叠时触发的事件。
+
+9. **`OnComponentEndOverlap`**：
+
+   ```cpp
+   cppCopy codevoid UMeshComponent::OnComponentEndOverlap(
+       UPrimitiveComponent* OverlappedComponent,
+       AActor* OtherActor,
+       UPrimitiveComponent* OtherComp,
+       int32 OtherBodyIndex);
+   ```
+
+   当组件结束与其他组件的重叠时触发的事件。
+
+10. **`CreateDynamicMaterialInstance`**：
+
+```cpp
+cppCopy code
+UMaterialInstanceDynamic* UMeshComponent::CreateDynamicMaterialInstance(int32 ElementIndex, UMaterialInterface* SourceMaterial);
+```
+
+在运行时创建一个动态材质实例。
