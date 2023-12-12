@@ -1,4 +1,5 @@
 #include "HexGrid.h"
+#include "Chess.h"
 #define STARTX 200
 #define STARTY 200
 USING_NS_CC;
@@ -60,4 +61,15 @@ HexCell* HexGrid::getCellAt(const cocos2d::Vec2& position)
     }
     CCLOG("Outposition x:%f,y:%f", closestCell->getPositionX(), closestCell->getPositionY());
     return closestCell;
+}
+
+void HexGrid::swapChessOnGrids(HexCell* cella, HexCell* cellb)
+{
+    if (cella && cellb)
+    {
+        Chess* a = cella->chess;
+        Chess* b = cellb->chess;
+        cella->setChess(b);
+        cellb->setChess(a);
+    }
 }

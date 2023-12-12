@@ -2,8 +2,10 @@
 #include "cocos2d.h"
 #include "PrepareScene.h"
 #include "Chess.h"
-#include"HexCell.h"
+#include "HexCell.h"
 #include "HexGrid.h"
+#include "Charmander.h"
+#include "Squirtle.h"
 
 USING_NS_CC;
 
@@ -69,17 +71,28 @@ void PrepareScene::initLittleHero()
 
 void PrepareScene::initChessExp()
 {
-    auto fireDragon=Chess::create("fireDragon1.png");
-    if (fireDragon) {
-        fireDragon->setScale(0.5);
-        chessSet.push_back(fireDragon);
-        auto cell = hexGrid->getCellAt(Vec2(300, 210));
-        fireDragon->setPosition(cell->getPosition());
-        fireDragon->initialPosition = cell->getPosition();
-        
-        cell->chess = fireDragon;
+    //正在测试同时出现两个
+    auto charmander=Charmander::create("charmander1-back-left.png");
+    if (charmander) {
+        charmander->setScale(0.15);
+        chessSet.push_back(charmander);
 
-        this->addChild(fireDragon,1);
+        auto cell = hexGrid->getCellAt(Vec2(300, 210));
+
+        cell->setChess(charmander);
+
+        this->addChild(charmander,1);
+    }
+
+    auto squirtle = Squirtle::create("squirtle1-back-left.png");
+    if (squirtle) {
+        squirtle->setScale(0.15);
+        chessSet.push_back(squirtle);
+        auto cell = hexGrid->getCellAt(Vec2(600, 210));
+       
+        cell->setChess(squirtle);
+
+        this->addChild(squirtle, 1);
     }
     
 }
@@ -126,7 +139,7 @@ void PrepareScene::onMouseDown(Event* event)
         if (cell && cell->chess) {
             selectedChess = cell->chess;
             selectedChess->isDragging = true;
-            cell->chess = nullptr;
+            cell->chess=nullptr;
         }
 
     }
@@ -175,17 +188,29 @@ void PrepareScene::onMouseUp(Event* event)
         selectedChess->isDragging = false;
 
         //此处判断鼠标位置所处棋格是否存在
-        if (cell) {
-            selectedChess->setPosition(cell->getPosition());
-            selectedChess->initialPosition = cell->getPosition();
-            cell->chess = selectedChess;
-            selectedChess = nullptr;
+        //1 存在且位置为空
+        if (cell && !cell->chess) {
+            cell->setChess(selectedChess);//设置新棋格上的棋子为被拖拽的棋子
+            selectedChess = nullptr;//置空，安全
         }
+        //2 存在且位置不为空
+        else if (cell && cell->chess)
+        {
+            HexGrid::swapChessOnGrids(cell, hexGrid->getCellAt(selectedChess->initialPosition));//交换两个棋格上的棋子
+            cell->setChess(selectedChess);//有不可抗力因素，交换后一个被拖拽棋子无法被控制（在MouseDown时那个棋格就失去了指向），凑活写了
+        }
+        //3 不存在
         else {
-            selectedChess->setPosition(selectedChess->initialPosition);
+            HexCell* initialCell =hexGrid->getCellAt(selectedChess->initialPosition);//获取初始棋格
+            initialCell->setChess(selectedChess);//回到初始棋格
         }
 
     }
         return;
     
+}
+
+void PrepareScene::createChessAtCell(HexCell* cell)
+{
+
 }

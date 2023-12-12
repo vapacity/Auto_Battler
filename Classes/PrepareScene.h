@@ -7,6 +7,7 @@
 #include "HexGrid.h"
 #include "Chess.h"
 #include "LittleHero.h"
+#include "HexCell.h"
 USING_NS_CC;
 class PrepareScene : public cocos2d::Scene
 {
@@ -36,7 +37,7 @@ public:
 
     //创建棋子样例
     void initChessExp();
-
+    void createChessAtCell(HexCell* cell);
     //在onMouseMove函数中实现Grids透明度变化
     void moveOnGrids(Vec2 mousePosition);
     void moveOnChess(Vec2 mousePosition);

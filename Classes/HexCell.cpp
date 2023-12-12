@@ -33,3 +33,13 @@ void HexCell::changeOpacity(int Opacity)
         return;
     hexSprite->setOpacity(Opacity);
 }
+
+void HexCell::setChess(Chess* Inchess)
+{
+    if (!Inchess)
+        return;
+    this->chess = Inchess;
+    chess->setPosition(this->getPosition());
+    chess->initialPosition = this->getPosition();
+   // Inchess->atCell = this;
+}

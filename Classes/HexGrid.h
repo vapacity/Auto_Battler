@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "HexCell.h"
 
+USING_NS_CC;
 class HexGrid : public cocos2d::Node {
 public:
     std::vector<HexCell*> GridMap;
@@ -18,7 +19,8 @@ public:
     //获得游戏中坐标Vec2处对应的格子（方法为遍历查找与鼠标最靠近的格子中心）
     HexCell* getCellAt(const cocos2d::Vec2& position);
 
-    //
+    //交换两个棋格上的棋子
+    static void swapChessOnGrids(HexCell* cella, HexCell* cellb);
 };
 
 #endif // HEXGRID_H

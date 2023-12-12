@@ -2,6 +2,7 @@
 #define CHESS_H
 
 #include "cocos2d.h"
+
 USING_NS_CC;
 class Chess :public cocos2d::Sprite
 {
@@ -9,7 +10,6 @@ class Chess :public cocos2d::Sprite
 public://此处放属性变量
 	Sprite* chessExample;
 
-	Vec2 chessPosition;//位置
 
 	Vec2 initialPosition;//起始位置
 	
