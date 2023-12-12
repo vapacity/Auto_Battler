@@ -34,8 +34,8 @@ void PreparationSeats::removeChessOfSeat( Seat* seat)
 
 void PreparationSeats::addOrRemove(Chess* chess, Seat* seat)
 {
-    if (seat && chess) {
-        if (!seat->chessInSeat) {
+    if (seat) {
+        if (!seat->chessInSeat&&chess) {
             addChessToSeat(chess, seat);
         }
         else
@@ -155,8 +155,13 @@ void PreparationSeats::testClickUp(Event* event)
     // 获取鼠标位置
     Vec2 mousePosition = mouseEvent->getLocationInView();
     if (auto seat = mouseInWhichSeat(mousePosition)) {
-        if (TEST)
-            chessWithMouse = Chess::create();
+        if (TEST) {
+            if (!seat->chessInSeat)
+                chessWithMouse = Chess::create();
+            else
+                chessWithMouse = nullptr;
+        }
+            
         addOrRemove(chessWithMouse, seat);
     }
 }
