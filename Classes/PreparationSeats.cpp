@@ -156,7 +156,7 @@ void PreparationSeats::testClickUp(Event* event)
     Vec2 mousePosition = mouseEvent->getLocationInView();
     if (auto seat = mouseInWhichSeat(mousePosition)) {
         if (TEST)
-            Chess* chessWithMouse = Chess::create();
+            chessWithMouse = Chess::create();
         addOrRemove(chessWithMouse, seat);
     }
 }
