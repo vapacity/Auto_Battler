@@ -171,7 +171,7 @@ void StoreLayer::refresh() {
 }
 
 void StoreLayer::buyCard(int choice) {
-    this->buyCardId = layerId[choice];
+   
     money -= (buyCardId / 3 + 1);
     if (money < 0) {
         noMoneyText();
@@ -179,6 +179,7 @@ void StoreLayer::buyCard(int choice) {
         money += (buyCardId / 3 + 1);
         return;
     }
+    this->buyCardId = layerId[choice];
 	layerId[choice] = -1;
     updateMoneyLabel();
     showStore();
