@@ -1,6 +1,6 @@
-#include"Store.h"
+
 #include"StoreLayer.h"
-//include"card.h"
+
 USING_NS_CC;
 
 
@@ -25,36 +25,25 @@ void StoreLayer::enableMouseListener() {
 }
 
 void StoreLayer::showStore() {//显示商店数据及卡牌数据
+    clearCard();
     for (int i = 0; i < 5; i++) {
-        if (layerId[i] == -1) {
-            auto sprite = Sprite::create("03.jpg");
-            sprite->setContentSize(Size(pictureSize, pictureSize));
-            sprite->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
-            this->addChild(sprite);
-            spriteArray.push_back(sprite);
-        }
-        else if (layerId[i] % 3 == 0) {
-            auto sprite = Sprite::create("00.jpg");
-            sprite->setContentSize(Size(pictureSize, pictureSize));
-            sprite->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
-            this->addChild(sprite);
-            spriteArray.push_back(sprite);
-        }
-        else if (layerId[i] % 3 == 1) {
-            auto sprite = Sprite::create("01.jpg");
-            sprite->setContentSize(Size(pictureSize, pictureSize));
-            sprite->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
-            this->addChild(sprite);
-            spriteArray.push_back(sprite);
-        }
-        else if (layerId[i] % 3 == 2) {
-            auto sprite = Sprite::create("02.jpg");
-            sprite->setContentSize(Size(pictureSize, pictureSize));
-            sprite->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
-            this->addChild(sprite);
-            spriteArray.push_back(sprite);
+
+        StoreCard* storeCard = StoreCard::create(layerId[i]);
+        if (storeCard) {
+            storeCard->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
+            addChild(storeCard);
+            cardArray.push_back(storeCard);
         }
     }
+}
+
+void StoreLayer::clearCard() {
+    for (auto item : cardArray) {
+        if (item) {
+            item->removeFromParentAndCleanup(true);
+        }
+    }
+    cardArray.clear();
 }
 
 void StoreLayer::updateMoneyLabel() {
@@ -97,11 +86,11 @@ void StoreLayer:: selectStore(Event* event) {
 
     Rect label1Rect = label1->getBoundingBox();
     Rect label2Rect = label2->getBoundingBox();
-    Rect spriteRect0 = spriteArray[0]->getBoundingBox();
-    Rect spriteRect1 = spriteArray[1]->getBoundingBox();
-    Rect spriteRect2 = spriteArray[2]->getBoundingBox();
-    Rect spriteRect3 = spriteArray[3]->getBoundingBox();
-    Rect spriteRect4 = spriteArray[4]->getBoundingBox();
+    Rect spriteRect0 = cardArray[0]->getBoundingBox();
+    Rect spriteRect1 = cardArray[1]->getBoundingBox();
+    Rect spriteRect2 = cardArray[2]->getBoundingBox();
+    Rect spriteRect3 = cardArray[3]->getBoundingBox();
+    Rect spriteRect4 = cardArray[4]->getBoundingBox();
     if (label1Rect.containsPoint(mousePosition))
         refresh();
     if (label2Rect.containsPoint(mousePosition))
@@ -171,7 +160,7 @@ void StoreLayer::refresh() {
 }
 
 void StoreLayer::buyCard(int choice) {
-    buyCardId = layerId[choice];
+    log("%d", buyCardId);
     money -= (buyCardId / 3 + 1);
     if (money < 0) {
         noMoneyText();
@@ -179,6 +168,7 @@ void StoreLayer::buyCard(int choice) {
         money += (buyCardId / 3 + 1);
         return;
     }
+    buyCardId = layerId[choice];
 	layerId[choice] = -1;
     updateMoneyLabel();
     showStore();

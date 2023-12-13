@@ -48,10 +48,9 @@ void Store::getStoreId(int chessId[]) {//获取刷新商店的棋子ID
 void Store::buyExp(int& money) {//购买经验
 	money -= 4;
 	exp += expPerUpgrade;
-	if (exp >= levelExp[level - 1]) {
+	if (exp >= levelExp[level - 1]&&level<=7) {
 		exp -= levelExp[level - 1];
 		level++;
-		
 	}
 }
 

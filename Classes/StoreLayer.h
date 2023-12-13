@@ -1,6 +1,7 @@
 #pragma once
 #include"cocos2d.h"
 #include"Store.h"
+#include"StoreCard.h"
 using namespace cocos2d;
 const int pictureSize = 150;
 #define storeHeight 200;
@@ -18,7 +19,7 @@ public:
 	Label* label2;
 	Label* fadingText;
 	std::vector<Sprite*> spriteArray;
-	std::vector<Label*>labelArray;
+	std::vector<StoreCard*>cardArray;
 	EventListenerMouse* StoreLayerMouseListener;//鼠标监听器
 	// 禁用和启用鼠标监听器的方法
 	void disableMouseListener();
@@ -35,6 +36,8 @@ public:
 	virtual bool init();//初始化
 
 	void showStore();
+
+	void StoreLayer::clearCard();
 
 	void buyCard(int choice);//购买卡牌
 
