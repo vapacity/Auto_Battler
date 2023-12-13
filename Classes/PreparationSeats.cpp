@@ -21,13 +21,15 @@ void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
     if (!chess || !seat)
         return;
     
-    seatsNum++;
-    renewLatestSeat();
-    seat->turnToSelected();
-   // chessWithMouse = nullptr;
     seat->chessInSeat = chess;
     chess->setPosition(seat->getPosition());
     chess->initialPosition = chess->getPosition();
+
+    seatsNum++;
+    renewLatestSeat();
+    seat->turnToSelected();
+    //chessWithMouse = nullptr;
+
 }
 
 void PreparationSeats::removeChessOfSeat( Seat* seat)

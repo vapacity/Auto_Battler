@@ -41,6 +41,8 @@ bool GridMap::init() {
     for (int y = 0; y < NUM_LINE; ++y) {
         for (int x = 0; x < NUM_COLUMN; ++x) {
             auto cell = HexCell::create();
+            if (y < NUM_LINE / 2)
+                cell->isMine = 1;
             nodeMap.insert(std::make_pair(Vec2(x, y), cell));
             
             cell->coordinateInBoard = Vec2(x, y);
