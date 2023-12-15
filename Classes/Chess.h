@@ -5,6 +5,8 @@
 class HexCell;
 class Seat;
 USING_NS_CC;
+
+#define SET_SCALE 0.15
 class Chess :public cocos2d::Sprite
 {
 

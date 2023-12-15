@@ -21,6 +21,8 @@ public:
 
 	static StoreLayer* create(int id);
 
+	Rect getBoundingBox() const;
+
 	virtual bool init(int id);//≥ı ºªØ
 
 

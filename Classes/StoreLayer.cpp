@@ -29,7 +29,7 @@ void StoreLayer::refreshWithId(int id)
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
-    std::string newLabel = "COST " + layerId / 3 + 1;
+    std::string newLabel = "COST:" + std::to_string(layerId / 3 + 1);
     costLabel->setString(newLabel);
 }
 
@@ -43,57 +43,18 @@ StoreLayer* StoreLayer::create(int id) {
 	return nullptr;
 }
 
-
-//void StoreLayer::showStore() {//显示商店数据及卡牌数据
-//    clearCard();
-//
-//
-//    for (int i = 0; i < 5; i++) {
-//
-//        StoreCard* storeCard = StoreCard::create(layerId[i]);
-//        if (storeCard) {
-//            storeCard->setPosition(Vec2(i * 200 + 200, pictureSize / 2));
-//            addChild(storeCard);
-//            cardArray.push_back(storeCard);
-//        }
-//    }
-//}
-
+Rect StoreLayer::getBoundingBox() const {
+    if (layerImage) {
+        Vec2 origin = getPosition() - Vec2(layerImage->getContentSize().width / 2, layerImage->getContentSize().height / 2);
+        return Rect(origin.x, origin.y, layerImage->getContentSize().width, layerImage->getContentSize().height);
+    }
+    else {
+        // 如果没有 layerImage，返回一个默认的边界框
+        return Rect(getPosition().x, getPosition().y, 0, 0);
+    }
+}
 
 bool StoreLayer::init(int id) {
-
-    //// 创建文本标签
-    //moneyLabel = Label::createWithTTF("NULL", "fonts/arial.ttf", 24);
-    //levelAndExpLabel = Label::createWithTTF("NULL", "fonts/arial.ttf", 20);
-    //label1 = Label::createWithTTF("REFRESH", "fonts/arial.ttf", 24);
-    //label2 = Label::createWithTTF("BUYEXP", "fonts/arial.ttf", 24);
-    //// 设置文本标签的位置
-    //moneyLabel->setPosition(Vec2(0, 175));
-    //levelAndExpLabel->setPosition(Vec2(1170, 40));
-    //label1->setPosition(Vec2(1170, 160));
-    //label2->setPosition(Vec2(1170, 100));
-    //// 设置文本颜色
-    //moneyLabel->setColor(Color3B::RED);
-    //levelAndExpLabel->setColor(Color3B::RED);
-    //label1->setColor(Color3B::BLUE);
-    //label2->setColor(Color3B::BLUE);
-    //// 将文本标签添加到场景
-    //this->addChild(moneyLabel);
-    //this->addChild(levelAndExpLabel);
-    //this->addChild(label1);
-    //this->addChild(label2);
-    //updateMoneyLabel();
-    //updateLevelLabel();
-
-    //StoreLayerMouseListener = EventListenerMouse::create();
-    //StoreLayerMouseListener->onMouseDown = [this](EventMouse* event) {
-    //    // 判断只处理左键点击事件
-    //    if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT) {
-    //        // 处理左键点击的逻辑，可以调用 selectStore 或其他处理函数
-    //        selectStore(event);
-    //    }
-    //};
-    //_eventDispatcher->addEventListenerWithSceneGraphPriority(StoreLayerMouseListener, this);
 
 
     if (!Node::init())

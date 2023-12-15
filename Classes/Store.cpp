@@ -29,7 +29,7 @@ bool Store::init(StoreAttribute* st)//初始化
 
 	//初始化storeLayers放在指定位置
 	for (int i = 0; i < 5; i++) {
-		storeLayers[i] = StoreLayer::create(-1);
+		storeLayers[i] = StoreLayer::create(playerStore->idInStore[i]);
 		storeLayers[i]->setPosition(Vec2(i * 200 + 130, 30));
 		this->addChild(storeLayers[i]);
 	}
@@ -119,6 +119,7 @@ int Store::whichCost(int pointer) {
 		return 3;
 	else if (pointer <= cardPercent[playerStore->level - 1][4])
 		return 4;
+	return -1;
 }
 
 
@@ -152,9 +153,7 @@ void Store::refresh()
 		return;
 	}
 	refreshStore();
-	playerStore->money -= 2;
-
-
+	playerStore->money -= MONEY_FOR_REFRESH;
 }
 
 //未更新金钱标签，
@@ -162,12 +161,15 @@ void Store::refresh()
 void Store::buyCard(int choice)
 {
 	int id = playerStore->idInStore[choice];
+	if (id == -1)//不能重复购买
+		return;
 	playerStore->money -= (id / 3 + 1);
 	if (playerStore->money < 0) {
 		noMoneyText();
 		log("no money");
 		playerStore->money += (id / 3 + 1);
 		chessIdHaveBought = -1;
+		return;
 	}
 	playerStore->idInStore[choice] = -1;
 	chessIdHaveBought = id;
@@ -198,21 +200,20 @@ void Store::upgrade()
 }
 
 //执行点击事件.
-void Store::selectStore(Event* event,bool isFull)
+void Store::selectStore(Event* event,Vec2 mousePosition,bool isFull)
 {
-	// 获取鼠标事件
-	EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
+	//// 获取鼠标事件
+	//EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
 	// 获取鼠标位置
-	Vec2 mousePosition = mouseEvent->getLocationInView();
-
+	//Vec2 mousePosition = event->getLocationInView();
 	Rect label1Rect = labelRefresh->getBoundingBox();
 	Rect label2Rect = labelUpgrade->getBoundingBox();
 	
-	Rect spriteRect0 = storeLayers[0]->layerImage->getBoundingBox();
-	Rect spriteRect1 = storeLayers[1]->layerImage->getBoundingBox();
-	Rect spriteRect2 = storeLayers[2]->layerImage->getBoundingBox();
-	Rect spriteRect3 = storeLayers[3]->layerImage->getBoundingBox();
-	Rect spriteRect4 = storeLayers[4]->layerImage->getBoundingBox();
+	Rect spriteRect0 = storeLayers[0]->getBoundingBox();
+	Rect spriteRect1 = storeLayers[1]->getBoundingBox();
+	Rect spriteRect2 = storeLayers[2]->getBoundingBox();
+	Rect spriteRect3 = storeLayers[3]->getBoundingBox();
+	Rect spriteRect4 = storeLayers[4]->getBoundingBox();
 
 	if (label1Rect.containsPoint(mousePosition))
 		refresh();
@@ -240,7 +241,7 @@ StoreAttribute* StoreAttribute::create()
 {
 	StoreAttribute* s = new (std::nothrow) StoreAttribute();
 	if (s && s->init()) {
-		s->autorelease();
+		//s->autorelease();
 		return s;
 	}
 	CC_SAFE_DELETE(s);
@@ -286,15 +287,31 @@ void Store::updateLevelLabel()
 //输出金钱不足的提示，并在一段时间后自动移除
 void Store::noMoneyText()
 {
-
-	// 创建文本标签
-	static Label* fadingText = Label::createWithTTF("You Have No Money", "fonts/arial.ttf", 36);
+	unschedule(CC_SCHEDULE_SELECTOR(Store::updateText));
+	if (fadingText) {
+		fadingText->removeFromParentAndCleanup(true);
+		fadingText = nullptr;
+	}
+	fadingText = Label::createWithTTF("You Have No Money", "fonts/arial.ttf", 36);
 	fadingText->setPosition(Vec2(600, 300));
 	this->addChild(fadingText);
 
+	elapsedTime = 0.0f;
 
-	//一段时间后，移除标签不再显示
-	scheduleOnce([this](float dt) {
-		this->removeChild(fadingText);
-		}, 1.0f, "removeRemind");
+	schedule(CC_SCHEDULE_SELECTOR(Store::updateText));
+}
+
+void Store::updateText(float dt)
+{
+	elapsedTime += dt;
+
+	int opacity = 255 - static_cast<int>(elapsedTime * 200);
+
+	fadingText->setOpacity(opacity);
+
+	if (opacity <= 0) {
+		unschedule(CC_SCHEDULE_SELECTOR(Store::updateText));
+		fadingText->removeFromParentAndCleanup(true);
+		fadingText = nullptr;
+	}
 }

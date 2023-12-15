@@ -28,14 +28,6 @@ bool Seat::init()
     return true;
 }
 
-void Seat::showIsSelected()
-{
-    if (!this->chessInSeat)
-        seatImage->setOpacity(80);
-    else
-        seatImage->setOpacity(150);
-}
-
 void Seat::turnToSelected()
 {
     if (this == nullptr)

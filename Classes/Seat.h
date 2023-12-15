@@ -20,15 +20,11 @@ public:
 
 	float width;
 
-	int number;
-
 
 public:
 	static Seat* create();
 
 	virtual bool init() override;
-
-	void showIsSelected();
 
 	void turnToSelected();
 

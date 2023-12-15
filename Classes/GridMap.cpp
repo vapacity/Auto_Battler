@@ -4,11 +4,9 @@
 #define STARTY 320
 USING_NS_CC;
 
-
-
-GridMap* GridMap::create(std::map<Vec2, Chess*, Vec2Compare>myChessMap) {
+GridMap* GridMap::create() {
     GridMap* grid = new (std::nothrow) GridMap();
-    if (grid && grid->init(myChessMap)) {
+    if (grid && grid->init()) {
         grid->autorelease();
         return grid;
     }
@@ -27,13 +25,11 @@ void GridMap::enableMouseListener() {
 }
 
 //创建棋格对象并添加到棋盘的对应位置
-bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
+bool GridMap::init() {
     if (!Node::init()) {
         return false;
     }
 
-
-    //监听鼠标移动
     mouseListener = EventListenerMouse::create();
     mouseListener->onMouseMove = CC_CALLBACK_1(GridMap::selectGrid, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
@@ -90,24 +86,49 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
 
     }
 
-    myChessMap = playerChessMap;
-    for (auto a : myChessMap) {
-        nodeMap.at(a.first)->chessInGrid = a.second;
-    }
 
-    schedule(CC_CALLBACK_0(GridMap::updateForPlayer, this),0.0f,"updateMap");
+
+    //auto listener = EventListenerMouse::create();
+
+    //// 设置鼠标点击的回调函数
+    //listener->onMouseDown = CC_CALLBACK_1(GridMap::onMouseDown, this);
+
+    //// 将事件监听器添加到事件分发器中
+    //_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+
+
+
+
     return true;
 }
 
-//将myChessMap中的棋子显示出来
-void GridMap::updateForPlayer()
-{
-    for (auto a : myChessMap) {
-        a.second->setPosition(nodeMap.at(a.first)->getPosition());
-    }
 
-}
-
+//void GridMap::onMouseDown(Event* event)
+//{
+//    // 处理鼠标点击事件
+//    auto mouseEvent = static_cast<EventMouse*>(event);
+//    
+//    Vec2 mousePosition = mouseEvent->getLocationInView();
+//    if (auto grid=mouseInWhichCell(mousePosition)) {
+//        grid->turnToSelected();
+//        grid->isSelected = 1;
+//        //num++;
+//        //num == 1 ? a = grid : b = grid;
+//        log("%f,%f\n", grid->coordinateInBoard.x, grid->coordinateInBoard.y);
+//    }
+//
+//    //if (num == 2) {
+//    //    Vector<HexCell*>path;
+//    //    Chess* c = Chess::create();
+//    //    FindPath(path, c, a, b);
+//    //    for (auto g : path) {
+//    //        log("%f,%f\n", g->coordinateInBoard.x, g->coordinateInBoard.y);
+//    //    }
+//    //}
+//
+//    log("Mouse Clicked - Button: %d, Position: (%.2f, %.2f)", mouseEvent->getMouseButton(), mouseEvent->getCursorX(), mouseEvent->getCursorY());
+//}
 
 bool GridMap::isInBoard(Vec2 coor) {
     if (coor.x >= 0 && coor.x < NUM_COLUMN && coor.y >= 0 && coor.y < NUM_LINE)
@@ -139,8 +160,8 @@ HexCell* GridMap::mouseInWhichCell(const cocos2d::Vec2& position)
         }
 
     }
-    //if (closestCell)
-        //CCLOG("Outposition x:%f,y:%f", closestCell->getPositionX(), closestCell->getPositionY());
+    if (closestCell)
+        CCLOG("Outposition x:%f,y:%f", closestCell->getPositionX(), closestCell->getPositionY());
     return closestCell;
 }
 
@@ -301,18 +322,16 @@ Vector<HexCell*> GridMap::GetNodeNeighbors(HexCell* inNode,int stepRange) {
     return findList;
 }
 
-//向指定棋格添加棋子。暂不改变棋子对象的显示位置。将要显示的棋子存入myChessMap。
+
 void GridMap::addChessToGrid(Chess* Inchess, HexCell* Incell)
 {
     if (!Inchess ||!Incell)
         return;
    // chessAmount++;
     Incell->chessInGrid = Inchess;
-    //Inchess->setPosition(Incell->getPosition());
+    Inchess->setPosition(Incell->getPosition());
     Inchess->atCell = Incell;
     Inchess->atSeat = nullptr;
- 
-    myChessMap.insert(std::make_pair(Incell->coordinateInBoard, Inchess));
 }
 
 void GridMap::removeChessOfGrid(HexCell* Incell)
@@ -320,6 +339,5 @@ void GridMap::removeChessOfGrid(HexCell* Incell)
     if (!Incell)
         return;
     Incell->chessInGrid = nullptr;
-    myChessMap.erase(Incell->coordinateInBoard);
     //chessAmount--;
 }

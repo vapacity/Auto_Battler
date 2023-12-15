@@ -40,6 +40,9 @@ public:
 	Label* labelRefresh;//显示刷新的标签
 	Label* labelUpgrade;//显示更新的标签
 
+	//提示文本
+	Label* fadingText;
+	float elapsedTime;
 
 	StoreLayer* storeLayers[5];//5个卡槽
 
@@ -91,7 +94,9 @@ public:
 	//输出金钱不足的提示，并在一段时间后自动移除
 	void noMoneyText();
 
-	void selectStore(Event* event,bool isFull);
+	void updateText(float dt);
+
+	void selectStore(Event* event,Vec2 mousePosition,bool isFull);
 
 
 	//读到改变后更新显示
