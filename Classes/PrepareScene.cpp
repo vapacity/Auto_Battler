@@ -3,30 +3,13 @@
 #include "PrepareScene.h"
 USING_NS_CC;
 
-Scene* PrepareScene::createScene(Player* player)
+Scene* PrepareScene::createScene()
 {
     // 创建一个场景对象，该对象将由自动释放池自动释放
-    auto scene = PrepareScene::create(player);
-
+    auto scene = PrepareScene::create();
     return scene;
 }
-
-PrepareScene* PrepareScene::create(Player* player)
-{
-    PrepareScene* scene = new PrepareScene();
-    if (scene && scene->init(player)) {
-        // 如果初始化成功，autorelease 以确保在不再需要时释放内存
-        scene->autorelease();
-        return scene;
-    }
-    else {
-        // 如果初始化失败，释放内存并返回 nullptr
-        delete scene;
-        return nullptr;
-    }
-}
-
-bool PrepareScene::init(Player* player)
+bool PrepareScene::init()
 {
     // 首先调用基类的init方法
     if (!Scene::init())
@@ -36,9 +19,6 @@ bool PrepareScene::init(Player* player)
 
     // 这里可以添加初始化场景的代码
     
-    //初始化玩家属性
-    initPlayer(player);
-    //player->retain();
 
     //添加背景图片
     initBackground();
@@ -46,11 +26,15 @@ bool PrepareScene::init(Player* player)
     //创建初始棋盘
     initGridMap();
 
+
     //创建备战席
     initPreparationSeats();
 
     //创建商店
     initStore();
+
+    //初始化棋子
+   // initChessExp();
    
     //初始化小小英雄
     initLittleHero();
@@ -58,13 +42,19 @@ bool PrepareScene::init(Player* player)
     //启用鼠标监听器
     this->enableMouseListener();
     gridMap->enableMouseListener();
+    //store->enableMouseListener();
+    
+    /*if (store->buyCardId != -1)
+    {
+        Chess* chess = ChessFactory::createChessById(store->buyCardId);
+        if (chess)
+        {
+            preSeats->addChessToSeat(chess, preSeats->latestSeat);
+            this->addChild(chess, 1);
+        }
+    }*/
 
     return true;
-}//init一结束，player就变0了？
-
-void PrepareScene::initPlayer(Player* player)
-{
-    myPlayer = player;
 }
 
 void PrepareScene::initBackground()
@@ -80,13 +70,13 @@ void PrepareScene::initBackground()
 
 void PrepareScene::initGridMap()
 {
-    gridMap = GridMap::create(myPlayer->myChessMap); 
+    gridMap = GridMap::create(); // 假设您的棋盘有8行8列
     this->addChild(gridMap, 0);
 }
 
 void PrepareScene::initPreparationSeats()
 {
-    preSeats = PreparationSeats::create(myPlayer->mySeats);
+    preSeats = PreparationSeats::create();
     this->addChild(preSeats);
 }
 
@@ -152,13 +142,12 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
         
         CCLOG("PrepareScene:Left mouse button clicked.");
         Vec2 mousePosition = mouseEvent->getLocationInView();
-        
+       
         /*此部分为对拖拽棋子的判断*/
         chessOnMouseDown(mousePosition);
-        store->selectStore(event, preSeats->isFull());//store监听函数,备战席未满则可以添加
-           
-
-        //根据buyCardId判断买到的棋子id
+        /*此部分为对点击图片的判断*/
+        if(!preSeats->isFull())//备战席未满则可以添加
+            store->selectStore(event,mousePosition,preSeats->isFull());//store监听函数
         if (store->chessIdHaveBought != -1)
         {
             Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);
@@ -174,8 +163,6 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
 
 void PrepareScene::prepareSceneOnMouseMove(Event* event)
 {
-    //if (myPlayer)
-    //    log("%d\n", myPlayer->playerStore->money);
     //CCLOG("MousMove");
     // 获取鼠标事件
     EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
@@ -243,7 +230,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
 {
     HexCell* cell = gridMap->mouseInWhichCell(mousePosition);
     Seat* seat = preSeats->mouseInWhichSeat(mousePosition);
-    //若有已经在被拖动的棋子
+    //是否有已经在被拖动的棋子
     if (selectedChess && selectedChess->isDragging)
     {
         selectedChess->isDragging = false;

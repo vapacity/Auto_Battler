@@ -5,16 +5,17 @@
 
 #include "cocos2d.h"
 #include "GridMap.h"
+#include "PlayerManager.h"
 #include "Chess.h"
 #include "ChessFactory.h"
+#include "PreparationSeats.h"
 #include "Store.h"
 #include "LittleHero.h"
-#include "Player.h"
 USING_NS_CC;
 class PrepareScene : public cocos2d::Scene
 {
 public:
-    Player* myPlayer;
+    Player* myPlayer = PlayerManager::getInstance()->getPlayer(0);
 
     Sprite* backgroundImg;
     GridMap* gridMap;
@@ -26,15 +27,10 @@ public:
     LittleHero* littleHeroEnemy;
 public:
     // 创建场景的静态方法
-    cocos2d::Scene* createScene(Player* myPlayer);
+    static cocos2d::Scene* createScene();
     
-    static PrepareScene* create(Player* myPlayer);
-
     // 初始化场景的方法
-    virtual bool init(Player* myPlayer);
-
-    //初始化玩家属性
-    void initPlayer(Player* player);
+    virtual bool init();
 
     //添加背景图片
     void initBackground();
@@ -71,7 +67,8 @@ public:
     void chessOnMouseMove(Vec2 mousePosition);
     void chessOnMouseUp(Vec2 mousePosition);
 
-
+    // 实现 "static create()" 方法，用于创建对象
+    CREATE_FUNC(PrepareScene);
 
 };
 

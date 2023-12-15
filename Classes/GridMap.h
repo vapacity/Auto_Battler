@@ -23,19 +23,16 @@ public:
 
     EventListenerMouse* mouseListener;
 
-    std::map<Vec2, Chess*, Vec2Compare>myChessMap;
-
-    std::map<Vec2, HexCell*, Vec2Compare>nodeMap;
+    //int num;
+    //HexCell* a;
+    //HexCell* b;
 public:
-    //根据棋手信息更新显示
-    void updateForPlayer();
-
-    static GridMap* create(std::map<Vec2, Chess*, Vec2Compare>myChessMap);
+    static GridMap* create();
     
     //初始化棋格，行数列数
-    virtual bool init(std::map<Vec2, Chess*, Vec2Compare>myChessMap);
+    virtual bool init();
 
-
+    std::map<Vec2, HexCell*, Vec2Compare>nodeMap;
 
     bool isInBoard(Vec2 coor);
 

@@ -17,7 +17,7 @@ bool Charmander::init()
     if (!Node::init()) {
         return false;
     }
-    this->setScale(0.15);
+    this->setScale(SET_SCALE);
     name = "Charmander1";
     return true;
 }

@@ -16,7 +16,7 @@ bool Squirtle::init()
     if (!Node::init()) {
         return false;
     }
-    this->setScale(0.15);
+    this->setScale(SET_SCALE);
     name = "Squirtle1";
     return true;
 }

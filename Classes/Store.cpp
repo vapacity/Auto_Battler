@@ -29,7 +29,7 @@ bool Store::init(StoreAttribute* st)//初始化
 
 	//初始化storeLayers放在指定位置
 	for (int i = 0; i < 5; i++) {
-		storeLayers[i] = StoreLayer::create(-1);
+		storeLayers[i] = StoreLayer::create(playerStore->idInStore[i]);
 		storeLayers[i]->setPosition(Vec2(i * 200 + 130, 30));
 		this->addChild(storeLayers[i]);
 	}
@@ -198,13 +198,12 @@ void Store::upgrade()
 }
 
 //执行点击事件.
-void Store::selectStore(Event* event,bool isFull)
+void Store::selectStore(Event* event,Vec2 mousePosition,bool isFull)
 {
-	// 获取鼠标事件
-	EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
+	//// 获取鼠标事件
+	//EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
 	// 获取鼠标位置
-	Vec2 mousePosition = mouseEvent->getLocationInView();
-
+	//Vec2 mousePosition = event->getLocationInView();
 	Rect label1Rect = labelRefresh->getBoundingBox();
 	Rect label2Rect = labelUpgrade->getBoundingBox();
 	
@@ -240,7 +239,7 @@ StoreAttribute* StoreAttribute::create()
 {
 	StoreAttribute* s = new (std::nothrow) StoreAttribute();
 	if (s && s->init()) {
-		s->autorelease();
+		//s->autorelease();
 		return s;
 	}
 	CC_SAFE_DELETE(s);

@@ -17,7 +17,7 @@ bool Yevee::init()
     if (!Node::init()) {
         return false;
     }
-    this->setScale(0.15);
+    this->setScale(SET_SCALE);
     this->name = "Yevee1";
     return true;
 }

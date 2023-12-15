@@ -1,20 +1,11 @@
 #include <PreparationSeats.h>
 USING_NS_CC;
 
-//显示mySeats中棋子
-void PreparationSeats::updateForPlayer()
-{
-    for (int i = 0; i < SEATS_NUM; i++) {
-        if (mySeats[i]) {          
-            mySeats[i]->setPosition(seatsArray.at(i)->getPosition());
-        }
-    } 
-}
 
-PreparationSeats* PreparationSeats::create(Chess* playerSeats[SEATS_NUM])
+PreparationSeats* PreparationSeats::create()
 {
     PreparationSeats* p = new (std::nothrow) PreparationSeats();
-    if (p && p->init(playerSeats)) {
+    if (p && p->init()) {
         p->autorelease();
         return p;
     }
@@ -25,17 +16,18 @@ PreparationSeats* PreparationSeats::create(Chess* playerSeats[SEATS_NUM])
 //加个出售鼠标拿起的棋子
 
 
-//将chess放入seat，更新seat和chess相关信息
 void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
 {
     if (!chess || !seat)
         return;
     seat->chessInSeat = chess;
+    chess->setPosition(seat->getPosition());
     chess->atSeat = seat;
     chess->atCell = nullptr;
+    //seatsNum++;
     renewLatestSeat();
     seat->turnToSelected();
-    mySeats[seat->number] = chess;
+
 
 }
 
@@ -44,7 +36,7 @@ void PreparationSeats::removeChessOfSeat( Seat* seat)
     if (!seat)
         return;
     seat->chessInSeat = nullptr;
-    mySeats[seat->number] = nullptr;
+    //seatsNum--;
     renewLatestSeat();
 }
 
@@ -66,6 +58,8 @@ void PreparationSeats::addOrRemove(Chess* chess, Seat* seat)
 
 void PreparationSeats::renewLatestSeat()
 {
+    if (seatsArray.size() <= 0)
+        return;
     for (auto s : seatsArray) {
         if (!s->chessInSeat) {
             latestSeat = s;
@@ -92,6 +86,7 @@ bool PreparationSeats::isFull()
     }
     return !(SEATS_NUM - seatedSeats);
 }
+
 void PreparationSeats::selectSeat(Event* event)
 {
     // 获取鼠标事件
@@ -131,43 +126,54 @@ Seat* PreparationSeats::mouseInWhichSeat(const cocos2d::Vec2& position)
 
         // 判断鼠标是否在精灵的显示区域内
         if (spriteInWorld.containsPoint(position))
-            return s;       
+            return s;
     }
     return nullptr;
 }
 
-bool PreparationSeats::init(Chess* playerSeats[SEATS_NUM])
+bool PreparationSeats::init()
 {
     if (!Node::init()) {
         return false;
     }
 
-    //读取playerSeats
-    mySeats = playerSeats;
+    EventListenerMouse* mouseListener = EventListenerMouse::create();
+    mouseListener->onMouseMove = CC_CALLBACK_1(PreparationSeats::selectSeat, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+    mouseListener->setEnabled(true);
+
+    EventListenerMouse* testUp = EventListenerMouse::create();
+    testUp->onMouseUp = CC_CALLBACK_1(PreparationSeats::testClickUp, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(testUp, this);
+    testUp->setEnabled(true);
 
 
-    //创建备战席格，放在指定位置
+
     for (int i = 0; i < SEATS_NUM; i++) {
         Seat* s = Seat::create();
         float x = SEAT_STARTX + i * (s->width + seatGap);
         s->setPosition(x, SEAT_STARTY);
-        s->number = i;
         seatsArray.pushBack(s);
         this->addChild(s);
     }
 
 
     latestSeat = seatsArray.at(0);
-
-    //监听鼠标移动过程中选择的棋格
-    EventListenerMouse* mouseListener = EventListenerMouse::create();
-    mouseListener->onMouseMove = CC_CALLBACK_1(PreparationSeats::selectSeat, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
-    mouseListener->setEnabled(true);
-
-    schedule(CC_CALLBACK_0(PreparationSeats::updateForPlayer, this), 0.0f, "updateSeats");
 }
 
 
-
+void PreparationSeats::testClickUp(Event* event)
+{
+    
+    // 获取鼠标事件
+    auto mouseEvent = static_cast<EventMouse*>(event);
+    // 获取鼠标位置
+    Vec2 mousePosition = mouseEvent->getLocationInView();
+    if (auto seat = mouseInWhichSeat(mousePosition)) {
+        if (TEST)
+            ;
+           //chessWithMouse = Chess::create();
+       // addOrRemove(chessWithMouse, seat);
+    }
+}
 

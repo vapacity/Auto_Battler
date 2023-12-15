@@ -4,7 +4,6 @@
 #include "cocos2d.h"
 #include "Chess.h"
 #include "Seat.h"
-#include "Player.h"
 USING_NS_CC;
 
 #define SEATS_NUM 8
@@ -16,9 +15,7 @@ const float seatGap = 13.0f;
 
 class PreparationSeats : public cocos2d::Node {
 public:
-	Chess** mySeats;
-
-	int seatsNum;//备战席的棋格数量
+	int seatsNum=0;//备战席的被填满的棋格数量
 
 	Vector<Seat*> seatsArray;
 	
@@ -26,10 +23,7 @@ public:
 
 	Seat* latestSeat;//最左侧的空位位置
 public:
-	//根据棋手信息更新显示
-	void updateForPlayer();
-
-	static PreparationSeats* create(Chess* playerSeats[SEATS_NUM]);
+	static PreparationSeats* create();
 
 	//放棋子,更新最左侧的空位位置
 	void addChessToSeat(Chess* chess,Seat* seat);
@@ -51,8 +45,11 @@ public:
 	//获得游戏中坐标Vec2处对应的格子（方法为遍历查找与鼠标最靠近的格子中心）
 	Seat* mouseInWhichSeat(const cocos2d::Vec2& position);
 
-	virtual bool init(Chess* playerSeats[SEATS_NUM]);
+	virtual bool init() override;
 
+	void testClickDown(Event* event);
+
+	void testClickUp(Event* event);
 };
 
 
