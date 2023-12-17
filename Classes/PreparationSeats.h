@@ -50,6 +50,9 @@ public:
 
 	virtual bool init(Chess* playerSeats[SEATS_NUM]) ;
 
+	//获得指定位置的Seat*
+	Seat* getSeatAtPosition(int position);
+
 };
 
 

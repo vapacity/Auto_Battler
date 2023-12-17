@@ -57,9 +57,12 @@ public:
 
     //添加一个棋子到棋格上
     void addChessToGrid(Chess* chess, HexCell* cell);
-    
+
     //将一个棋格上的棋子去掉
     void removeChessOfGrid(HexCell* Incell);
+
+    //传入一个Vec2值，返回对应的HexCell*
+    HexCell* getCellAtPosition(Vec2 position);
 };
 
 #endif // HEXGRID_H

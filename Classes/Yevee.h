@@ -6,11 +6,36 @@
 
 USING_NS_CC;
 
-class Yevee :public Chess
+class Yevee1 :public Chess
 {
 public:
 	//create一个伊布
-	static Yevee* create(const std::string& filename);
+	static Yevee1* create(const std::string& filename);
+
+	//重写init方法
+	virtual bool init() override;
+
+	//特有函数。。待更新
+	void breateFire();
+};
+class Yevee2 : public Chess
+{
+public:
+	//create一个伊布
+	static Yevee2* create(const std::string& filename);
+
+	//重写init方法
+	virtual bool init() override;
+
+	//特有函数。。待更新
+	void breateFire();
+};
+
+class Yevee3 :public Chess
+{
+public:
+	//create一个伊布
+	static Yevee3* create(const std::string& filename);
 
 	//重写init方法
 	virtual bool init() override;

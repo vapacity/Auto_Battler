@@ -168,6 +168,7 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
        
         /*此部分为对拖拽棋子的判断*/
         chessOnMouseDown(mousePosition);
+
         /*此部分为对点击图片的判断*/
         store->selectStore(event,mousePosition,preSeats->isFull());//store监听函数
         if (store->chessIdHaveBought != -1)
@@ -175,9 +176,11 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
             Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);
             if (chess)
             {
-                preSeats->addChessToSeat(chess, preSeats->latestSeat);
+                //检查新增的这个是否能合成
+                preSeats->addChessToSeat(chess, preSeats->latestSeat); 
                 myPlayer->addChess(chess);
                 this->addChild(chess, 1);
+                checkAndMerge(chess);
             }
             store->chessIdHaveBought = -1;
         }
@@ -226,7 +229,7 @@ void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
     if (cell && cell->chessInGrid)
     {
         selectedChess = cell->chessInGrid;
-        selectedChess->atCell = cell;
+        //selectedChess->atGridPosition = cell;
         selectedChess->isDragging = true;
 
         gridMap->removeChessOfGrid(cell);
@@ -237,7 +240,7 @@ void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
     if (seat && seat->chessInSeat)
     {
         selectedChess = seat->chessInSeat;
-        selectedChess->atSeat = seat;
+        //selectedChess->atSeat = seat;
         selectedChess->isDragging = true;
 
         preSeats->removeChessOfSeat(seat);
@@ -271,8 +274,8 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         if (gridMap->chessAmount >= myPlayer->myStore->level && cell && !cell->chessInGrid) {
             noPopulationText();
             CCLOG("PrepareScene:swap failed");
-            gridMap->addChessToGrid(selectedChess, selectedChess->atCell);
-            preSeats->addChessToSeat(selectedChess, selectedChess->atSeat);
+            gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
 
             myPlayer->addChess(selectedChess);
         }
@@ -295,31 +298,34 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         {
             CCLOG("PrepareScene:swap Cell and Something");
 
-            Chess* chessIn = cell->chessInGrid;;
+            Chess* moveChess = cell->chessInGrid;
+            //将该位置上的棋子清除
+            myPlayer->removeChess(moveChess);
             gridMap->removeChessOfGrid(cell);
-            myPlayer->removeChess(chessIn);
 
+            //将该位置处的棋子添加到selectedChess的位置
+            gridMap->addChessToGrid(moveChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(moveChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
+            myPlayer->addChess(moveChess);        
 
-            gridMap->addChessToGrid(chessIn, selectedChess->atCell);
-            preSeats->addChessToSeat(chessIn, selectedChess->atSeat);
-            myPlayer->addChess(chessIn);
-
-            
-            
+            //将selectedChess添加到这个位置上
             gridMap->addChessToGrid(selectedChess, cell);
             myPlayer->addChess(selectedChess);
         }
         else if (seat && seat->chessInSeat)
         {
             CCLOG("PrepareScene:swap Seat and Something");
+            Chess* moveChess = seat->chessInSeat;
+            //将该位置上的棋子清除
             myPlayer->removeChess(seat->chessInSeat);
             preSeats->removeChessOfSeat(seat);
-            
 
-            gridMap->addChessToGrid(seat->chessInSeat, selectedChess->atCell);
-            preSeats->addChessToSeat(seat->chessInSeat, selectedChess->atSeat);
-            myPlayer->addChess(seat->chessInSeat);
-            
+            //将该位置处的棋子添加到selectedChess的位置
+            gridMap->addChessToGrid(moveChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(moveChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
+            myPlayer->addChess(moveChess);
+           
+            //将selectedChess添加到这个位置上
             preSeats->addChessToSeat(selectedChess, seat);
             myPlayer->addChess(selectedChess);
         }
@@ -327,8 +333,10 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         else if (mousePosition.y <= store->storeAreaHeight)
         {
             CCLOG("PrepareScene: chess to be sold");
-            gridMap->removeChessOfGrid(selectedChess->atCell);
-            preSeats->removeChessOfSeat(selectedChess->atSeat);
+            
+            gridMap->removeChessOfGrid(gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->removeChessOfSeat(preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
+            
             myPlayer->myStore->money += selectedChess->price;
             myPlayer->removeChess(selectedChess);
             selectedChess->removeFromParentAndCleanup(1);
@@ -338,13 +346,65 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         else
         {
             CCLOG("PrepareScene:swap failed");
-            gridMap->addChessToGrid(selectedChess, selectedChess->atCell);
-            preSeats->addChessToSeat(selectedChess, selectedChess->atSeat);
+            gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
             myPlayer->addChess(selectedChess);
         }
         selectedChess = nullptr;
     }
 
+}
+
+void PrepareScene::checkAndMerge(Chess*chess)
+{
+    int chessId = chess->getId();
+    if (myPlayer->chessCount[chessId] >= 3 && chessId < MAX_ID)
+    {
+        //此处需要注意有连续进化的可能，用递归形式容易理解
+        checkAndMerge(upgradeChess(chessId));
+    }
+    else
+    {
+        return;
+    }
+}
+
+Chess* PrepareScene::upgradeChess(const int chessId)
+{
+    for (int i = 0; i < SEATS_NUM; i++)
+    {
+        if (preSeats->mySeats[i]->getId() == chessId)
+        {
+            auto chessRemove = preSeats->mySeats[i];
+            myPlayer->removeChess(chessRemove);
+            preSeats->removeChessOfSeat(preSeats->getSeatAtPosition(chessRemove->atSeatPosition));
+            chessRemove->deleteChess();
+
+        }
+    }
+    std::vector<Vec2> keysToRemove;
+    for (auto pair : myPlayer->myChessMap)
+    {
+        if (pair.second->getId() == chessId)
+        {
+            keysToRemove.push_back(pair.first);
+        }
+    }
+    for (const auto& key : keysToRemove)
+    {
+        auto chessRemove = myPlayer->myChessMap[key];
+        myPlayer->removeChess(chessRemove);
+        gridMap->removeChessOfGrid(gridMap->getCellAtPosition(chessRemove->atGridPosition));
+        chessRemove->deleteChess();
+    }
+    
+
+
+    auto upgradeChess = ChessFactory::createChessById(chessId + 3);
+    preSeats->addChessToSeat(upgradeChess,preSeats->latestSeat);
+    myPlayer->addChess(upgradeChess);
+    this->addChild(upgradeChess);
+    return upgradeChess;
 }
 
 

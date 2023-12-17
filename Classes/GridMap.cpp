@@ -311,8 +311,8 @@ void GridMap::addChessToGrid(Chess* Inchess, HexCell* Incell)
     chessAmount++;
     Incell->chessInGrid = Inchess;
     Inchess->atGridPosition = Incell->coordinateInBoard;
-    Inchess->atCell = Incell;
-    Inchess->atSeat = nullptr;
+
+    Inchess->atSeatPosition = -1;
 
     myChessMap.insert(std::make_pair(Incell->coordinateInBoard, Inchess));
 }
@@ -324,4 +324,11 @@ void GridMap::removeChessOfGrid(HexCell* Incell)
     Incell->chessInGrid = nullptr;
     myChessMap.erase(Incell->coordinateInBoard);
     chessAmount--;
+}
+
+HexCell* GridMap::getCellAtPosition(Vec2 position)
+{
+    if (position.x >= 0 && position.y >= 0)
+        return nodeMap[position];
+    return nullptr;
 }

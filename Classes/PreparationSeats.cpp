@@ -32,8 +32,8 @@ void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
     if (!chess || !seat)
         return;
     seat->chessInSeat = chess;
-    chess->atSeat = seat;
-    chess->atCell = nullptr;
+    chess->atSeatPosition = seat->number;
+    chess->atGridPosition = Vec2(-1,-1);
 
     seat->turnToSelected();
 
@@ -44,10 +44,10 @@ void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
 void PreparationSeats::removeChessOfSeat( Seat* seat)
 {
     if (!seat)
-        return;
+        return;    
     seat->chessInSeat = nullptr;
     mySeats[seat->number] = nullptr;
-
+    seat->turnToNormal();
 }
 
 
@@ -151,9 +151,14 @@ bool PreparationSeats::init(Chess* playerSeats[SEATS_NUM])
     mouseListener->setEnabled(true);
 
 
-    //schedule(CC_CALLBACK_0(PreparationSeats::updateForPlayer, this), 0.0f, "updateSeats");
+    schedule(CC_CALLBACK_0(PreparationSeats::updateForPlayer, this), 0.0f, "updateSeats");
 
 }
 
-
+Seat* PreparationSeats::getSeatAtPosition(int position)
+{
+    if (position >= 0 && position <= SEATS_NUM)
+        return seatsArray.at(position);
+    return nullptr;
+}
 

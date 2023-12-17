@@ -24,7 +24,7 @@ public:
     void addGold(int amount) { /* ... */ }
     void addExperience(int amount) { /* ... */ }
     void addChess(Chess* chess);
-    void upgradeChess(const int id);
+   // Chess* upgradeChess(const int id);//返回升级后的棋子
     void removeChess(Chess* chess);
 
     // 更多方法...

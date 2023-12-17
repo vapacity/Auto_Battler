@@ -74,6 +74,9 @@ public:
     void chessOnMouseMove(Vec2 mousePosition);
     void chessOnMouseUp(Vec2 mousePosition);
 
+    //检查三合一并合成
+    void checkAndMerge(Chess* chess);
+    Chess* upgradeChess(const int chessId);
     // 实现 "static create()" 方法，用于创建对象
     CREATE_FUNC(PrepareScene);
 

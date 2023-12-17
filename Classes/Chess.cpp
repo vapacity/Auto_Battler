@@ -29,7 +29,7 @@ Chess* Chess::create(const std::string&filename)
 void Chess::deleteChess()
 {
     if (this)
-        this->removeFromParentAndCleanup(1);
+        this->removeFromParent();
 }
 
 int Chess::getId()
@@ -40,6 +40,18 @@ int Chess::getId()
     return -1;
 }
 
+bool Chess::isInGrid()
+{
+    return (atGridPosition.x>=0&&atGridPosition.y>=0);
+}
+
+bool Chess::isAtSeat()
+{
+    return atSeatPosition>=0;
+}
+
+
+
 
 bool Chess::init()
 {
@@ -49,17 +61,16 @@ bool Chess::init()
     return true;
 }
 
-void Chess::upgrade()
+Chess* Chess::upgrade()
 {
     auto upChess = ChessFactory::createChessById(this->getId() + 3);
-    upChess->atCell = atCell;
     upChess->atGridPosition = atGridPosition;
-    upChess->atSeat = atSeat;
+    upChess->atSeatPosition = atSeatPosition;
     //以下部分应该在createChessById中构造完成，此函数应该只用来继承其位置信息
     upChess->id = id + 3;
     upChess->setPosition(this->getPosition());
     this->getParent()->addChild(upChess,1);
-
+    return upChess;
 }
 
 void Chess::attack()
