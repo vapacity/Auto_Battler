@@ -170,10 +170,10 @@ void Store::buyCard(int choice)
 	int id = playerStore->idInStore[choice];
 	if (id == -1 || id == -2)//不能重复购买或者购买捕捉失败的卡牌
 		return;
-	playerStore->money -= calCostFromId(id);
+	playerStore->money -= StoreLayer::calCostFromId(id);
 	if (playerStore->money < 0) {
 		createText("You Have No Money");
-		playerStore->money += calCostFromId(id);
+		playerStore->money += StoreLayer::calCostFromId(id);
 		chessIdHaveBought = -1;
 		return;
 	}
@@ -187,7 +187,7 @@ void Store::buyCard(int choice)
 //根据传入的棋子id和星级，更新出售后的money数值，利润
 void Store::sellCard(int sellCardId, int star)
 {
-	playerStore->money += calCostFromId(sellCardId);
+	playerStore->money += StoreLayer::calCostFromId(sellCardId);
 	if (star != 1)
 		playerStore->money--;
 	renewInterest();
@@ -330,17 +330,3 @@ void Store::updateText(float dt)
 		fadingText = nullptr;
 	}
 }
-
-int Store::calCostFromId(int id)
-{
-	if (id < COST1_Amount)
-		return 1;
-	id -= COST1_Amount;
-	if (id < COST2_Amount)
-		return 2;
-	id -= COST2_Amount;
-	if (id < COST3_Amount)
-		return 3;
-	return 0;
-}
-

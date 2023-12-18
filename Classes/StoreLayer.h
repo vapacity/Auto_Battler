@@ -25,5 +25,5 @@ public:
 
 	virtual bool init(int id);//初始化
 
-	int calCostFromId(int id);//从Id计算费用
+	static int calCostFromId(int id);//从Id计算费用
 };

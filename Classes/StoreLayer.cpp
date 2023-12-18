@@ -85,7 +85,7 @@ bool StoreLayer::init(int id) {
 	return true;
 }
 
-int StoreLayer::calCostFromId(int id)
+ int StoreLayer::calCostFromId(int id)
 {
     if (id < COST1_Amount)
         return 1;

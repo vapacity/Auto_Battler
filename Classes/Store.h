@@ -11,7 +11,7 @@
 #define INIT_EXP 0//初始经验
 #define INIT_INTEREST 0//初始利息
 #define INIT_ADD_FOR_TURN 4 //每回合自然增长的金币数
-#define COST1_Amount 3
+#define COST1_Amount 4
 #define COST2_Amount 5
 #define COST3_Amount 3//一到三费卡对应的数量
 //包括人物的等级、经验、金钱、回合利润，商店5个卡槽id
@@ -108,8 +108,4 @@ public:
 	//判断点击事件并执行
 	void selectStore(Event* event,Vec2 mousePosition,bool isFull);
 
-
-	//读到改变后更新显示
-	//从Id计算费用
-	int calCostFromId(int id);
 };
