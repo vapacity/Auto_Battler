@@ -172,10 +172,10 @@ void Player::placeChessToBoard()
 
     //将该放在棋盘上的棋子，放在棋盘的远程和近程区
     for (int i = 0; i < meleeIndex; i++) {  
-        myChessMap.insert(std::make_pair(Vec2(NUM_COLUMN-i, NUM_LINE/2+1), meleeAttacks.at(i)));
+        myChessMap.insert(std::make_pair(Vec2(i, 0), meleeAttacks.at(i)));
     }
     for (int i = 0; i < rangedIndex; i++) {
-        myChessMap.insert(std::make_pair(Vec2(NUM_COLUMN - i, NUM_LINE-1), rangedAttacks.at(i)));
+        myChessMap.insert(std::make_pair(Vec2(i, NUM_LINE/2-1), rangedAttacks.at(i)));
     }
 
     //将剩余的棋子放在备战席上
