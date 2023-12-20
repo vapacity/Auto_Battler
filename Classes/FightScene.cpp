@@ -120,6 +120,7 @@ void FightScene::initStore()
     this->addChild(store, 2);
 }
 
+//获取移动路径，一格格移动，通过第二个参数反应是否到达终点
 void FightScene::moveChess(Chess* chessToMove,bool& stopMoveFlag)
 {
     //获得起始棋格和终止棋格
@@ -177,8 +178,12 @@ void FightScene::battleBegin()
     }
     for (auto chess: chessesOnMap)
     {
-        auto sequence = createSequenceFromVector(chess->actions, 0);
-        chess->runAction(sequence);
+        if (chess) {
+            auto sequence = createSequenceFromVector(chess->actions, 0);
+            if (sequence)
+                chess->runAction(sequence);
+        }
+       
     }
 
 }

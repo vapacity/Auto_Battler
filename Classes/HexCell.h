@@ -63,13 +63,6 @@ public:
     //Æå×ÓÀàÐÍÌæ»»
     bool CanPass(Chess* InActor) const;
 
-    void EnterNode(Chess* InActor);
-
-    void BookNode(Chess* InActor);
-
-    void CancelBookNode(Chess* InActor);
-
-    void LeaveNode(Chess* InActor);
 
 };
 

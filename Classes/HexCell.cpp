@@ -43,7 +43,8 @@ bool HexCell::init() {
 void HexCell::turnToSelected() {
     if (this == nullptr)
         return;
-    hexSprite->setOpacity(150);
+    if (this->hexSprite!=nullptr)
+        hexSprite->setOpacity(150);
 }
 
 void HexCell::turnToNormal() {
@@ -97,8 +98,8 @@ Vector<HexCell*> HexCell::GetNeighbors() {
 }
 
 bool HexCell::CanPass(Chess* InActor) const {
-    if (chessedInThisNode.size() > 0 && InActor) {
-        if (chessedInThisNode.contains(InActor))
+    if (chessInGrid && InActor) {
+        if (chessInGrid==InActor)
             return true;
         else
             return false;
@@ -106,42 +107,4 @@ bool HexCell::CanPass(Chess* InActor) const {
     return true;
 }
 
-void HexCell::EnterNode(Chess* InActor) {
-    if (InActor)
-    {
-        if (!chessedInThisNode.contains(InActor)) {
-            chessedInThisNode.pushBack(InActor);
-            this->turnToSelected();
-        }
-    }
-}
-
-void HexCell::BookNode(Chess* InActor){
-    if (InActor)
-    {
-        if (!chessedInThisNode.contains(InActor)) {
-            chessedInThisNode.pushBack(InActor);
-            this->turnToSelected();
-        }       
-    }
-}
-
-void HexCell::CancelBookNode(Chess* InActor) {
-    if (InActor && chessedInThisNode.contains(InActor))
-    {
-        chessedInThisNode.eraseObject(InActor);
-        this->turnToNormal();
-    }
-}
-
-void HexCell::LeaveNode(Chess* InActor) {
-    if (InActor)
-    {
-        if (chessedInThisNode.contains(InActor)) {
-            chessedInThisNode.eraseObject(InActor);
-            this->turnToNormal();
-        }
-
-    }
-}
 
