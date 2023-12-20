@@ -22,6 +22,7 @@ bool Yevee::init(const std::string& filename)
     name = filename;
     id = 0;
     star = 1;
+    ATK = 10;
     return true;
 }
 

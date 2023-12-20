@@ -149,7 +149,7 @@ HexCell* GridMap::mouseInWhichCell(const cocos2d::Vec2& position)
         }
 
     }
-    //if (closestCell)
+    if (closestCell)
         //CCLOG("Outposition x:%f,y:%f", closestCell->getPositionX(), closestCell->getPositionY());
     return closestCell;
 }

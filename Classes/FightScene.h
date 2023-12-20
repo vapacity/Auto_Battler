@@ -61,11 +61,14 @@ public:
     //棋子判断是否有敌人进入了攻击范围
     bool judgeAttack(Vector<HexCell*> movePath);
 
-    //判断棋子是否全部停止移动
-    bool judgeAllStop();
+    //一方的棋子死完之后，退出循环
+    bool judgeAllDead();
 
     //对棋盘上的所有棋子遍历，开始索敌，直到有敌人进入了攻击范围
-    void battleBegin();
+    void findEnemyAndMove();
+
+    //对棋盘上的棋子进行遍历，已经完成了移动，判断自己周围是否有敌人，如有则触发attack
+    void locatdEnemyAndAttack(Chess* chess);
     CREATE_FUNC(FightScene);
 
 };

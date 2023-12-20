@@ -22,5 +22,6 @@ bool Charmander::init(const std::string& filename)
     this->name = filename;
     this->id = 1;
     this->star = 1;
+    ATK = 10;
     return true;
 }

@@ -21,6 +21,8 @@ USING_NS_CC;
 #define PRICE_STAR3_GRADE1 3//3星1阶卡的费用
 #define PRICE_STAR3_GRADE2 8//3星2阶卡的费用
 #define PRICE_STAR3_GRADE3 23//3星3阶卡的费用
+#define CHESS_ATK 10
+#define CHESS_HEALTH 100
 class Chess :public cocos2d::Sprite
 {
 
@@ -45,13 +47,13 @@ public://此处放属性变量
 
 	int star;//卡牌星级
 
-	int ATK;//攻击力
+	int ATK=CHESS_ATK;//攻击力
 
-	int attackSpeed;//攻击速度
+	int attackSpeed=9;//攻击速度，范围为0-9
 
 	int moveSpeed=1;//移动速度
 
-	int health;//生命值
+	int health=CHESS_HEALTH;//生命值
 
 	int blueBar;//蓝条
 
@@ -66,6 +68,8 @@ public://此处放属性变量
 	bool stopMoveFlag;//棋子停止移动标志
 
 	Vector<FiniteTimeAction*> actions;//棋子移动的行动序列
+
+	int attackTrigTimes=0;
 public:
 	//初始化棋子
 	static Chess* create();
@@ -106,14 +110,14 @@ public:
 	//进化成等级3，在三合一时触发
 	void upgradeToThird(const std::string& filename);
 
-	//攻击函数
-	virtual void attack();
+	//攻击函数,返回造成的伤害
+	virtual int attack(Chess* attackedChess);
 
 	//移动函数
 	MoveTo* moveTo(Vec2 position);
 
 	//掉血函数
-	virtual void getHurt();
+	virtual void getHurt(int ATK);
 
 	//使用技能
 	virtual void useSkill();

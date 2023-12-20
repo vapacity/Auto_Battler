@@ -43,8 +43,7 @@ bool HexCell::init() {
 void HexCell::turnToSelected() {
     if (this == nullptr)
         return;
-    if (this->hexSprite!=nullptr)
-        hexSprite->setOpacity(150);
+    hexSprite->setOpacity(150);
 }
 
 void HexCell::turnToNormal() {
@@ -98,13 +97,12 @@ Vector<HexCell*> HexCell::GetNeighbors() {
 }
 
 bool HexCell::CanPass(Chess* InActor) const {
-    if (chessInGrid && InActor) {
-        if (chessInGrid==InActor)
+    if(chessInGrid&& InActor){
+        if(chessInGrid==InActor)
             return true;
         else
             return false;
     }
     return true;
 }
-
 

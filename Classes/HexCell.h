@@ -64,6 +64,7 @@ public:
     bool CanPass(Chess* InActor) const;
 
 
+
 };
 
 #endif // HEXCELL_H

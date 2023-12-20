@@ -34,7 +34,7 @@ bool FightScene::init()
     initStore();
     //moveChess(gridMap->myChessMap[Vec2(1, 0)], gridMap->myChessMap[Vec2(1, 0)]->stopMoveFlag);
     //initChessExp();
-    battleBegin();
+    findEnemyAndMove();
     gridMap->disableMouseListener();
 }
 
@@ -60,7 +60,7 @@ void FightScene::initBackground()
 void FightScene::initChessExp()
 {
     //正在测试同时出现三个
-    auto Yevee = ChessFactory::createChessById(0);
+  /*  auto Yevee = ChessFactory::createChessById(0);
     if (Yevee) {
         Yevee->setScale(0.15);
 
@@ -68,7 +68,7 @@ void FightScene::initChessExp()
         myPlayer->addChess(Yevee);
         Yevee->playerNumber = 1;
         this->addChild(Yevee, 1);
-    }
+    }*/
 
     auto charmander = ChessFactory::createChessById(1);
     if (charmander) {
@@ -76,7 +76,7 @@ void FightScene::initChessExp()
         gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
         myPlayer->addChess(charmander);
         charmander->playerNumber = 1;
-        charmander->attackRange = 3;
+        charmander->attackRange = 1;
         this->addChild(charmander, 1);
     }
 
@@ -120,7 +120,6 @@ void FightScene::initStore()
     this->addChild(store, 2);
 }
 
-//获取移动路径，一格格移动，通过第二个参数反应是否到达终点
 void FightScene::moveChess(Chess* chessToMove,bool& stopMoveFlag)
 {
     //获得起始棋格和终止棋格
@@ -134,7 +133,10 @@ void FightScene::moveChess(Chess* chessToMove,bool& stopMoveFlag)
     //判断是否进入攻击范围
     stopMoveFlag=judgeAttack(movePath);
     if (stopMoveFlag)
+    {
         return;
+    }
+        
 
     //只取第一步
     Vec2 firstMove = movePath.at(0)->getPosition();
@@ -149,17 +151,21 @@ bool FightScene::judgeAttack(Vector<HexCell*> movePath)
     return !movePath.size();
 }
 
-bool FightScene::judgeAllStop()
+bool FightScene::judgeAllDead()
 {
+    int cntMy = 0;
+    int cntEnemy = 0;
     for (auto& iter : gridMap->myChessMap)
     {
-        if (iter.second->stopMoveFlag == 0)
-            return 0;
+        if (iter.second->playerNumber == myPlayer->playerNumber)
+            cntMy++;
+        else
+            cntEnemy++;
     }
-    return 1;
+    return !(cntMy && cntEnemy);
 }
 
-void FightScene::battleBegin()
+void FightScene::findEnemyAndMove()
 {
     Vector<Chess*> chessesOnMap;
     //遍历myChessMap取出所有棋盘上的棋子
@@ -167,23 +173,49 @@ void FightScene::battleBegin()
     {
         chessesOnMap.pushBack(iter.second);
     }
-    //
+    //对每一个棋子进行移动操作，直到所有的棋子停止移动
     while (true) {
+        //遍历移动棋子
         for (auto& chess :chessesOnMap)
         {
-            moveChess(chess, chess->stopMoveFlag);
+             //移动
+             moveChess(chess, chess->stopMoveFlag);
+             //若移动不了，则可以攻击
+             if (chess->stopMoveFlag == 1)
+             {
+                 //判断目标位置能不能打
+                 HexCell* toCell = gridMap->FindBattle(chess, gridMap->getCellAtPosition(chess->atGridPosition));
+                 if (toCell && toCell->chessInGrid && toCell->chessInGrid->health > 0)
+                 {
+                     Chess* attackedChess = toCell->chessInGrid;
+                     chess->attack(attackedChess);
+
+                     // 检查被攻击的棋子是否死亡
+                     if (attackedChess->health <= 0)
+                     {
+                         auto fadeOut = FadeOut::create(1.0f);
+                         attackedChess->actions.pushBack(fadeOut);
+                         gridMap->removeChessOfGrid(toCell);
+                     }
+                 }
+             }
+
         }
-        if (judgeAllStop())
+        
+        if (judgeAllDead())
             break;
     }
     for (auto chess: chessesOnMap)
     {
-        if (chess) {
-            auto sequence = createSequenceFromVector(chess->actions, 0);
-            if (sequence)
-                chess->runAction(sequence);
-        }
-       
+        auto sequence = createSequenceFromVector(chess->actions, 0);
+        chess->runAction(sequence);
     }
+
+}
+
+void FightScene::locatdEnemyAndAttack(Chess* chess)
+{
+    HexCell* toCell = gridMap->FindBattle(chess, gridMap->getCellAtPosition(chess->atGridPosition));
+    chess->attack(toCell->chessInGrid);
 
 }

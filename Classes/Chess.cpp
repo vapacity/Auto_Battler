@@ -4,6 +4,7 @@
 
 USING_NS_CC;
 #define MoveTime 1.0f
+#define ATTACK_MOVE 10
 Chess* Chess::create()
 {
     Chess* chessExample = new (std::nothrow) Chess();
@@ -130,9 +131,26 @@ void Chess::upgradeToThird(const std::string& filename)
 //    return upChess;
 //}
 
-void Chess::attack()
+int Chess::attack(Chess* attackedChess)
 {
-    ;
+    attackTrigTimes++;
+    if (attackTrigTimes % (10 - this->attackSpeed) != 0)
+    {
+        auto delay = DelayTime::create(MoveTime);
+        this->actions.pushBack(delay);
+        return 0;
+    }
+
+    //获得目标位置和自己的位置之间的坐标区别
+    Vec2 position = attackedChess->getPosition() - this->getPosition();
+    position = Vec2(position.x / ATTACK_MOVE, position.y / ATTACK_MOVE);
+    //向目标棋子的方向移动
+    auto moveBackAction = MoveBy::create(0.1f, position);  
+    auto moveBackReverseAction = moveBackAction->reverse();  // 移回原始位置
+    this->actions.pushBack(moveBackAction);
+    this->actions.pushBack(moveBackReverseAction);
+    attackedChess->getHurt(this->ATK);//让对方的棋子掉血
+    return this->ATK;
 }
 
 MoveTo* Chess::moveTo(Vec2 position)
@@ -142,9 +160,9 @@ MoveTo* Chess::moveTo(Vec2 position)
 }
 
 
-void Chess::getHurt()
+void Chess::getHurt(int ATK)
 {
-    ;
+    this->health-=ATK;
 }
 
 void Chess::useSkill()
