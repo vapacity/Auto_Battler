@@ -4,7 +4,7 @@
 #include "HexGrid.h"
 #include "sword.h"
 #include "BlueBar.h"
-#include "HelloWorldScene.h"
+//#include "HelloWorldScene.h"
 USING_NS_CC;
 
 Scene* PrepareScene::createScene()

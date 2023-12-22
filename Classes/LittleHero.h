@@ -11,7 +11,7 @@ public:
     static LittleHero* create();
     virtual bool initWithFile(const std::string& filename);
     virtual bool init();
-    void moveToClickLocation(cocos2d::EventMouse* event);
+    //void moveToClickLocation(cocos2d::EventMouse* event);
     virtual void attack(LittleHero* enemy); // 攻击函数，需要攻击对象
     virtual void gethurt(float atkval);   // 受伤函数，需要攻击数值
     void enableMouseClick();

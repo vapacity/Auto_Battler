@@ -25,9 +25,9 @@ bool LittleHero::initWithFile(const std::string& filename)
     healthBar = HealthBar::create();
     healthBar->setPosition(Vec2(25, 150));
     this->addChild(healthBar);
-    blueBar = BlueBar::create();
+   /* blueBar = BlueBar::create();
     blueBar->setPosition(Vec2(25, 140));
-    this->addChild(blueBar);
+    this->addChild(blueBar);*/
     return true;
 }
 bool LittleHero::init()
@@ -35,9 +35,9 @@ bool LittleHero::init()
     isEnemy = 0;
     atk = 10.0f;
     percentage = 100.0f;
-    auto mouseListener = EventListenerMouse::create();
+   /* auto mouseListener = EventListenerMouse::create();
     mouseListener->onMouseDown = CC_CALLBACK_1(LittleHero::moveToClickLocation, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);*/
     enableMouseClick();
     return true;
 }
@@ -93,29 +93,29 @@ void LittleHero::setEnemy()
     isEnemy = 1;
     disableMouseClick();
 }
-void LittleHero::moveToClickLocation(EventMouse* event)
-{
-    // 判断是否是右键点击
-    if (!mouseClickEnabled)return;
-    if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT)
-    {
-        this->stopAllActions();
-        // 创建一个MoveTo动作，移动到点击位置
-        Vec2 currentPosition = this->getPosition();
-
-        // 计算鼠标点击位置相对于当前位置的相对位移
-        Vec2 targetPosition(event->getCursorX(), event->getCursorY());
-        Vec2 moveDelta = targetPosition - currentPosition;
-
-        float distance = moveDelta.length();
-
-        // 计算匀速移动的时间（假设速度为300像素/秒）
-        float speed = 300.0f;
-        float duration = distance / speed;
-
-        // 创建MoveBy动作，匀速移动到相对位移位置
-        auto moveTo = MoveTo::create(duration, targetPosition);
-
-        this->runAction(moveTo);
-    }
-}
+//void LittleHero::moveToClickLocation(EventMouse* event)
+//{
+//    // 判断是否是右键点击
+//    if (!mouseClickEnabled)return;
+//    if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT)
+//    {
+//        this->stopAllActions();
+//        // 创建一个MoveTo动作，移动到点击位置
+//        Vec2 currentPosition = this->getPosition();
+//
+//        // 计算鼠标点击位置相对于当前位置的相对位移
+//        Vec2 targetPosition(event->getCursorX(), event->getCursorY());
+//        Vec2 moveDelta = targetPosition - currentPosition;
+//
+//        float distance = moveDelta.length();
+//
+//        // 计算匀速移动的时间（假设速度为300像素/秒）
+//        float speed = 300.0f;
+//        float duration = distance / speed;
+//
+//        // 创建MoveBy动作，匀速移动到相对位移位置
+//        auto moveTo = MoveTo::create(duration, targetPosition);
+//
+//        this->runAction(moveTo);
+//    }
+//}
