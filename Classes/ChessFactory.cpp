@@ -9,10 +9,10 @@ Chess* ChessFactory::createChessById(int id)
 		chess = Magikarp::create("Magikarp-right-1.png");
 		break;
 	case 12:
-		chess = Rabbit::create("Rabbit-right-1.png");
+		chess = Buneary::create("Buneary-right-1.png");
 		break;
 	case 13:
-		chess = Jigglypuff::create("Jigglypuff-right-1.png");
+		chess = Jingglypuff::create("Jigglypuff-right-1.png");
 		break;
 
 	case 21:
@@ -26,7 +26,7 @@ Chess* ChessFactory::createChessById(int id)
 		break;
 	case 24:
 		chess = Bulbasaur::create("Bulbasaur-right-1.png");
-		break; 
+		break;
 	case 25:
 		chess = Pikachu::create("Pikachu-left-1.png");
 		break;
@@ -46,3 +46,4 @@ Chess* ChessFactory::createChessById(int id)
 	}
 	return chess;
 }
+

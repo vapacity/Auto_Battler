@@ -1,6 +1,4 @@
-/**/#include "Snorlax.h"
-
-//SnorlaxµÈ¼¶1
+#include "Snorlax.h"
 Snorlax* Snorlax::create(const std::string& filename)
 {
     Snorlax* snorlax = new (std::nothrow) Snorlax();

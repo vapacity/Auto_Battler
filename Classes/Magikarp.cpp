@@ -1,6 +1,4 @@
-/*#include "Magikarp.h"
-
-//MagikarpµÈ¼¶1
+#include "Magikarp.h"
 Magikarp* Magikarp::create(const std::string& filename)
 {
     Magikarp* magikarp = new (std::nothrow) Magikarp();
@@ -23,4 +21,4 @@ bool Magikarp::init(const std::string& filename)
     id = 11;
     star = 1;
     return true;
-}*/
+}

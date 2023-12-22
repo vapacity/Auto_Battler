@@ -26,6 +26,7 @@
 #include "HelloWorldScene.h"
 #include "PrepareScene.h"
 #include "PlayerManager.h"
+#include "StartScene.h"
  //#define USE_AUDIO_ENGINE 1
  //#define USE_SIMPLE_AUDIO_ENGINE 1
 

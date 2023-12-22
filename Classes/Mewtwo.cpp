@@ -1,6 +1,4 @@
-/*#include "Mewtwo.h"
-
-//MewtwoµÈ¼¶1
+#include "Mewtwo.h"
 Mewtwo* Mewtwo::create(const std::string& filename)
 {
     Mewtwo* mewtwo = new (std::nothrow) Mewtwo();
@@ -18,9 +16,9 @@ bool Mewtwo::init(const std::string& filename)
         return false;
     }
     this->setScale(SET_SCALE);
-    this->price = PRICE_STAR1_GRADE1;
-    this->name = filename;
-    this->id = 32;
-    this->star = 1;
+    price = PRICE_STAR1_GRADE1;
+    name = filename;
+    id = 32;
+    star = 1;
     return true;
-}*/
+}

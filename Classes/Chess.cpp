@@ -1,4 +1,5 @@
 
+
 #include "Chess.h"
 #include"ChessFactory.h"
 
@@ -92,6 +93,7 @@ void Chess::upgrade()
 void Chess::upgradeToSecond(const std::string& filename)
 {
     this->setTexture(filename);
+    this->setScale(SET_SCALE * 1.25);
     price;//«Æ‘ı√¥À„£ø
     name = filename;
     star = 2;
@@ -101,6 +103,7 @@ void Chess::upgradeToSecond(const std::string& filename)
 void Chess::upgradeToThird(const std::string& filename)
 {
     this->setTexture(filename);
+    this->setScale(SET_SCALE * 1.5);
     price;//«Æ‘ı√¥À„£ø
     name = filename;
     star = 3;

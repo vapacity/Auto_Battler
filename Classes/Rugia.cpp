@@ -1,6 +1,4 @@
-/*#include "Rugia.h"
-
-//RugiaµÈ¼¶1
+#include "Rugia.h"
 Rugia* Rugia::create(const std::string& filename)
 {
     Rugia* rugia = new (std::nothrow) Rugia();
@@ -23,4 +21,4 @@ bool Rugia::init(const std::string& filename)
     id = 33;
     star = 1;
     return true;
-}*/
+}

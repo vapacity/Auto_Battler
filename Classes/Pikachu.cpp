@@ -1,6 +1,4 @@
-/*#include "Pikachu.h"
-
-//PikachuµÈ¼¶1
+#include "Pikachu.h"
 Pikachu* Pikachu::create(const std::string& filename)
 {
     Pikachu* pikachu = new (std::nothrow) Pikachu();
@@ -23,4 +21,4 @@ bool Pikachu::init(const std::string& filename)
     id = 25;
     star = 1;
     return true;
-}*/
+}

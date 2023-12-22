@@ -1,6 +1,5 @@
 #include "Bulbasaur.h"
 
-//BulbasaurµÈ¼¶1
 Bulbasaur* Bulbasaur::create(const std::string& filename)
 {
     Bulbasaur* bulbasaur = new (std::nothrow) Bulbasaur();
@@ -18,9 +17,9 @@ bool Bulbasaur::init(const std::string& filename)
         return false;
     }
     this->setScale(SET_SCALE);
-    price = PRICE_STAR1_GRADE2;
-    name = filename;
-    id = 24;
-    star = 1;
+    this->price = PRICE_STAR1_GRADE2;
+    this->name = filename;
+    this->id = 24;
+    this->star = 1;
     return true;
 }
