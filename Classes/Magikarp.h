@@ -1,0 +1,1 @@
+//Magikarp 1阶#ifndef MAGIKARP_H#include"cocos2d.h"#include"Chess.h"USING_NS_CC;class Magikarp :public Chess{public:	//create一个	static Magikarp* create(const std::string& filename);	//重写init方法	bool init(const std::string& filename);	//特有函数。。待更新	void breateFire();};#endif

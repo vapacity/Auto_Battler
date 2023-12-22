@@ -87,7 +87,6 @@ void Store::updateForPlayer()
 
 }
 
-//一种棋子有5个不同费用，须改
 //刷新商店，更新5个playerStore的id
 void Store::refreshStore()
 {

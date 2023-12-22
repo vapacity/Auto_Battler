@@ -20,7 +20,7 @@ bool Yevee::init(const std::string& filename)
     this->setScale(SET_SCALE);
     price = PRICE_STAR1_GRADE1;
     name = filename;
-    id = 0;
+    id = 21;
     star = 1;
     return true;
 }

@@ -19,7 +19,7 @@ bool Squirtle::init(const std::string& filename)
     this->setScale(SET_SCALE);
     this->price = PRICE_STAR1_GRADE1;
     this->name = filename;
-    this->id = 2;
+    this->id = 22;
     this->star = 1;
     return true;
 }

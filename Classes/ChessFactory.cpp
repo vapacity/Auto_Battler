@@ -6,15 +6,40 @@ Chess* ChessFactory::createChessById(int id)
 	switch (id)
 	{
 	case 11:
-		chess = Yevee::create("Yevee-left-1.png");
+		chess = Magikarp::create("Magikarp-right-1.png");
 		break;
 	case 12:
-		chess = Charmander::create("Charmander-left-1.png");
+		chess = Rabbit::create("Rabbit-right-1.png");
 		break;
 	case 13:
-		chess = Squirtle::create("Squirtle-left-1.png");
+		chess = Jigglypuff::create("Jigglypuff-right-1.png");
 		break;
 
+	case 21:
+		chess = Yevee::create("Yevee-left-1.png");
+		break;
+	case 22:
+		chess = Squirtle::create("Squirtle-left-1.png");
+		break;
+	case 23:
+		chess = Charmander::create("Charmander-left-1.png");
+		break;
+	case 24:
+		chess = Bulbasaur::create("Bulbasaur-right-1.png");
+		break; 
+	case 25:
+		chess = Pikachu::create("Pikachu-left-1.png");
+		break;
+
+	case 31:
+		chess = Snorlax::create("Snorlax-right-1.png");
+		break;
+	case 32:
+		chess = Mewtwo::create("Mewtwo-right-1.png");
+		break;
+	case 33:
+		chess = Rugia::create("Rugia-right-1.png");
+		break;
 	default:
 		chess = Chess::create("defualt.png");
 		break;

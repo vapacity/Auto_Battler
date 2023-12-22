@@ -6,6 +6,14 @@
 #include "Yevee.h"
 #include "Charmander.h"
 #include "Squirtle.h"
+#include "Bulbasaur.h"
+#include "Jigglypuff.h"
+#include "Magikarp.h"//
+#include "Mewtwo.h"//
+#include "Pikachu.h"//
+#include "Rabbit.h"//
+#include "Rugia.h"//
+#include "Snorlax.h"
 USING_NS_CC;
 class ChessFactory
 {

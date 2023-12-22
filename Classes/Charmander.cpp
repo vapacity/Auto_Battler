@@ -20,7 +20,7 @@ bool Charmander::init(const std::string& filename)
     this->setScale(SET_SCALE);
     this->price = PRICE_STAR1_GRADE1;
     this->name = filename;
-    this->id = 1;
+    this->id = 23;
     this->star = 1;
     return true;
 }

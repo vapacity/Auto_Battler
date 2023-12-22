@@ -25,24 +25,20 @@ void StoreLayer::refreshWithId(int id)
     }
     //Ðë¸Ä
     else if (layerId == 11) {
-        layerImage->setTexture("Yevee-card.png");
+        layerImage->setTexture("Magikarp-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 12) {
-        layerImage->setTexture("Charmander-card.png");
+        layerImage->setTexture("Rabbit-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 13) {
-        layerImage->setTexture("Squirtle-card.png");
-        layerImage->setContentSize(Size(pictureSize, pictureSize));
-    }
-    else if (layerId == 14) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Jigglypuff-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
     else if (layerId == 21) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Yevee-card.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 22) {
@@ -50,31 +46,30 @@ void StoreLayer::refreshWithId(int id)
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 23) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Charmander-card.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 24) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Bulbasaur-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 25) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Pikachu-left-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
     else if (layerId == 31) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Snorlax-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 32) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Mewtwo-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
     else if (layerId == 33) {
-        layerImage->setTexture("Squirtle-card.png");
+        layerImage->setTexture("Rugia-right-1.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
-
 
     std::string newLabel = "COST:" + std::to_string(calCostFromId(layerId));
     costLabel->setString(newLabel);
