@@ -13,6 +13,5 @@ public:
 	//重写init方法
 	bool init(const std::string& filename);
 
-	//特有函数。。待更新
-	void breateFire();
+	virtual void useSkill() override;
 };

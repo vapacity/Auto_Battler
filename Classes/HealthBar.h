@@ -1,6 +1,6 @@
 // HealthBar.h
 #ifndef __HEALTH_BAR_H__
-#define __HEALTH_BAR_H__
+#define __HEALTH_BAR_H__ 
 
 #include "cocos2d.h"
 

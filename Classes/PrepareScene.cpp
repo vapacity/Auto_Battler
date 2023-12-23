@@ -179,6 +179,7 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
         {
             Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);
             chess->initHealthBar();
+            chess->initBlueBar();
             chess->maxHP = chess->health;
             if (chess)
             {

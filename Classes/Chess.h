@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "HealthBar.h"
+#include "BlueBar.h"
 class GridMap;
 class HexCell;
 class Seat;
@@ -55,7 +56,13 @@ public://此处放属性变量
 
 	int maxHP;
 
-	int blueBar;//蓝条
+	int blueBar;//大写的Bar是蓝条上限
+
+	int currentBlueBar = 0;//当前蓝条
+
+	bool enable_skill = false;//能否放技能
+
+	int skillCount = 0;//使用技能次数
 
 	int attackRange;//攻击范围
 
@@ -74,6 +81,7 @@ public://此处放属性变量
 	bool isAnimationPlaying = false;//是否正在播放动画
 
 	HealthBar* healthBar;
+	BlueBar* bluebar;
 public:
 	//初始化棋子
 	static Chess* create();
@@ -99,7 +107,7 @@ public:
 	// 根据输入的id值创建一个棋子实例
 	static Chess* createById(int id);
 
-	// 根据输入的id值创建一个棋子实例
+	// 根据输入的id值和星级创建一个棋子实例
 	static Chess* createByIdAndStar(int id, int star);
 
 	//单个棋子的初始化
@@ -116,6 +124,7 @@ public:
 
 	//将这个棋子反转
 	void reverseImg();
+
 	//移动函数（包含其回调函数）
 	virtual void moveAction(GridMap* gridMap);
 
@@ -145,6 +154,7 @@ public:
 	bool isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessAround);
 
 	void initHealthBar();
+	void initBlueBar();
 };
 
 

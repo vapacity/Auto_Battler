@@ -35,4 +35,40 @@ bool Yevee::init(const std::string& filename)
     return true;
 }
 
+//防御两次攻击
+void Yevee::useSkill()
+{
+    skillCount++;
+    if (skillCount > 2) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
+        enable_skill = false;
+        currentBlueBar = 0;
+        bluebar->setPercentage(0);
+        skillCount = 0;
+    }
+}
+
+void Yevee::getHurt(int ATK)
+{
+    if(!enable_skill)//放技能时不被伤害
+    {
+        this->health -= ATK;
+        float percentage_health = 100.0 * health / maxHP;
+        if (percentage_health < 0)
+            percentage_health = 0;
+        healthBar->setPercentage(percentage_health);
+
+        if (!enable_skill)
+        {
+            this->currentBlueBar += 5;
+            float percentage_blue = 100.0 * currentBlueBar / this->blueBar;
+            if (currentBlueBar > this->blueBar)
+            {
+                this->enable_skill = true;
+                percentage_blue = 100.0f;
+            }
+            bluebar->setPercentage(percentage_blue);
+        }
+    }
+}
+
 

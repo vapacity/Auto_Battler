@@ -7,9 +7,10 @@ USING_NS_CC;
 class Buneary :public Chess
 {
 public:
+
 	static Buneary* create(const std::string& filename);
 
 	bool init(const std::string& filename);
 
-	void breateFire();
+	virtual void useSkill() override;
 };

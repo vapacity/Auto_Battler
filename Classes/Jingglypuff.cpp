@@ -35,3 +35,21 @@ bool Jingglypuff::init(const std::string& filename)
     moveSpeed = 1;
     return true;
 }
+
+//回血50%
+void Jingglypuff::useSkill()
+{
+    skillCount++;
+    if (skillCount == 1)//第一次用技能时更新数值，之后不动
+    {
+        health = health + maxHP / 2 > maxHP ? maxHP : health + maxHP / 2;
+        float percentage_health = 100.0 * health / maxHP;
+        healthBar->setPercentage(percentage_health);
+    }
+    if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
+        enable_skill = false;
+        currentBlueBar = 0;
+        bluebar->setPercentage(0);
+        skillCount = 0;
+    }
+}

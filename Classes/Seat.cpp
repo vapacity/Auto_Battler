@@ -43,3 +43,4 @@ void Seat::turnToNormal()
         seatImage->setOpacity(80);
 }
 
+

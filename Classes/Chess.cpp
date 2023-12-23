@@ -1,8 +1,8 @@
-
+#include "cocos2d.h"
 #include "Chess.h"
 #include"ChessFactory.h"
 #include "GridMap.h"
-USING_NS_CC;
+USING_NS_CC; 
 #define MoveTime 1.0f
 #define ATTACK_MOVE 5
 Chess* Chess::create()
@@ -64,7 +64,7 @@ Chess* Chess::createByIdAndStar(int id, int star)
     while (star > 1)
     {
         chess->upgrade();
-        star--;
+        star--;//////////////////////
     }
     return chess;
 }
@@ -75,6 +75,7 @@ bool Chess::init()
         return false;
     }
     //this->initHealthBar();
+    //this->initBlueBar();
     return true;
 }
 //这个函数用于寻找字符串中的一个字符串并将他删除
@@ -176,27 +177,68 @@ void Chess::attackAction(GridMap* gridMap)
         return;
     }
     Chess* attackObject = enemyChessAround.at(0)->chessInGrid;
-    //播放对攻击对象,设想是顶一下
-    //播放对攻击对象,设想是顶一下,远程目标需要修改
-    Vec2 position = attackObject->getPosition() - this->getPosition();
-    position = Vec2(position.x / ATTACK_MOVE, position.y / ATTACK_MOVE);
-
-    float attackDuration = 1.0f /(10*attackSpeed);
-    auto moveBackAction = MoveBy::create(attackDuration, position);
-    auto moveBackReverseAction = moveBackAction->reverse();  // 移回原始位置
+    //当前能释放技能
+    if (this->enable_skill) {
+        useSkill();
+    }
+    
     //回调函数对目标产生伤害
     auto callback = CallFunc::create([=]() {
         // 动画完成后的回调,对目标实际造成伤害
         attackObject->getHurt(ATK);
         if (attackObject->health <= 0)
             attackObject->changeState(Dead);
+
+        //蓝条,放技能时不变
+        if(!enable_skill)
+        {
+            this->currentBlueBar += 5;
+            float percentage_blue = 100.0 * currentBlueBar / this->blueBar;
+            if (currentBlueBar > this->blueBar)
+            {
+                this->enable_skill = true;
+                percentage_blue = 100.0f;
+            }
+            bluebar->setPercentage(percentage_blue);
+        }
+
         isAnimationPlaying = false;
         this->changeState(Idle); // 或其他状态
         });
     //回调函数对目标产生伤害
-    auto sequence = Sequence::create(moveBackAction, moveBackReverseAction, callback, nullptr);
-    this->runAction(sequence);
+
+    if(isMelee==1){
+        //播放对攻击对象,设想是顶一下,远程目标需要修改
+        Vec2 position = attackObject->getPosition() - this->getPosition();
+        position = Vec2(position.x / ATTACK_MOVE, position.y / ATTACK_MOVE);
+
+        float attackDuration = 1.0f / (10 * attackSpeed);
+        auto moveBackAction = MoveBy::create(attackDuration, position);
+        auto moveBackReverseAction = moveBackAction->reverse();  // 移回原始位置
+        auto sequence1 = Sequence::create(moveBackAction, moveBackReverseAction, callback, nullptr);
+        this->runAction(sequence1);
+    }
+    else {
+        auto bullet = Sprite::create();
+        bullet->setTexture("SliderNode_Normal.png");
+        this->getParent()->addChild(bullet);
+        bullet->setPosition(this->getPosition());
+        bullet->setScale(0.5);
+        bullet->setZOrder(2);
+        CCLOG("BULLET");
+        Vec2 position = attackObject->getPosition() - this->getPosition();
+        float attackDuration = 1.0f / (10 * attackSpeed);
+        auto moveBackAction = MoveBy::create(attackDuration, position);
+        CCLOG("moveBackAction");
+        auto fadeOut = FadeOut::create(0.0001f);
+        CCLOG("fadeOut");
+        auto sequence2 = Sequence::create(moveBackAction, fadeOut, callback, nullptr);
+        CCLOG("sequence2");
+        bullet->runAction(sequence2);
+        CCLOG("RUN");
+    }
     isAnimationPlaying = true;
+    
 }
 
 void Chess::deadAction(GridMap* gridMap)
@@ -220,23 +262,36 @@ void Chess::getBlood()
 void Chess::getHurt(int ATK)
 {
     this->health -= ATK;
-    float percentage = 1.0 * health / maxHP;
-    if (percentage < 0)
-        percentage = 0;
-    healthBar->setPercentage(percentage);
+    float percentage_health = 100.0 * health / maxHP;
+    if (percentage_health < 0)
+        percentage_health = 0;
+    healthBar->setPercentage(percentage_health);
+
+    if(!enable_skill)
+    {
+        this->currentBlueBar += 5;
+        float percentage_blue = 100.0 * currentBlueBar / this->blueBar;
+        if (currentBlueBar > this->blueBar)
+        {
+            this->enable_skill = true;
+            percentage_blue = 100.0f;
+        }
+        bluebar->setPercentage(percentage_blue);
+    }
     // 可创建掉血动画，但不必要 
 }
 
 void Chess::useSkill()
 {
-    ;
+    CCLOG("USESKILL");
+
 }
 
 void Chess::updateInBattle(float dt, GridMap* gridMap)
 {
     switch (currentState) {
     case Idle: {
-        //检查是否有可攻击的敌人
+        //检查是否有可攻击的敌人//////////////////
         Vector<HexCell*>a;
         if (isEnemyInAttackRange(gridMap, a))
             // 如果有，切换到攻击状态
@@ -335,8 +390,17 @@ bool Chess::isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessA
 void Chess::initHealthBar()
 {
     healthBar = HealthBar::create("Blood1.png", "Blood2.png", 100.0f);
-    healthBar->setPosition(Vec2(25, 150));
+    healthBar->setScale(3);
+    healthBar->setPosition(Vec2(100, 450));
     this->addChild(healthBar);
+}
+
+void Chess::initBlueBar()
+{
+    bluebar = BlueBar::create("Blood1.png", "Blood2.png", 0.0f);
+    bluebar->setScale(3);
+    bluebar->setPosition(Vec2(100, 350));
+    this->addChild(bluebar);
 }
 
 

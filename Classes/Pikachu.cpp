@@ -33,3 +33,20 @@ bool Pikachu::init(const std::string& filename)
     moveSpeed = 3;
     return true;
 }
+
+//攻击速度加20%
+void Pikachu::useSkill()
+{
+    skillCount++;
+    if (skillCount == 1)//第一次用技能时更新数值，之后不动
+    {
+        attackSpeed *= 1.2;
+    }
+    if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
+        attackSpeed /= 1.2;
+        enable_skill = false;
+        currentBlueBar = 0;
+        bluebar->setPercentage(0);
+        skillCount = 0;
+    }
+}

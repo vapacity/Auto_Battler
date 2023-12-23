@@ -32,3 +32,20 @@ bool Rugia::init(const std::string& filename)
     moveSpeed = 0.7;
     return true;
 }
+
+//打500*star
+void Rugia::useSkill()
+{
+    skillCount++;
+    if (skillCount == 1)//第一次用技能时更新数值，之后不动
+    {
+        ATK = 500 * star;
+    }
+    if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
+        ATK = 130;
+        enable_skill = false;
+        currentBlueBar = 0;
+        bluebar->setPercentage(0);
+        skillCount = 0;
+    }
+}

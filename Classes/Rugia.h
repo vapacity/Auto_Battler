@@ -12,5 +12,5 @@ public:
 
 	bool init(const std::string& filename);
 
-	void breateFire();
+	virtual void useSkill() override;
 };

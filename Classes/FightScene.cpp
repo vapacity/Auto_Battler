@@ -69,7 +69,7 @@ void FightScene::initChessExp()
         this->addChild(Yevee, 1);
     }*/
 
-    auto charmander = ChessFactory::createChessById(31);
+    /*auto charmander = ChessFactory::createChessById(31);
     if (charmander) {
         charmander->setScale(0.15);
         gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
@@ -87,10 +87,12 @@ void FightScene::initChessExp()
         charmander2->reverseImg();
         charmander2->playerNumber = 1;
         this->addChild(charmander2, 1);
-    }
-    auto charmander3 = ChessFactory::createChessById(33);
+    }*/
+    auto charmander3 = ChessFactory::createChessById(32);
     if (charmander3) {
-        charmander3->setScale(0.15);
+        charmander3->initHealthBar();
+        charmander3->initBlueBar();
+        charmander3->maxHP = charmander3->health;
         gridMap->addChessToGrid(charmander3, gridMap->getCellAtPosition(Vec2(10, 5)));
         myPlayer->addChess(charmander3);
         charmander3->playerNumber = 1;
