@@ -21,9 +21,12 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-
+#include<iostream>
 #include "SetMenuScene.h"
-
+#include "SimpleAudioEngine.h"
+#include "HelloWorldScene.h"
+#include "ui/CocosGUI.h"
+#include "AudioManager.h"
 using namespace cocos2d::ui;
 USING_NS_CC;
 
@@ -63,15 +66,15 @@ bool SetMenu::init()
     // 2. add a menu item with "X" image, which is clicked to quit the program
     //    you may modify it.
     Vector<MenuItem*> MenuItems_Set;
-    
+
     auto slider = Slider::create();
     slider->loadBarTexture("Slider_Back.png"); // what the slider looks like
     slider->loadSlidBallTextures("SliderNode_Normal.png", "SliderNode_Press.png", "SliderNode_Disable.png");
     slider->loadProgressBarTexture("Slider_PressBar.png");
     slider->setPosition(Vec2(origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height - 4*slider->getContentSize().height));
-    slider->setPercent(g_slider_position);//每次进入场景时滑动条保存上一次设置的位置，g_slider_position的定义在AudioManager.cpp里
-    slider->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+        origin.y + visibleSize.height - 4 * slider->getContentSize().height));
+    slider->setPercent(cocos2d::UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50));//12.16 此处改动  每次进入场景时滑动条保存上一次设置的位置，g_slider_position的定义在AudioManager.cpp里
+    slider->addTouchEventListener([=](Ref* sender, Widget::TouchEventType type) {//12.16 将&改为=
         switch (type)
         {
             case Widget::TouchEventType::BEGAN:
@@ -80,16 +83,15 @@ bool SetMenu::init()
                 // 获取滑动条的数值（假设范围是0.0到1.0）
                 // 设置背景音乐的音量,先暂停再设置
                 AudioManager::pauseBackgroundMusic();
-                AudioManager::setBackgroundMusicVolume(0.5);
-                //BUG:会异常退出而且调不了音量，本来应该是AudioManager::setBackgroundMusicVolume(slider->getPercent() / 100.0f);
+                AudioManager::setBackgroundMusicVolume(slider->getPercent() / 100.0f);//这个setBackgroundMusicVolume不起作用，尝试了设置为0，但音量不变
                 AudioManager::resumeBackgroundMusic();
                 // 将滑动条的位置保存到全局变量中
-                //g_slider_position = slider->getPercent();//BUG
+                cocos2d::UserDefault::getInstance()->setFloatForKey("backGroundMusicVolumn", slider->getPercent());//12.16 此处改动 BUG
                 break;
             default:
                 break;
         }
-    });
+        });
 
     this->addChild(slider);
 
@@ -108,7 +110,7 @@ bool SetMenu::init()
         //将标签添加到当前图层中，层级参数为1，表示将标签放置在其他元素的上方
         this->addChild(label_volume, 1);
     }
-    
+
     auto checkbox = CheckBox::create("check_box_normal.png",
         "check_box_normal_press.png",
         "check_box_active.png",
@@ -116,15 +118,14 @@ bool SetMenu::init()
         "check_box_active_disable.png");
     checkbox->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height - 4 * checkbox->getContentSize().height));
-    checkbox->setSelected(lastCheckBoxState);
-    checkbox->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
+    checkbox->setSelected(cocos2d::UserDefault::getInstance()->getBoolForKey("lastCheckBoxState",1 ));//12.16 此处改动  每次进入场景时滑动条保存上一次设置的位置，g_slider_position的定义在AudioManager.cpp里
+    checkbox->addTouchEventListener([=](Ref* sender, Widget::TouchEventType type) {
         switch (type)
         {
             case Widget::TouchEventType::BEGAN:
                 break;
             case Widget::TouchEventType::ENDED:
-                // 保存上一次复选框的选择状态
-                //lastCheckBoxState = checkbox->isSelected();//BUG:取消注释会异常退出
+                
                 // 切换音效开关变量的值
                 isAudioEnabled = !isAudioEnabled;
 
@@ -139,6 +140,8 @@ bool SetMenu::init()
                     // 禁用音效
                     AudioManager::playEffect();
                 }
+                // 保存上一次复选框的选择状态
+                cocos2d::UserDefault::getInstance()->setBoolForKey("lastCheckBoxState", checkbox->isSelected());///////////////haishibaocunbuliao
                 break;
             default:
                 break;

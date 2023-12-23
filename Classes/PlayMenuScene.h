@@ -31,6 +31,7 @@
 #include "StartScene.h"
 #include "AudioManager.h"
 #include "HumanPlayScene.h"
+#include "PrepareScene.h"
 
 class PlayMenu : public cocos2d::Scene
 {
@@ -38,6 +39,7 @@ public:
     static cocos2d::Scene* createScene();//创建场景
 
     virtual bool init();//初始化
+    void menuMachinePlayCallback(Ref* pSender);//切换到人机场景
     void menuMultiPlayCallback(Ref* pSender);//切换到联机场景
     void menuFirstCallback(Ref* pSender);//回到Play场景
     // a selector callback

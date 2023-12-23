@@ -23,12 +23,11 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "HelloWorldScene.h"
 #include "PrepareScene.h"
 #include "PlayerManager.h"
 #include "StartScene.h"
  //#define USE_AUDIO_ENGINE 1
- //#define USE_SIMPLE_AUDIO_ENGINE 1
+ #define USE_SIMPLE_AUDIO_ENGINE 1
 
 #if USE_AUDIO_ENGINE && USE_SIMPLE_AUDIO_ENGINE
 #error "Don't use AudioEngine and SimpleAudioEngine at the same time. Please just select one in your game!"
@@ -101,7 +100,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     Player* enemyPlayer = Player::create();
     PlayerManager::getInstance()->addPlayer(enemyPlayer);
     // 创建一个场景
-    auto scene = PrepareScene::create();
+    auto scene = StartScene::create();
    
     // 运行场景
     director->runWithScene(scene);

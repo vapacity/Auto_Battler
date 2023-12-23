@@ -27,10 +27,6 @@
 #define __SETMENU_SCENE_H__
 
 #include "cocos2d.h"
-#include "SimpleAudioEngine.h"
-#include "StartScene.h"
-#include "ui/CocosGUI.h"
-#include "AudioManager.h"
 
 class SetMenu : public cocos2d::Scene
 {

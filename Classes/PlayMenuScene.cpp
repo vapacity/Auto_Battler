@@ -25,7 +25,7 @@
 #include "PlayMenuScene.h"
 
 USING_NS_CC;
-
+class PrepareScene;
 Scene* PlayMenu::createScene()
 {
     return PlayMenu::create();
@@ -68,7 +68,7 @@ bool PlayMenu::init()
     auto machinePlayItem = MenuItemImage::create(
         "renjinormal.png",
         "renjiselected.png",
-        CC_CALLBACK_1(PlayMenu::menuCloseCallback, this));
+        CC_CALLBACK_1(PlayMenu::menuMachinePlayCallback, this));
 
     if (machinePlayItem == nullptr ||
         machinePlayItem->getContentSize().width <= 0 ||
@@ -170,6 +170,18 @@ bool PlayMenu::init()
         this->addChild(background, -1);
     }
     return true;
+}
+
+void PlayMenu::menuMachinePlayCallback(Ref* pSender) {
+    if (isAudioEnabled)
+    {// ÆôÓÃÒôÐ§
+        AudioManager::playEffect();
+    }
+
+    auto machinePrepareScene = PrepareScene::createScene();
+    float dur = 1.0f;
+    auto transition = TransitionFade::create(dur, machinePrepareScene);
+    Director::getInstance()->pushScene(transition);
 }
 
 void PlayMenu::menuMultiPlayCallback(Ref* pSender) {

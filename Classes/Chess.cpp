@@ -397,7 +397,7 @@ void Chess::initHealthBar()
 
 void Chess::initBlueBar()
 {
-    bluebar = BlueBar::create("Blood1.png", "Blood2.png", 0.0f);
+    bluebar = BlueBar::create("Blood1.png", "Blue2.png", 0.0f);
     bluebar->setScale(3);
     bluebar->setPosition(Vec2(100, 350));
     this->addChild(bluebar);

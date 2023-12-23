@@ -116,6 +116,7 @@ void PrepareScene::initLittleHero()
 {
     //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
     littleHero = myPlayer->myHero;
+    myPlayer->myHero->removeFromParent();
     this->addChild(myPlayer->myHero);
 }
 

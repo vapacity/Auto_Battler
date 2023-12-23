@@ -26,8 +26,7 @@
 using namespace CocosDenshion;
 USING_NS_CC;
 
-float g_slider_position = 50.0f;
-bool lastCheckBoxState = true;
+
 bool isAudioEnabled = true;// 定义音效开关变量并初始化为开启状态
 void AudioManager::playBackgroundMusic()
 {

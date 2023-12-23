@@ -30,6 +30,7 @@ bool Player::init()
     }
     //初始化小小英雄
     myHero = LittleHero::create("kalakala-littlehero-left.png", 0);
+    myHero->retain();
     return true;
 }
 
