@@ -33,6 +33,7 @@ public:
 
     Vector<FiniteTimeAction*> actions;
     cocos2d::network::WebSocket* webSocket_;
+    int test = 0;
 public:
     // 创建场景的静态方法
     FightScene();
@@ -86,10 +87,11 @@ public:
     void onClose(cocos2d::network::WebSocket* ws);
     void onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error);
     void update(float dt);
-
     void updateDead(float dt);
     void updateWin(float dt);
     CREATE_FUNC(FightScene);
 
 };
 #endif
+
+

@@ -3,7 +3,7 @@
 FightScene::FightScene()
 {
     webSocket_ = new cocos2d::network::WebSocket();
-    webSocket_->init(*this, "ws://100.81.177.2:3000"); // 替换为你的服务器地址和端口号
+    webSocket_->init(*this, "ws://100.81.177.2:3000");
 }
 
 FightScene::~FightScene()
@@ -82,9 +82,10 @@ bool FightScene::init()
     //initChessExp();
     //findEnemyAndMove();
     initWeb();
-    sendChessInfoToServer();
+    
+    //sendChessInfoToServer();
     gridMap->disableMouseListener();
-    //is->schedule([this](float dt) {this->update(dt); }, "update_key");
+    this->schedule([this](float dt) {this->update(dt); }, "update_key");
 }
 
 void FightScene::initPlayer()
@@ -162,7 +163,7 @@ void FightScene::initGridMap()
         iter.second->removeFromParent();
         this->addChild(iter.second, 1);
     }
-    gridMap->selectSchedule(0);
+    //gridMap->selectSchedule(1);
 }
 
 void FightScene::initPreparationSeats()
@@ -202,6 +203,9 @@ void FightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d::netwo
     CCLOG("Received message: %s", data.bytes);
     std::string message(data.bytes, data.len);
     CCLOG("Received message: %s", message.c_str());
+    if (message == "开始游戏") {
+        sendChessInfoToServer();
+    }
     // 在这里解析 JSON 数据，更新棋子状态等
     rapidjson::Document document;
     document.Parse(message.c_str());
@@ -219,16 +223,17 @@ void FightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d::netwo
                 float y = chessObject["y"].GetFloat();
                 int enemyplayerNumber = chessObject["playerNumber"].GetInt();
                 auto chess = Chess::createByIdAndStar(id, star);
-                chess->playerNumber = enemyplayerNumber;
+                chess->playerNumber = 1;
                 //为了视角保持在以0号player的主视角
                 gridMap->addChessToGrid(chess, gridMap->getCellAtPosition(Vec2(NUM_COLUMN - x - 1, NUM_LINE - y - 1)));
                 chess->maxHP = chess->health;
                 chess->initHealthBar();
-
+                this->addChild(chess);
 
             }
         }
     }
+    gridMap->updateForPlayer();
 }
 
 void FightScene::onClose(cocos2d::network::WebSocket* ws)
@@ -268,7 +273,7 @@ void FightScene::update(float dt)
     //        gridMap->removeChessOfGrid(gridMap->getCellAtPosition(chess->atGridPosition));//不能放在回调函数中，因为其它棋子需要直接搜索
     //    }
     //}
-    updateWin(dt);
+    //updateWin(dt);
 }
 
 void FightScene::updateWin(float dt)
@@ -319,4 +324,6 @@ void FightScene::updateWin(float dt)
         this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
     }
 }
+
+
 
