@@ -9,13 +9,14 @@
 #include "PreparationSeats.h"
 #include "Store.h"
 #include "LittleHero.h"
+#include "PrepareScene.h"
 USING_NS_CC;
 
 class FightScene :public cocos2d::Scene
 {
 public:
-    Player* myPlayer = PlayerManager::getInstance()->getPlayer(0);
-    Player* enemyPlayer = PlayerManager::getInstance()->getPlayer(0);
+    Player* myPlayer;
+    Player* enemyPlayer;
 
     Sprite* backgroundImg;//背景图片
     GridMap* gridMap;//棋盘
@@ -55,6 +56,10 @@ public:
     //创建棋子样例
     void initChessExp();
 
+    //在棋盘上创建我方和对方的棋子（并非调用实例，而是创建新的）
+    void createChessOnGrids();
+
+
     //棋子移动函数
     void moveChess(Chess* chessToMove, bool& stopMoveFlag);
 
@@ -75,6 +80,7 @@ public:
 
     void updateDead(float dt);
     void updateWin(float dt);
+    void goToPrepareScene();
     CREATE_FUNC(FightScene);
 
 };

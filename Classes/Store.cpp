@@ -7,8 +7,7 @@
 StoreAttribute* StoreAttribute::create()
 {
     StoreAttribute* s = new (std::nothrow) StoreAttribute();
-    if (s && s->init()) {
-        s->retain(); // 需要增加 retain，这是 player 的成员变量，不能被随意释放
+    if (s && s->init()) {// 需要增加 retain，这是 player 的成员变量，不能被随意释放
         s->autorelease();
         return s;
     }

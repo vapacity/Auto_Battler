@@ -66,6 +66,8 @@ Chess* Chess::createByIdAndStar(int id, int star)
         chess->upgrade();
         star--;
     }
+    chess->maxHP = chess->health;
+    chess->initHealthBar();
     return chess;
 }
 
@@ -207,7 +209,11 @@ void Chess::deadAction(GridMap* gridMap)
     }
     // 处理死亡逻辑
     auto fadeOut = FadeOut::create(0.3f);//回调函数对目标产生伤害
-    runAction(fadeOut);
+    auto callback = CallFunc::create([=]() {
+        healthBar->setOpacity(0);
+        });
+    auto sequence = Sequence::create(fadeOut, callback, nullptr);
+    runAction(sequence);
     gridMap->removeChessOfGrid(gridMap->getCellAtPosition(this->atGridPosition));//不能放在回调函数中，因为其它棋子需要直接搜索
 }
 

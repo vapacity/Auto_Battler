@@ -27,6 +27,7 @@ private:
     Vector<Chess*> meleeAttacks;
     Vector<Chess*>rangedAttacks;
     int chessNum;
+    //Chess* aiSeats[AI_SEATS_NUM];
 public:
     static Player* create();
 

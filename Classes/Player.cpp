@@ -20,6 +20,7 @@ bool Player::init()
 {
     // 初始化代码，例如设置金币和经验的初始值
     myStore = StoreAttribute::create();
+    myStore->retain();
     //test
     for (int i = 0; i < 5; i++) {
         myStore->idInStore[i] = 1;
@@ -30,6 +31,7 @@ bool Player::init()
     }
     //初始化小小英雄
     myHero = LittleHero::create("kalakala-littlehero-left.png", 0);
+    myHero->retain();
     return true;
 }
 
@@ -343,7 +345,7 @@ bool Player::judgeForUpdate()
 {
     if (myStore->money < 50 + EXP_FOR_UPGRADE)
         return false;
-    else if (myStore->level < 4)
+    else if (myStore->level < 5)
         return true;
     else
         return false;
@@ -379,8 +381,8 @@ bool Player::judgeForRefresh()
         return true;
 
     //若人数已满则不买，留一个格子用于三合一
-    if (myStore->level + SEATS_NUM-1 <= meleeAttacks.size() + rangedAttacks.size())
-        return false;
+    //if (myStore->level + SEATS_NUM-1 <= meleeAttacks.size() + rangedAttacks.size())
+    //    return false;
 
     //当前策略不是优先升级,则卡利息d牌
     if (!judgeForUpdate() && myStore->money > 50 + MONEY_FOR_REFRESH) {

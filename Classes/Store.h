@@ -7,7 +7,7 @@
 #define MAX_INTEREST 5              // 回合结算的最大利润
 #define MONEY_FOR_REFRESH 2         // 每次刷新所需金币
 #define EXP_FOR_UPGRADE 4           // 每次升级的经验
-#define INIT_MONEY 100              // 初始钱
+#define INIT_MONEY 1000             // 初始钱
 #define INIT_LEVEL 1                // 初始等级
 #define INIT_EXP 0                  // 初始经验
 #define INIT_INTEREST 0             // 初始利息

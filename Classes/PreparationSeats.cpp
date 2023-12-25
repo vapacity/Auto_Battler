@@ -132,18 +132,18 @@ bool PreparationSeats::init(Chess* playerSeats[SEATS_NUM])
         return false;
     }
 
-    //∂¡»°playerSeats
     mySeats = playerSeats;
-
-
     for (int i = 0; i < SEATS_NUM; i++) {
         Seat* s = Seat::create();
         float x = SEAT_STARTX + i * (s->width + seatGap);
         s->setPosition(x, SEAT_STARTY);
         s->number = i;
         seatsArray.pushBack(s);
+        if (s->getParent())
+            this->removeFromParent();
         this->addChild(s);
     }
+   
 
     EventListenerMouse* mouseListener = EventListenerMouse::create();
     mouseListener->onMouseMove = CC_CALLBACK_1(PreparationSeats::selectSeat, this);

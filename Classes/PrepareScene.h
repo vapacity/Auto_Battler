@@ -16,7 +16,7 @@ USING_NS_CC;
 class PrepareScene : public cocos2d::Scene
 {
 public:
-    Player* myPlayer = PlayerManager::getInstance()->getPlayer(0);
+    Player* myPlayer;
 
     Sprite* backgroundImg;
     GridMap* gridMap;
@@ -39,6 +39,8 @@ public:
 
     // 初始化场景的方法
     virtual bool init();
+    //初始化角色
+    void initPlayer();
 
     //初始化ai
     void initEnemyAi();
@@ -61,6 +63,11 @@ public:
 
     //创建商店
     void initStore();
+
+    //将玩家现有棋子放置到棋盘上（实例）
+    void putChessOnGrids();
+    //将玩家现有棋子放置到备战席上
+    void putChessOnSeats();
 
     //以下是监听鼠标信息的函数
     //启用鼠标监听器

@@ -18,6 +18,8 @@ public:
 };
 
 class GridMap : public cocos2d::Node {
+private:
+    HexCell* lastCell = nullptr;
 public:
     int chessAmount=0;//记录棋子总数
 

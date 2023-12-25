@@ -44,9 +44,6 @@ void FightScene::initPlayer()
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
     enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
     enemyPlayer->convertToEnemy();
-
-
-  
 }
 
 void FightScene::initBackground()
@@ -76,7 +73,7 @@ void FightScene::initChessExp()
     if (charmander) {
         charmander->setScale(0.15);
         gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
-        myPlayer->addChess(charmander);
+        //myPlayer->addChess(charmander);
         charmander->reverseImg();
         charmander->playerNumber = 1;
 
@@ -86,7 +83,7 @@ void FightScene::initChessExp()
     if (charmander2) {
         charmander2->setScale(0.15);
         gridMap->addChessToGrid(charmander2, gridMap->getCellAtPosition(Vec2(10, 7)));
-        myPlayer->addChess(charmander2);
+        //myPlayer->addChess(charmander2);
         charmander2->reverseImg();
         charmander2->playerNumber = 1;
         this->addChild(charmander2, 1);
@@ -95,34 +92,57 @@ void FightScene::initChessExp()
     if (charmander3) {
         charmander3->setScale(0.15);
         gridMap->addChessToGrid(charmander3, gridMap->getCellAtPosition(Vec2(10, 5)));
-        myPlayer->addChess(charmander3);
+        //myPlayer->addChess(charmander3);
         charmander3->playerNumber = 1;
         charmander3->reverseImg();
         this->addChild(charmander3, 1);
     }
 
 }
+void FightScene::createChessOnGrids()
+{
+    for (auto a : myPlayer->myChessMap) {
+        int newChessId = a.second->id;
+        int newChessStar = a.second->star;
+        Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
+        gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
+        gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
+        this->addChild(newChess, 2);
+    }
+    for (auto a : enemyPlayer->transformedMap) {
+        int newChessId = a.second->id;
+        int newChessStar = a.second->star;
+        Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
+        newChess->reverseImg();
+        newChess->playerNumber = 1-myPlayer->playerNumber;
+        gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
+        gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
+        this->addChild(newChess, 2);
+    }
+}
 void FightScene::initGridMap()
 {
     gridMap = GridMap::create(myPlayer->myChessMap);
     //此处需要一个导入地方棋盘的操作！！
-    for (auto& pair : enemyPlayer->transformedMap)
-    {
-        gridMap->addChessToGrid(pair.second, gridMap->getCellAtPosition(pair.first));
-        myPlayer->addChess(pair.second);
-        pair.second->reverseImg();
-        pair.second->playerNumber = 1;
-        gridMap->myChessMap.insert(pair);
-    }
-
+    //for (auto& pair : enemyPlayer->transformedMap)
+    //{
+    //    gridMap->addChessToGrid(pair.second, gridMap->getCellAtPosition(pair.first));
+    //    //myPlayer->addChess(pair.second);
+    //    pair.second->reverseImg();
+    //    pair.second->playerNumber = 1;
+    //    gridMap->nodeMap.at(pair.first)->chessInGrid = pair.second;
+    //    //gridMap->myChessMap.insert(pair);
+    //}
+    createChessOnGrids();
 
     this->addChild(gridMap, 0);
     //initChessExp();
-    for (auto iter : gridMap->myChessMap)
+    /*for (auto iter : gridMap->myChessMap)
     {
-        iter.second->removeFromParent();
+        if(iter.second->getParent())
+            iter.second->removeFromParent();
         this->addChild(iter.second, 1);
-    }
+    }*/
     gridMap->selectSchedule(0);
 
 
@@ -137,7 +157,15 @@ void FightScene::initPreparationSeats()
 void FightScene::initLittleHero()
 {
     myLittleHero = myPlayer->myHero;
+    if (myLittleHero->getParent())
+        myLittleHero->removeFromParent();
+    this->addChild(myLittleHero);
 
+    enemyLittleHero = enemyPlayer->myHero;
+    if (enemyLittleHero->getParent())
+        enemyLittleHero->removeFromParent();
+    enemyLittleHero->setScaleX(enemyLittleHero->getScaleX() * -1);
+    this->addChild(enemyLittleHero);
     //this->addChild(myLittleHero);
     //enemyLittleHero = enemyPlayer->myHero;
     //this->addChild(enemyLittleHero);
@@ -161,20 +189,6 @@ void FightScene::update(float dt)
     {
         chess->updateInBattle(dt, gridMap);
     }
-    //for (auto& chess : chesses)
-    //{
-    //    if (chess->health <= 0)
-    //    {
-    //        if (chess->isAnimationPlaying) {
-    //            //死了的时候，就算正在移动或者正在攻击都需要直接停下
-    //            this->stopAllActions();
-    //        }
-    //        // 处理死亡逻辑
-    //        auto fadeOut = FadeOut::create(0.1f);//回调函数对目标产生伤害
-    //        runAction(fadeOut);
-    //        gridMap->removeChessOfGrid(gridMap->getCellAtPosition(chess->atGridPosition));//不能放在回调函数中，因为其它棋子需要直接搜索
-    //    }
-    //}
     updateWin(dt);
 }
 
@@ -190,6 +204,7 @@ void FightScene::updateWin(float dt)
             cntEnemy++;
     }
     if (cntEnemy == 0) {
+        //myLittleHero->attack(enemyLittleHero);
         // 创建一个Label
         auto label = Label::createWithTTF("You Win", "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
@@ -206,9 +221,23 @@ void FightScene::updateWin(float dt)
 
         // 将Label添加到当前场景
         this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
+        auto delay = cocos2d::DelayTime::create(2);
+
+        // 创建一个回调动作，用于执行需要等待的操作
+        auto callback = cocos2d::CallFunc::create([this]() {
+            FightScene::goToPrepareScene();
+
+            });
+
+        // 创建一个顺序动作，先等待，然后执行回调操作
+        auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
+
+        // 运行动作
+        this->runAction(sequence);
     }
     else if (cntMy == 0) {
         // 创建一个Label
+        //enemyLittleHero->attack(myLittleHero);
         auto label = Label::createWithTTF("Enemy Win", "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
         // 设置Label的颜色（可选）
@@ -224,6 +253,27 @@ void FightScene::updateWin(float dt)
 
         // 将Label添加到当前场景
         this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
+        auto delay = cocos2d::DelayTime::create(2);
+
+        // 创建一个回调动作，用于执行需要等待的操作
+        auto callback = cocos2d::CallFunc::create([this]() {
+            FightScene::goToPrepareScene();
+            });
+
+        // 创建一个顺序动作，先等待，然后执行回调操作
+        auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
+
+        // 运行动作
+        this->runAction(sequence);
     }
+}
+
+void FightScene::goToPrepareScene()
+{
+    // 创建新的场景
+    auto prepareScene = PrepareScene::create();
+
+    // 切换到新场景
+    cocos2d::Director::getInstance()->replaceScene(prepareScene);
 }
 

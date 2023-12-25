@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "PrepareScene.h"
 USING_NS_CC;
-#define PREPARE_TIME 10.0f
+#define PREPARE_TIME 1.0f
 void PrepareScene::noPopulationText()
 {
     unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
@@ -52,15 +52,14 @@ bool PrepareScene::init()
 
     // 这里可以添加初始化场景的代码
 
-    auto enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
-    enemyPlayer->ai();
+    //初始化player
+    initPlayer();
 
     //添加背景图片
     initBackground();
 
     //创建初始棋盘
     initGridMap();
-
 
     //创建备战席
     initPreparationSeats();
@@ -75,17 +74,9 @@ bool PrepareScene::init()
     //测试棋子用函数，一般注释掉
     //initChessExp();
 
-
-
-
-
     //启用鼠标监听器
     this->enableMouseListener();
     gridMap->enableMouseListener();
-    //此处为寻路测试
-    /*Vector<HexCell*> path;
-    HexCell* toNode=nullptr;
-    gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid->moveTo(gridMap->FindBattle(gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid, gridMap->getCellAtPosition(Vec2(1, 1)))->getPosition());*/
 
     this->scheduleOnce(schedule_selector(PrepareScene::goToFightScene), PREPARE_TIME);
 
@@ -94,7 +85,14 @@ bool PrepareScene::init()
     return true;
 }
 
+void PrepareScene::initPlayer()
+{
+    myPlayer = PlayerManager::getInstance()->getPlayer(0);
 
+    //此处用于测试ai
+    auto enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
+    enemyPlayer->ai();
+}
 
 void PrepareScene::initBackground()
 {
@@ -111,13 +109,15 @@ void PrepareScene::initGridMap()
 {
     gridMap = GridMap::create(myPlayer->myChessMap);
     this->addChild(gridMap, 0);
+    putChessOnGrids();
     gridMap->selectSchedule(1);
 }
 
 void PrepareScene::initPreparationSeats()
 {
     preSeats = PreparationSeats::create(myPlayer->mySeats);
-    this->addChild(preSeats);
+    putChessOnSeats();
+    this->addChild(preSeats,0);
 }
 
 //待改
@@ -125,13 +125,15 @@ void PrepareScene::initLittleHero()
 {
     //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
     littleHero = myPlayer->myHero;
-    this->addChild(myPlayer->myHero);
+    if (littleHero->getParent())
+        littleHero->removeFromParent();
+    this->addChild(myPlayer->myHero,1);
 }
 
 void PrepareScene::initChessExp()
 {
     //正在测试同时出现三个
-    auto Yevee = ChessFactory::createChessById(0);
+    /*auto Yevee = ChessFactory::createChessById(0);
     if (Yevee) {
         Yevee->setScale(0.15);
 
@@ -148,7 +150,10 @@ void PrepareScene::initChessExp()
         myPlayer->addChess(charmander);
         charmander->playerNumber = 2;
         this->addChild(charmander, 1);
-    }
+    }*/
+    //auto pikachu = Chess::createByIdAndStar(25, 2);
+    //gridMap->addChessToGrid(pikachu, gridMap->getCellAtPosition(Vec2(1, 1)));
+    //this->addChild(pikachu, 1);
 
 }
 
@@ -156,6 +161,32 @@ void PrepareScene::initStore()
 {
     store = Store::create(myPlayer->myStore);
     this->addChild(store, 2);
+}
+
+void PrepareScene::putChessOnGrids()
+{
+    for (auto a : myPlayer->myChessMap) {
+        if (a.second->getParent())
+            a.second->removeFromParent();
+        gridMap->nodeMap.at(a.first)->chessInGrid = a.second;
+        gridMap->addChessToGrid(a.second, gridMap->getCellAtPosition(a.first));
+        this->addChild(a.second, 2);        
+        a.second->setOpacity(255);
+    }
+}
+
+void PrepareScene::putChessOnSeats()
+{
+    for (int i = 0; i < SEATS_NUM; i++)
+    {
+        if (auto iter = myPlayer->mySeats[i])
+        {
+            if (iter->getParent())
+                iter->removeFromParent();
+            preSeats->addChessToSeat(iter, preSeats->seatsArray.at(i));
+            this->addChild(iter, 2);
+        }
+    }
 }
 
 void PrepareScene::enableMouseListener()
@@ -187,8 +218,8 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
         if (store->chessIdHaveBought != -1)
         {
             Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);
-            chess->initHealthBar();
-            chess->maxHP = chess->health;
+            /*chess->initHealthBar();
+            chess->maxHP = chess->health;*/
             if (chess)
             {
                 //检查新增的这个是否能合成

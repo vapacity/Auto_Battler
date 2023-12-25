@@ -16,19 +16,19 @@ Chess* ChessFactory::createChessById(int id)
 		break;
 
 	case 21:
-		chess = Yevee::create("Yevee-left-1.png");
+		chess = Yevee::create("Yevee-right-1.png");
 		break;
 	case 22:
-		chess = Squirtle::create("Squirtle-left-1.png");
+		chess = Squirtle::create("Squirtle-right-1.png");
 		break;
 	case 23:
-		chess = Charmander::create("Charmander-left-1.png");
+		chess = Charmander::create("Charmander-right-1.png");
 		break;
 	case 24:
 		chess = Bulbasaur::create("Bulbasaur-right-1.png");
 		break;
 	case 25:
-		chess = Pikachu::create("Pikachu-left-1.png");
+		chess = Pikachu::create("Pikachu-right-1.png");
 		break;
 
 	case 31:

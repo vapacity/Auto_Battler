@@ -95,12 +95,6 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
 
     }
 
-
-
-    myChessMap = playerChessMap;
-    for (auto a : myChessMap) {
-        nodeMap.at(a.first)->chessInGrid = a.second;
-    }
     return true;
 }
 
@@ -157,7 +151,7 @@ void GridMap::selectGrid(Event* event)
 
     // 获取鼠标位置
     Vec2 mousePosition = mouseEvent->getLocationInView();
-    static HexCell* lastCell = nullptr;
+    //static HexCell* lastCell = nullptr;
     auto currentCell = mouseInWhichCell(mousePosition);
     //log("%f,%f\n", currentCell->getPositionX(), currentCell->getPositionY());
 
