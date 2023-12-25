@@ -225,17 +225,12 @@ void Chess::attackAction(GridMap* gridMap)
         bullet->setPosition(this->getPosition());
         bullet->setScale(0.5);
         bullet->setZOrder(2);
-        CCLOG("BULLET");
         Vec2 position = attackObject->getPosition() - this->getPosition();
         float attackDuration = 1.0f / (10 * attackSpeed);
         auto moveBackAction = MoveBy::create(attackDuration, position);
-        CCLOG("moveBackAction");
         auto fadeOut = FadeOut::create(0.0001f);
-        CCLOG("fadeOut");
         auto sequence2 = Sequence::create(moveBackAction, fadeOut, callback, nullptr);
-        CCLOG("sequence2");
         bullet->runAction(sequence2);
-        CCLOG("RUN");
     }
     isAnimationPlaying = true;
     
@@ -244,14 +239,26 @@ void Chess::attackAction(GridMap* gridMap)
 void Chess::deadAction(GridMap* gridMap)
 {
     if (isAnimationPlaying) {
-        //死了的时候，就算正在移动或者正在攻击都需要直接停下
         this->stopAllActions();
     }
+
     // 处理死亡逻辑
-    auto fadeOut = FadeOut::create(0.3f);//回调函数对目标产生伤害
-    runAction(fadeOut);
-    gridMap->removeChessOfGrid(gridMap->getCellAtPosition(this->atGridPosition));//不能放在回调函数中，因为其它棋子需要直接搜索
+    auto fadeOut = FadeOut::create(0.3f);
+
+    // 创建Sequence动作，包含淡出动作和回调函数（移除节点的逻辑）
+    auto sequence = Sequence::create(
+        fadeOut,
+        CallFunc::create([this, gridMap]() {
+            this->removeFromParentAndCleanup(true); // 移除并执行清理操作
+            }),
+        nullptr
+                );
+
+    // 对角色、血条和蓝条分别应用独立的Sequence动作
+    this->runAction(sequence->clone());
+    gridMap->removeChessOfGrid(gridMap->getCellAtPosition(this->atGridPosition));
 }
+
 
 void Chess::getBlood()
 {

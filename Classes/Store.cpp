@@ -2,11 +2,6 @@
 
 #include "Store.h"
 
-// 棋子概率
-const int cardPercent[MAX_LEVEL][4] = { {50, 100, 0, 0}, {25, 85, 100, 0}, {10, 60, 100, 0}, {0, 40, 80, 100}, {0, 30, 70, 100} };
-// 升级所需经验(共四次升级)
-const int levelExp[4] = { 4, 8, 14, 20 };
-
 StoreAttribute* StoreAttribute::create()
 {
     StoreAttribute* s = new (std::nothrow) StoreAttribute();

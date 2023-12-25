@@ -153,6 +153,7 @@ public:
 	void changeState(State newState);
 	bool isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessAround);
 
+	//初始化血条蓝条
 	void initHealthBar();
 	void initBlueBar();
 };

@@ -50,8 +50,33 @@ bool PrepareScene::init()
         return false;
     }
 
-    // 这里可以添加初始化场景的代码
 
+    Vector<MenuItem*> MenuItems_fight;
+    //回退
+    auto backItem = MenuItemImage::create(
+        "smallbacknormal.png",
+        "smallbackselected.png",
+        CC_CALLBACK_1(PrepareScene::menuPlayCallback, this));
+
+    if (!(backItem == nullptr ||
+        backItem->getContentSize().width <= 0 ||
+        backItem->getContentSize().height <= 0))
+    {//退出菜单项有效，接下来会计算退出菜单项的位置
+        // 获取场景的尺寸和中心坐标
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        float x = origin.x + visibleSize.width * 17 / 18;
+        float y = origin.y + visibleSize.height * 14 / 15;
+        backItem->setPosition(Vec2(x, y));
+    }
+    MenuItems_fight.pushBack(backItem);
+    auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
+    menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
+    this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+    // 这里可以添加初始化场景的代码
+    ///////////////////////////////////////////////////////////
+    auto enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
+    enemyPlayer->ai();
 
     //添加背景图片
     initBackground();
@@ -116,7 +141,7 @@ void PrepareScene::initLittleHero()
 {
     //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
     littleHero = myPlayer->myHero;
-    myPlayer->myHero->removeFromParent();
+    myPlayer->myHero->removeFromParent();/////////////////////////
     this->addChild(myPlayer->myHero);
 }
 
@@ -430,4 +455,15 @@ void PrepareScene::goToFightScene(float dt)
     cocos2d::Director::getInstance()->replaceScene(fightScene);
 }
 
+void PrepareScene::menuPlayCallback(Ref* pSender) {
+    if (isAudioEnabled)
+    {// 启用音效
+        AudioManager::playEffect();
+    }
+    //把原数据删除再离开场景
+    PlayerManager::getInstance()->getPlayer(0)->deletePast();
+    PlayerManager::getInstance()->getPlayer(1)->deletePast();
+
+    Director::getInstance()->popScene(); // 切换到playscene场景
+}
 

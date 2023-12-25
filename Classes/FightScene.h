@@ -9,6 +9,7 @@
 #include "PreparationSeats.h"
 #include "Store.h"
 #include "LittleHero.h"
+#include "AudioManager.h"
 USING_NS_CC;
 
 class FightScene :public cocos2d::Scene
@@ -73,6 +74,7 @@ public:
     //在战斗场景中每帧更新
     void update(float dt);
 
+    void menuPlayCallback(Ref* pSender);
     void updateDead(float dt);
     void updateWin(float dt);
     CREATE_FUNC(FightScene);

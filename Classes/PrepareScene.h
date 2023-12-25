@@ -83,6 +83,8 @@ public:
     //进入战斗场景
     void goToFightScene(float dt);
     CREATE_FUNC(PrepareScene);
+
+    void menuPlayCallback(Ref* pSender);
 };
 
 #endif // __PREPARE_SCENE_H__
