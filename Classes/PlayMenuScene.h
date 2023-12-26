@@ -32,6 +32,7 @@
 #include "AudioManager.h"
 #include "HumanPlayScene.h"
 #include "PrepareScene.h"
+#include "WaitingRoomScene.h"
 
 class PlayMenu : public cocos2d::Scene
 {
@@ -40,7 +41,7 @@ public:
 
     virtual bool init();//初始化
     void menuMachinePlayCallback(Ref* pSender);//切换到人机场景
-    void menuMultiPlayCallback(Ref* pSender);//切换到联机场景
+    void menuMultiPlayCallback(Ref* pSender);//切换到联机场景-WaitingRoom
     void menuFirstCallback(Ref* pSender);//回到Play场景
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);//关闭

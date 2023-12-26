@@ -189,8 +189,8 @@ void PlayMenu::menuMultiPlayCallback(Ref* pSender) {
     {// ÆôÓÃÒôÐ§
         AudioManager::playEffect();
     }
-    auto humanScene = HumanPlayScene::createScene();
-    Director::getInstance()->pushScene(humanScene);
+    auto WaitingScene = WaitingRoomScene::create();
+    Director::getInstance()->pushScene(WaitingScene);
 }
 
 void PlayMenu::menuFirstCallback(Ref* pSender) {
