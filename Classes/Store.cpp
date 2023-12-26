@@ -58,6 +58,9 @@ bool Store::init(StoreAttribute* st)
     backGround->setPosition(Vec2(600, 90));
     this->addChild(backGround, -1);
 
+    //生成随机数种子
+    srand((unsigned)time(NULL));
+
     // 初始化时，先随机生成一次商店
     refreshStore();
 
@@ -95,13 +98,13 @@ bool Store::init(StoreAttribute* st)
     this->addChild(levelAndExpLabel);
 
     // 显示刷新的标签
-    reFresh = Sprite::create("refresh.png");
+    reFresh = Sprite::create("Refresh1.png");
     reFresh->setContentSize(Size(70, 70));
     reFresh->setPosition(Vec2(1140, 120));
     this->addChild(reFresh);
 
     // 显示升级的标签
-    upGrade = Sprite::create("upgrade.png");
+    upGrade = Sprite::create("Upgrade1.png");
     upGrade->setContentSize(Size(70, 70));
     upGrade->setPosition(Vec2(1230, 120));
     this->addChild(upGrade);
@@ -144,8 +147,6 @@ void Store::updateForPlayer()
 // 刷新商店
 void Store::refreshStore()
 {
-    srand((unsigned)time(NULL));
-
     for (int i = 0; i < 5; i++) {
         int costPointer = rand() % 100;
         switch (whichCost(costPointer)) {
@@ -210,12 +211,20 @@ void Store::refresh()
 {
     if (playerStore->money < MONEY_FOR_REFRESH) {
         createText("You Have No Money");
-        log("no money");
+        //log("no money");
         return;
     }
-    refreshStore();
-    playerStore->money -= MONEY_FOR_REFRESH;
-    renewInterest();
+    this->unschedule("refreshTimer");
+    reFresh->setTexture("Refresh0.png");
+    reFresh->setContentSize(Size(70, 70));
+    this->scheduleOnce([=](float dt) {
+        refreshStore();
+        playerStore->money -= MONEY_FOR_REFRESH;
+        renewInterest();
+        reFresh->setTexture("Refresh1.png");
+        reFresh->setContentSize(Size(70, 70));
+        }, 0.1f, "refreshTimer");
+
 }
 
 // 购买传入编号卡槽的棋子，更新卡槽信息，利润，钱，返回买到的棋子id到chessIdHaveBought
@@ -248,6 +257,7 @@ void Store::sellCard(int sellCardId, int star)
 // 升级，修改了金钱，经验，等级
 void Store::upgrade()
 {
+
     if (playerStore->level == MAX_LEVEL) {
         createText("You Are At The Max Level");
         return;
@@ -256,7 +266,15 @@ void Store::upgrade()
         createText("You Have No Money");
         return;
     }
-    buyExp();
+    this->unschedule("upgradeTimer");
+    upGrade->setTexture("Upgrade0.png");
+    upGrade->setContentSize(Size(70, 70));
+    this->scheduleOnce([=](float dt) {
+        buyExp();
+        upGrade->setTexture("Upgrade1.png");
+        upGrade->setContentSize(Size(70, 70));
+        }, 0.1f, "upgradeTimer");
+
 }
 
 // 判断点击事件并执行

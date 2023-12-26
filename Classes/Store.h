@@ -71,4 +71,5 @@ public:
     void createText(const std::string& textContent);
     void updateText(float dt);
     void selectStore(Event* event, Vec2 mousePosition, bool isFull);
+    void changePic(float dt);
 };
