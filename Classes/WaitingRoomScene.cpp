@@ -22,10 +22,13 @@ void WaitingRoomScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
 		return;
 	}
 	if (message == "Player2") {
+		if (isPlayer1 == 1) {
+			initPlayer2();
+			return;
+		}
 		myPlayer->playerNumber = 1;
 		enemyPlayer->playerNumber = 0;
 		initPlayer2();
-		if (isPlayer1 == 1) return;
 		initPlayer1();
 		return;
 	}
@@ -72,7 +75,13 @@ void WaitingRoomScene::initButton()
 }
 void WaitingRoomScene::initBackground()
 {
-
+	backGround = Sprite::create("WaitingRoomBackground.jpg");
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	backGround->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	backGround->setScaleX(visibleSize.width / backGround->getContentSize().width);
+	backGround->setScaleY(visibleSize.height / backGround->getContentSize().height);
+	this->addChild(backGround);
 }
 void WaitingRoomScene::initPlayer()
 {

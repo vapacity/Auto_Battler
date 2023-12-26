@@ -3,6 +3,7 @@
 #include "OnlinePrepareScene.h"
 USING_NS_CC;
 #define PREPARE_TIME 10.0f
+
 void OnlinePrepareScene::noPopulationText()
 {
     unschedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
@@ -106,7 +107,7 @@ bool OnlinePrepareScene::init()
     HexCell* toNode=nullptr;
     gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid->moveTo(gridMap->FindBattle(gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid, gridMap->getCellAtPosition(Vec2(1, 1)))->getPosition());*/
 
-    this->scheduleOnce(schedule_selector(OnlinePrepareScene::goToFightScene), PREPARE_TIME);
+    this->schedule(schedule_selector(PrepareScene::updateCountdownLabel), 0.01f);  // 每隔1秒更新一次Label
 
     return true;
 }
@@ -115,6 +116,7 @@ void OnlinePrepareScene::initPlayer()
 {
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
     enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
+    myPlayer->myStore->money += myPlayer->myStore->interest + INIT_ADD_FOR_TURN;
 }
 void OnlinePrepareScene::initBackground()
 {
@@ -181,6 +183,22 @@ void OnlinePrepareScene::initStore()
     store = Store::create(myPlayer->myStore);
     this->addChild(store, 2);
 }
+
+void OnlinePrepareScene::initPrepareLabel()
+{
+    // 初始化线段
+    countdownLine = DrawNode::create();
+    countdownLine->setAnchorPoint(Vec2(0, 0.5));
+    countdownLine->setPosition(Vec2(0, 100));
+    this->addChild(countdownLine);
+    // 初始化Label
+    countdownLabel = Label::createWithTTF("10", "fonts/arial.ttf", 50);
+    countdownLabel->setPosition(Vec2(270, 700));
+    this->addChild(countdownLabel);
+
+    remainingTime = PREPARE_TIME;
+}
+
 void OnlinePrepareScene::putChessOnGrids()
 {
     for (auto a : myPlayer->myChessMap) {
@@ -495,3 +513,27 @@ void OnlinePrepareScene::menuPlayCallback(Ref* pSender) {
     Director::getInstance()->popScene(); // 切换到playscene场景
 }
 
+void OnlinePrepareScene::updateCountdownLabel(float dt) {
+    remainingTime -= dt;
+    int seconds = static_cast<int>(remainingTime) + 1;
+
+    // 计算线段长度比例
+    float lengthRatio = remainingTime / PREPARE_TIME;
+
+    // 计算线段的宽度，可以根据需要调整
+    float lineWidth = 30.0f;
+
+    // 更新线段的长度
+    countdownLine->clear();
+
+    countdownLine->drawLine(Vec2(300, 600), Vec2(300 + 700 * lengthRatio, 600), Color4F::WHITE);
+    countdownLine->setLineWidth(lineWidth);
+
+    // 更新Label的文本
+    countdownLabel->setString(StringUtils::format("%d", seconds));
+
+    // 如果时间到，跳转到下一个场景
+    if (remainingTime <= 0) {
+        goToFightScene(0); // 这里的参数可以根据你的需要传递
+    }
+}

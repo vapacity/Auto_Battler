@@ -16,6 +16,7 @@
 #define COST2_AMOUNT 5
 #define COST3_AMOUNT 3
 
+
 // 棋子概率
 const int cardPercent[MAX_LEVEL][4] = { {50, 100, 0, 0}, {25, 85, 100, 0}, {10, 60, 100, 0}, {0, 40, 80, 100}, {0, 30, 70, 100} };
 // 升级所需经验(共四次升级)
@@ -42,9 +43,12 @@ public:
     // 用于显示的标签
     Label* moneyLabel;
     Label* levelAndExpLabel;
-    Label* labelRefresh;
-    Label* labelUpgrade;
     Label* fadingText;
+    Sprite* backGround;
+    Sprite* gold;
+    Sprite* reFresh;
+    Sprite* upGrade;
+    Sprite* leVel;
     float elapsedTime;
 
     StoreLayer* storeLayers[5];

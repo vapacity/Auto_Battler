@@ -1,7 +1,7 @@
 #include "GridMap.h"
 //最左下角棋格的初始坐标
 #define STARTX 200
-#define STARTY 320
+#define STARTY 300
 USING_NS_CC;
 
 void GridMap::selectSchedule(bool select)

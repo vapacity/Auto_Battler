@@ -7,8 +7,8 @@
 USING_NS_CC;
 
 #define SEATS_NUM 8
-#define SEAT_STARTX 200
-#define SEAT_STARTY 230
+#define SEAT_STARTX 210
+#define SEAT_STARTY 220
 const float seatGap = 13.0f;
 
 #define TEST 0//改成1，可通过左键单击变化备战席格状态

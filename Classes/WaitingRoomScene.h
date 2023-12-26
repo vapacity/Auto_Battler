@@ -30,6 +30,7 @@ private:
     Player* enemyPlayer ;
     cocos2d::network::WebSocket* webSocket_;
     int isPlayer1 = 0;
+    Sprite* backGround;
 };
 
 #endif // __WAITING_ROOM_SCENE_H__

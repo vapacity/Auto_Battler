@@ -35,8 +35,8 @@ bool GameOverScene::init()
 
     // 创建一个回调动作，用于执行需要等待的操作
     auto callback = cocos2d::CallFunc::create([this]() {
-        myPlayer->deletePlayer();
-        enemyPlayer->deletePlayer();
+        myPlayer->deletePast();
+        enemyPlayer->deletePast();
         GameOverScene::goToStartScene();
         });
 

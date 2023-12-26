@@ -2,10 +2,13 @@
 
 #include "Store.h"
 
+
+
 StoreAttribute* StoreAttribute::create()
 {
     StoreAttribute* s = new (std::nothrow) StoreAttribute();
     if (s && s->init()) {
+        s->retain(); // 需要增加 retain，这是 player 的成员变量，不能被随意释放
         s->autorelease();
         return s;
     }
@@ -49,43 +52,62 @@ bool Store::init(StoreAttribute* st)
 
     this->playerStore = st;
 
+    //初始化场景
+    backGround = Sprite::create("StoreBackground.png");
+    backGround->setContentSize(Size(1000, 180));
+    backGround->setPosition(Vec2(600, 90));
+    this->addChild(backGround, -1);
+
+    //生成随机数种子
+    srand((unsigned)time(NULL));
+
     // 初始化时，先随机生成一次商店
     refreshStore();
 
     // 初始化storeLayers放在指定位置
     for (int i = 0; i < 5; i++) {
         storeLayers[i] = StoreLayer::create(playerStore->idInStore[i]);
-        storeLayers[i]->setPosition(Vec2(i * 200 + 130, 30));
+        storeLayers[i]->setPosition(Vec2(i * 200 + 130, 10));
         this->addChild(storeLayers[i]);
     }
 
     chessIdHaveBought = -1;
 
     // 显示金钱数
-    std::string newLabel1 = "Money:\n  " + std::to_string(playerStore->money);
-    moneyLabel = Label::createWithTTF(newLabel1, "fonts/arial.ttf", 30);
-    moneyLabel->setPosition(Vec2(60, 175));
+    gold = Sprite::create("Gold.png");
+    gold->setContentSize(Size(80,80));
+    gold->setPosition(Vec2(50, 110));
+    this->addChild(gold);
+
+    std::string newLabel1 = std::to_string(playerStore->money);
+    moneyLabel = Label::createWithTTF(newLabel1, "fonts/arial.ttf", 50);
+    moneyLabel->setPosition(Vec2(50, 40));
     moneyLabel->setColor(Color3B::RED);
     this->addChild(moneyLabel);
 
     // 显示经验和等级
+    leVel = Sprite::create("Level.png");
+    leVel->setContentSize(Size(180, 70));
+    leVel->setPosition(Vec2(1190, 40));
+    this->addChild(leVel);
+
     std::string newLabel2 = "LEVEL " + std::to_string(playerStore->level) + "  EXP " + std::to_string(playerStore->exp);
     levelAndExpLabel = Label::createWithTTF(newLabel2, "fonts/arial.ttf", 20);
-    levelAndExpLabel->setPosition(Vec2(1170, 40));
-    levelAndExpLabel->setColor(Color3B::RED);
+    levelAndExpLabel->setPosition(Vec2(1190, 40));
+    levelAndExpLabel->setColor(Color3B::BLUE);
     this->addChild(levelAndExpLabel);
 
     // 显示刷新的标签
-    labelRefresh = Label::createWithTTF("Refresh", "fonts/arial.ttf", 24);
-    labelRefresh->setColor(Color3B::BLUE);
-    labelRefresh->setPosition(Vec2(1170, 160));
-    this->addChild(labelRefresh);
+    reFresh = Sprite::create("Refresh1.png");
+    reFresh->setContentSize(Size(70, 70));
+    reFresh->setPosition(Vec2(1140, 120));
+    this->addChild(reFresh);
 
-    // 显示更新的标签
-    labelUpgrade = Label::createWithTTF("BuyXP", "fonts/arial.ttf", 24);
-    labelUpgrade->setPosition(Vec2(1170, 100));
-    labelUpgrade->setColor(Color3B::BLUE);
-    this->addChild(labelUpgrade);
+    // 显示升级的标签
+    upGrade = Sprite::create("Upgrade1.png");
+    upGrade->setContentSize(Size(70, 70));
+    upGrade->setPosition(Vec2(1230, 120));
+    this->addChild(upGrade);
 
     updateForPlayer();
 
@@ -96,7 +118,7 @@ bool Store::init(StoreAttribute* st)
 // 更新金钱标签
 void Store::updateMoneyLabel()
 {
-    std::string newLabel = "Money:\n  " + std::to_string(playerStore->money);
+    std::string newLabel = std::to_string(playerStore->money);
     moneyLabel->setString(newLabel);
 }
 
@@ -104,6 +126,9 @@ void Store::updateMoneyLabel()
 void Store::updateLevelLabel()
 {
     std::string newLabel = "LEVEL " + std::to_string(playerStore->level) + "  EXP " + std::to_string(playerStore->exp);
+    if (playerStore->level == MAX_LEVEL) {
+        newLabel = "LEVEL 5 MAX";
+    }
     levelAndExpLabel->setString(newLabel);
 }
 
@@ -122,8 +147,6 @@ void Store::updateForPlayer()
 // 刷新商店
 void Store::refreshStore()
 {
-    srand((unsigned)time(NULL));
-
     for (int i = 0; i < 5; i++) {
         int costPointer = rand() % 100;
         switch (whichCost(costPointer)) {
@@ -188,12 +211,20 @@ void Store::refresh()
 {
     if (playerStore->money < MONEY_FOR_REFRESH) {
         createText("You Have No Money");
-        log("no money");
+        //log("no money");
         return;
     }
-    refreshStore();
-    playerStore->money -= MONEY_FOR_REFRESH;
-    renewInterest();
+    this->unschedule("refreshTimer");
+    reFresh->setTexture("Refresh0.png");
+    reFresh->setContentSize(Size(70, 70));
+    this->scheduleOnce([=](float dt) {
+        refreshStore();
+        playerStore->money -= MONEY_FOR_REFRESH;
+        renewInterest();
+        reFresh->setTexture("Refresh1.png");
+        reFresh->setContentSize(Size(70, 70));
+        }, 0.1f, "refreshTimer");
+
 }
 
 // 购买传入编号卡槽的棋子，更新卡槽信息，利润，钱，返回买到的棋子id到chessIdHaveBought
@@ -226,6 +257,7 @@ void Store::sellCard(int sellCardId, int star)
 // 升级，修改了金钱，经验，等级
 void Store::upgrade()
 {
+
     if (playerStore->level == MAX_LEVEL) {
         createText("You Are At The Max Level");
         return;
@@ -234,14 +266,22 @@ void Store::upgrade()
         createText("You Have No Money");
         return;
     }
-    buyExp();
+    this->unschedule("upgradeTimer");
+    upGrade->setTexture("Upgrade0.png");
+    upGrade->setContentSize(Size(70, 70));
+    this->scheduleOnce([=](float dt) {
+        buyExp();
+        upGrade->setTexture("Upgrade1.png");
+        upGrade->setContentSize(Size(70, 70));
+        }, 0.1f, "upgradeTimer");
+
 }
 
 // 判断点击事件并执行
 void Store::selectStore(Event* event, Vec2 mousePosition, bool isFull)
 {
-    Rect label1Rect = labelRefresh->getBoundingBox();
-    Rect label2Rect = labelUpgrade->getBoundingBox();
+    Rect spriteRectA = reFresh->getBoundingBox();
+    Rect spriteRectB = upGrade->getBoundingBox();
 
     Rect spriteRect0 = storeLayers[0]->getBoundingBox();
     Rect spriteRect1 = storeLayers[1]->getBoundingBox();
@@ -249,9 +289,9 @@ void Store::selectStore(Event* event, Vec2 mousePosition, bool isFull)
     Rect spriteRect3 = storeLayers[3]->getBoundingBox();
     Rect spriteRect4 = storeLayers[4]->getBoundingBox();
 
-    if (label1Rect.containsPoint(mousePosition))
+    if (spriteRectA.containsPoint(mousePosition))
         refresh();
-    if (label2Rect.containsPoint(mousePosition))
+    if (spriteRectB.containsPoint(mousePosition))
         upgrade();
     if (!isFull) {
         if (spriteRect0.containsPoint(mousePosition))
@@ -302,3 +342,4 @@ void Store::updateText(float dt)
         fadingText = nullptr;
     }
 }
+

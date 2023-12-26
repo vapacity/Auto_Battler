@@ -27,6 +27,11 @@ public:
     Store* store;
     LittleHero* littleHero;
     LittleHero* littleHeroEnemy;
+
+    // 倒计时相关
+    DrawNode* countdownLine;
+    Label* countdownLabel;
+    float remainingTime;
 public:
     //输出人口上限不足的提示，并在一段时间后自动移除
     void noPopulationText();
@@ -91,6 +96,9 @@ public:
     CREATE_FUNC(OnlinePrepareScene);
 
     void menuPlayCallback(Ref* pSender);
+
+    void initPrepareLabel();
+    void updateCountdownLabel(float dt);
 };
 
 #endif // __PREPARE_SCENE_H__

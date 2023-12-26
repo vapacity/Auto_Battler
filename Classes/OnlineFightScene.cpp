@@ -38,7 +38,7 @@ bool OnlineFightScene::init()
     //initChessExp();
     //findEnemyAndMove();
     gridMap->disableMouseListener();
-    this->schedule([this](float dt) {this->update(dt); }, "update_key");
+  //  this->schedule([this](float dt) {this->update(dt); }, "update_key");
 
 }
 
@@ -112,6 +112,7 @@ void OnlineFightScene::createChessOnGrids()
         Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
         gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
         gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
+        newChess->playerNumber = myPlayer->playerNumber;
         this->addChild(newChess, 2);
     }
  /*   for (auto a : enemyPlayer->transformedMap) {
@@ -358,7 +359,7 @@ void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
                 auto chess = Chess::createByIdAndStar(id, star);
                 chess->playerNumber = enemyplayerNumber;
                 //为了视角保持在以0号player的主视角
-                gridMap->addChessToGrid(chess, gridMap->getCellAtPosition(Vec2(NUM_COLUMN - x - 1, NUM_LINE - y - 1)));
+                gridMap->addChessToGrid(chess, gridMap->getCellAtPosition(Vec2(x, y)));
                 chess->maxHP = chess->health;
                 chess->initHealthBar();
                 this->addChild(chess);
@@ -366,6 +367,7 @@ void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
             }
         }
         gridMap->updateForPlayer();
+        this->schedule([this](float dt) {this->update(dt); }, "update_key");
     }
 }
 
