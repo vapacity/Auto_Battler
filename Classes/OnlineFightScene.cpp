@@ -305,7 +305,7 @@ void OnlineFightScene::goToGameOverScene()
 void OnlineFightScene::initWeb()
 {
     webSocket_ = new cocos2d::network::WebSocket();
-    webSocket_->init(*this, "ws://100.81.177.2:3000");
+    webSocket_->init(*this, "ws://192.168.43.182:3000");
 }
 void OnlineFightScene::sendChessInfoToServer()
 {

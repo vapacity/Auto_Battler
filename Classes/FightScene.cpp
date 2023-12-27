@@ -148,7 +148,7 @@ void FightScene::initLittleHero()
     myLittleHero->setPosition(myPosition);
     this->addChild(myLittleHero);
     myLittleHero->isAnimationPlaying = false;
-    myLittleHero->disableMoving();
+    myLittleHero->enableMoving();
     enemyLittleHero = enemyPlayer->myHero;
     enemyLittleHero->setEnemey();
     if (enemyLittleHero->getParent())

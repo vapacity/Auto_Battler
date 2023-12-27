@@ -38,6 +38,7 @@ void LittleHero::attack(LittleHero* enemy)
 {
     if (isAnimationPlaying)
         return;
+    this->stopAllActions();
     enemy->moving = 0;
     enemy->stopAllActions();
     cocos2d::Vec2 spritePosition = this->getPosition();

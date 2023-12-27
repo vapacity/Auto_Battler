@@ -4,7 +4,7 @@
 #define enemyPosition Vec2(1050,650)
 #define myPosition Vec2(40,265)
 USING_NS_CC;
-#define PREPARE_TIME 10.0f
+#define PREPARE_TIME 20.0f
 
 void OnlinePrepareScene::noPopulationText()
 {
@@ -79,7 +79,6 @@ bool OnlinePrepareScene::init()
     // 这里可以添加初始化场景的代码
     ///////////////////////////////////////////////////////////
 
-    initWeb();
 
     initPlayer();
 
@@ -163,7 +162,8 @@ void OnlinePrepareScene::initLittleHero()
     else {
         littleHero->setPosition(enemyPosition);
     }
-    this->addChild(littleHero, 1);
+    littleHero->enableMoving();
+    this->addChild(littleHero);
 }
 
 void OnlinePrepareScene::initChessExp()
@@ -274,45 +274,6 @@ void OnlinePrepareScene::prepareSceneOnMouseDown(Event* event)
                 checkAndMerge(chess);
             }
             store->chessIdHaveBought = -1;
-        }
-    }
-    if (mouseEvent->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
-
-        littleHero->stopAllActions();
-        // 创建一个MoveTo动作，移动到点击位置
-        Vec2 currentPosition = littleHero->getPosition();
-
-        // 计算鼠标点击位置相对于当前位置的相对位移
-        Vec2 targetPosition = mouseEvent->getLocationInView();
-        Vec2 moveDelta = targetPosition - currentPosition;
-
-        float distance = moveDelta.length();
-
-        // 计算匀速移动的时间（假设速度为300像素/秒）
-        float speed = 300.0f;
-        float duration = distance / speed;
-
-        // 创建MoveBy动作，匀速移动到相对位移位置
-        auto moveTo = MoveTo::create(duration, targetPosition);
-
-        littleHero->runAction(moveTo);
-        rapidjson::Document doc;
-        doc.SetObject();
-        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-
-        doc.AddMember("type", "position_update", allocator);
-        doc.AddMember("x", targetPosition.x, allocator);
-        doc.AddMember("y", targetPosition.y, allocator);
-
-        // 将 JSON 转为字符串
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        doc.Accept(writer);
-        std::string message = buffer.GetString();
-
-        // 发送消息给服务器
-        if (webSocket_->getReadyState() == cocos2d::network::WebSocket::State::OPEN) {
-            webSocket_->send(message);
         }
     }
 }
@@ -585,34 +546,7 @@ void OnlinePrepareScene::updateCountdownLabel(float dt) {
 
     // 如果时间到，跳转到下一个场景
     if (remainingTime <= 0) {
-        webSocket_->close();
         goToFightScene(0); // 这里的参数可以根据你的需要传递
     }
 }
 
-void OnlinePrepareScene::initWeb()
-{
-    webSocket_ = new cocos2d::network::WebSocket();
-    webSocket_->init(*this, "ws://100.81.177.2:3000");
-}
-
-
-
-void OnlinePrepareScene::onOpen(cocos2d::network::WebSocket* ws)
-{
-    CCLOG("WebSocket connected");
-}
-
-void OnlinePrepareScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::Data& data)
-{
-}
-
-void OnlinePrepareScene::onClose(cocos2d::network::WebSocket* ws)
-{
-    CCLOG("WebSocket closed");
-}
-
-void OnlinePrepareScene::onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error)
-{
-    CCLOG("WebSocket error: %d", static_cast<int>(error));
-}
