@@ -27,8 +27,7 @@
 
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
-extern float g_slider_position;//记录滑动条位置
-extern bool lastCheckBoxState;//记录复选框是否勾选
+#include "StartScene.h"
 extern bool isAudioEnabled;//记录是否选择音效
 class AudioManager
 {

@@ -31,7 +31,6 @@
 @brief    The cocos2d Application.
 
 Private inheritance here hides part of interface from Director.
-声明了一个名为AppDelegate的类，并私有继承自cocos2d::Application
 */
 class  AppDelegate : private cocos2d::Application
 {
@@ -39,31 +38,27 @@ public:
     AppDelegate();
     virtual ~AppDelegate();
 
-    virtual void initGLContextAttrs(); //初始化OpenGL上下文属性
+    virtual void initGLContextAttrs();
 
     /**
     @brief    Implement Director and Scene init code here.
     @return true    Initialize success, app continue.
     @return false   Initialize failed, app terminate.
     */
-    virtual bool applicationDidFinishLaunching();//在应用程序启动时初始化Director和场景
+    virtual bool applicationDidFinishLaunching();
 
     /**
     @brief  Called when the application moves to the background
     @param  the pointer of the application
     */
-    virtual void applicationDidEnterBackground();//后台运行
+    virtual void applicationDidEnterBackground();
 
     /**
     @brief  Called when the application reenters the foreground
     @param  the pointer of the application
     */
-    virtual void applicationWillEnterForeground();//前台运行
+    virtual void applicationWillEnterForeground();
 };
 
-//extern AudioManager BgMusic;
-
-
 #endif // _APP_DELEGATE_H_
-
 

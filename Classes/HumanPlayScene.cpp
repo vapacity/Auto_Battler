@@ -24,14 +24,14 @@
 
 #include "PlayMenuScene.h"
 #include "SimpleAudioEngine.h"
-#include "HelloWorldScene.h"
+#include "StartScene.h"
 #include "AudioManager.h"
-#include "HumanPlay.h"
+#include "HumanPlayScene.h"
 USING_NS_CC;
 
-Scene* HumanPlay::createScene()
+Scene* HumanPlayScene::createScene()
 {
-    return HumanPlay::create();
+    return HumanPlayScene::create();
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -44,7 +44,7 @@ static void problemLoading(const char* filename)
 }
 
 // on "init" you need to initialize your instance    HumanPlay场景的初始化
-bool HumanPlay::init()
+bool HumanPlayScene::init()
 {
     //////////////////////////////
     // 1. super init first初始化Scene父类，如果初始化失败则返回false
@@ -71,7 +71,7 @@ bool HumanPlay::init()
     auto createRoomItem = MenuItemImage::create(
         "createnormal.png",
         "createselected.png",
-        CC_CALLBACK_1(HumanPlay::menuCloseCallback, this));
+        CC_CALLBACK_1(HumanPlayScene::menuCloseCallback, this));
 
     if (createRoomItem == nullptr ||
         createRoomItem->getContentSize().width <= 0 ||
@@ -91,7 +91,7 @@ bool HumanPlay::init()
     auto joinRoomItem = MenuItemImage::create(
         "joinnormal.png",
         "joinselected.png",
-        CC_CALLBACK_1(HumanPlay::menuCloseCallback, this));
+        CC_CALLBACK_1(HumanPlayScene::menuCloseCallback, this));
 
     if (joinRoomItem == nullptr ||
         joinRoomItem->getContentSize().width <= 0 ||
@@ -111,7 +111,7 @@ bool HumanPlay::init()
     auto backItem = MenuItemImage::create(
         "backnormal.png",
         "backselected.png",
-        CC_CALLBACK_1(HumanPlay::menuPlayMenuCallback, this));
+        CC_CALLBACK_1(HumanPlayScene::menuPlayMenuCallback, this));
 
     if (backItem == nullptr ||
         backItem->getContentSize().width <= 0 ||
@@ -175,7 +175,7 @@ bool HumanPlay::init()
     return true;
 }
 
-void HumanPlay::menuPlayMenuCallback(Ref* pSender) {
+void HumanPlayScene::menuPlayMenuCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
         AudioManager::playEffect();
@@ -183,7 +183,7 @@ void HumanPlay::menuPlayMenuCallback(Ref* pSender) {
     Director::getInstance()->popScene(); // 切换到startscene场景
 }
 
-void HumanPlay::menuCloseCallback(Ref* pSender)
+void HumanPlayScene::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application关闭cocos2d-x游戏场景并退出应用程序
     Director::getInstance()->end();

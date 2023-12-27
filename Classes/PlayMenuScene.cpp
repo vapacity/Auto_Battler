@@ -23,12 +23,9 @@
  ****************************************************************************/
 
 #include "PlayMenuScene.h"
-#include "SimpleAudioEngine.h"
-#include "HelloWorldScene.h"
-#include "AudioManager.h"
-#include "HumanPlay.h"
-USING_NS_CC;
 
+USING_NS_CC;
+class PrepareScene;
 Scene* PlayMenu::createScene()
 {
     return PlayMenu::create();
@@ -71,7 +68,7 @@ bool PlayMenu::init()
     auto machinePlayItem = MenuItemImage::create(
         "renjinormal.png",
         "renjiselected.png",
-        CC_CALLBACK_1(PlayMenu::menuCloseCallback, this));
+        CC_CALLBACK_1(PlayMenu::menuMachinePlayCallback, this));
 
     if (machinePlayItem == nullptr ||
         machinePlayItem->getContentSize().width <= 0 ||
@@ -175,13 +172,25 @@ bool PlayMenu::init()
     return true;
 }
 
+void PlayMenu::menuMachinePlayCallback(Ref* pSender) {
+    if (isAudioEnabled)
+    {// 启用音效
+        AudioManager::playEffect();
+    }
+
+    auto machinePrepareScene = PrepareScene::createScene();
+    float dur = 1.0f;
+    auto transition = TransitionFade::create(dur, machinePrepareScene);
+    Director::getInstance()->pushScene(transition);
+}
+
 void PlayMenu::menuMultiPlayCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
         AudioManager::playEffect();
     }
-    auto humanScene = HumanPlay::createScene();
-    Director::getInstance()->pushScene(humanScene);
+    auto WaitingScene = WaitingRoomScene::create();
+    Director::getInstance()->pushScene(WaitingScene);
 }
 
 void PlayMenu::menuFirstCallback(Ref* pSender) {
@@ -194,7 +203,7 @@ void PlayMenu::menuFirstCallback(Ref* pSender) {
 
 void PlayMenu::menuCloseCallback(Ref* pSender)
 {
-    //Close the cocos2d-x game scene and quit the application关闭cocos2d-x游戏场景并退出应用程序
+    //关闭cocos2d-x游戏场景并退出应用程序
     Director::getInstance()->end();
 
     //To navigate back to native iOS screen(if present) without quitting the application 

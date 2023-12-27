@@ -28,7 +28,7 @@
 
 #include "cocos2d.h"
 
-class HumanPlay : public cocos2d::Scene
+class HumanPlayScene : public cocos2d::Scene
 {
 public:
     static cocos2d::Scene* createScene();//创建场景
@@ -39,7 +39,7 @@ public:
     void menuCloseCallback(cocos2d::Ref* pSender);//关闭
 
     // implement the "static create()" method manually
-    CREATE_FUNC(HumanPlay);
+    CREATE_FUNC(HumanPlayScene);
 };
 
 #endif // __HUMAN_PLAY_H__

@@ -22,38 +22,29 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __ROLE_H__
-#define __ROLE_H__
+#ifndef __START_SCENE_H__
+#define __START_SCENE_H__
 
-#include <cstring>
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
-#include "player.h"
-USING_NS_CC;
-class role
+#include "PlayMenuScene.h"
+#include "SetMenuScene.h"
+#include "AudioManager.h"
+
+class StartScene : public cocos2d::Scene
 {
 public:
-	friend class player;
-	virtual void attack();//攻击函数
+    static cocos2d::Scene* createScene();//创建场景
 
-	void moveTo();//移动函数
+    virtual bool init();//初始化
+    void menuStartCallback(Ref* pSender);//切换到Play场景
+    void menuSetCallback(Ref* pSender);//切换到set场景
+    // a selector callback
+    void menuCloseCallback(cocos2d::Ref* pSender);//关闭
 
-	virtual void getHurt();//掉血函数
-
-	virtual void useSkill();//使用技能
-
-protected:
-	std::string name;//名字
-	std::string picture;//图片
-	float X;//坐标
-	float Y;
-	int HP;//红条
-	int MP;//蓝条
-	int ATK;//攻击力
-	int attackSpeed;//攻击速度
-	int moveSpeed;//移动速度
-	int attackRange;//攻击范围
-	int price;//价格
+    // implement the "static create()" method manually
+    
+    CREATE_FUNC(StartScene);
 };
-#endif // __ROLE_H__
 
+#endif // __HELLOWORLD_SCENE_H__
