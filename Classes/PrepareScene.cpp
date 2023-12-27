@@ -3,6 +3,7 @@
 #include "PrepareScene.h"
 USING_NS_CC;
 #define PREPARE_TIME 5.0f
+#define myPosition Vec2(40,265)
 void PrepareScene::noPopulationText()
 {
     unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
@@ -155,6 +156,8 @@ void PrepareScene::initLittleHero()
     if (littleHero->getParent())
         littleHero->removeFromParent();
     this->addChild(myPlayer->myHero, 1);
+    littleHero->enableMoving();
+    littleHero->setPosition(myPosition);
 }
 
 void PrepareScene::initChessExp()

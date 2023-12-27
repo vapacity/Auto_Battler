@@ -1,5 +1,7 @@
 #include "OnlineFightScene.h"
 #include "FightScene.h"
+#define enemyPosition Vec2(1050,650)
+#define myPosition Vec2(40,265)
 cocos2d::Scene* OnlineFightScene::createScene()
 {
     // 创建一个场景对象，该对象将由自动释放池自动释放
@@ -34,6 +36,7 @@ bool OnlineFightScene::init()
     initPreparationSeats();
     initLittleHero();
     initStore();
+    enableMouseListener();
     //moveChess(gridMap->myChessMap[Vec2(1, 0)], gridMap->myChessMap[Vec2(1, 0)]->stopMoveFlag);
     //initChessExp();
     //findEnemyAndMove();
@@ -145,14 +148,23 @@ void OnlineFightScene::initLittleHero()
     myLittleHero = myPlayer->myHero;
     if (myLittleHero->getParent())
         myLittleHero->removeFromParent();
-    this->addChild(myLittleHero);
     myLittleHero->isAnimationPlaying = false;
     enemyLittleHero = enemyPlayer->myHero;
     if (enemyLittleHero->getParent())
         enemyLittleHero->removeFromParent();
     enemyLittleHero->setColor(Color3B(180, 180, 180));
-    this->addChild(enemyLittleHero);
     enemyLittleHero->isAnimationPlaying = false;
+    //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
+    if (myPlayer->playerNumber == 0) {
+        myLittleHero->setPosition(myPosition);
+        enemyLittleHero->setPosition(enemyPosition);
+    }
+    else {
+        myLittleHero->setPosition(enemyPosition);
+        enemyLittleHero->setPosition(myPosition);
+    }
+    this->addChild(myLittleHero);
+    this->addChild(enemyLittleHero);
 }
 
 void OnlineFightScene::initStore()
@@ -174,6 +186,13 @@ void OnlineFightScene::update(float dt)
         chess->updateInBattle(dt, gridMap);
     }
     updateWin(dt);
+}
+
+void OnlineFightScene::enableMouseListener()
+{
+    prepareSceneMouseListener = EventListenerMouse::create();
+    prepareSceneMouseListener->onMouseDown = CC_CALLBACK_1(OnlineFightScene::fightSceneOnMouseDown, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(prepareSceneMouseListener, this);
 }
 
 void OnlineFightScene::updateWin(float dt)
@@ -286,7 +305,7 @@ void OnlineFightScene::goToGameOverScene()
 void OnlineFightScene::initWeb()
 {
     webSocket_ = new cocos2d::network::WebSocket();
-    webSocket_->init(*this, "ws://192.168.43.182:3000");
+    webSocket_->init(*this, "ws://100.81.177.2:3000");
 }
 void OnlineFightScene::sendChessInfoToServer()
 {
@@ -363,11 +382,29 @@ void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
                 chess->maxHP = chess->health;
                 chess->initHealthBar();
                 this->addChild(chess);
-
+            }
+            gridMap->updateForPlayer();
+            this->schedule([this](float dt) {this->update(dt); }, "update_key");
+        }
+        if (document.HasMember("type") && document["type"].IsString() && document["type"] == "position_update") {
+            // 确保 JSON 中有 x 和 y 属性
+            if (document.HasMember("x") && document.HasMember("y") && document["x"].IsFloat() && document["y"].IsFloat()) {
+                // 从 JSON 中读取属性并更新 LittleHero 的位置
+                float x = document["x"].GetFloat();
+                float y = document["y"].GetFloat();
+                // 假设 LittleHero 有 setPosition 方法
+                enemyLittleHero->stopAllActions();
+                float speed = 500.0f;
+                Vec2 currentposition = enemyLittleHero->getPosition();
+                // 计算鼠标点击位置相对于当前位置的相对位移
+                Vec2 targetposition = Vec2(x, y);
+                Vec2 movedelta = targetposition - currentposition;
+                float distance = movedelta.length();
+                float duration = distance / speed;
+                auto moveto = MoveTo::create(duration, targetposition);
+                enemyLittleHero->runAction(moveto);
             }
         }
-        gridMap->updateForPlayer();
-        this->schedule([this](float dt) {this->update(dt); }, "update_key");
     }
 }
 
@@ -379,4 +416,48 @@ void OnlineFightScene::onClose(cocos2d::network::WebSocket* ws)
 void OnlineFightScene::onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error)
 {
     CCLOG("WebSocket error: %d", static_cast<int>(error));
+}
+
+void OnlineFightScene::fightSceneOnMouseDown(Event* event)
+{
+    EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
+    if (mouseEvent->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
+
+        myLittleHero->stopAllActions();
+        // 创建一个MoveTo动作，移动到点击位置
+        Vec2 currentPosition = myLittleHero->getPosition();
+
+        // 计算鼠标点击位置相对于当前位置的相对位移
+        Vec2 targetPosition = mouseEvent->getLocationInView();
+        Vec2 moveDelta = targetPosition - currentPosition;
+
+        float distance = moveDelta.length();
+
+        // 计算匀速移动的时间（假设速度为300像素/秒）
+        float speed = 300.0f;
+        float duration = distance / speed;
+
+        // 创建MoveBy动作，匀速移动到相对位移位置
+        auto moveTo = MoveTo::create(duration, targetPosition);
+
+        myLittleHero->runAction(moveTo);
+        rapidjson::Document doc;
+        doc.SetObject();
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+        doc.AddMember("type", "position_update", allocator);
+        doc.AddMember("x", targetPosition.x, allocator);
+        doc.AddMember("y", targetPosition.y, allocator);
+
+        // 将 JSON 转为字符串
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        doc.Accept(writer);
+        std::string message = buffer.GetString();
+
+        // 发送消息给服务器
+        if (webSocket_->getReadyState() == cocos2d::network::WebSocket::State::OPEN) {
+            webSocket_->send(message);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿#include "FightScene.h"
-
+#define enemyPosition Vec2(1050,650)
+#define myPosition Vec2(40,265)
 cocos2d::Scene* FightScene::createScene()
 {
     // 创建一个场景对象，该对象将由自动释放池自动释放
@@ -144,12 +145,16 @@ void FightScene::initLittleHero()
     myLittleHero = myPlayer->myHero;
     if (myLittleHero->getParent())
         myLittleHero->removeFromParent();
+    myLittleHero->setPosition(myPosition);
     this->addChild(myLittleHero);
     myLittleHero->isAnimationPlaying = false;
+    myLittleHero->disableMoving();
     enemyLittleHero = enemyPlayer->myHero;
+    enemyLittleHero->setEnemey();
     if (enemyLittleHero->getParent())
         enemyLittleHero->removeFromParent();
     enemyLittleHero->setColor(Color3B(180,180,180));
+    enemyLittleHero->setPosition(enemyPosition);
     this->addChild(enemyLittleHero);
     enemyLittleHero->isAnimationPlaying = false;
 }

@@ -13,8 +13,13 @@ public:
     void moveToClickLocation(cocos2d::EventMouse* event);
     virtual void attack(LittleHero* enemy);
     virtual void gethurt(float atkval);
+    void setEnemey();
+    void enableMoving();
+    void disableMoving();
     CREATE_FUNC(LittleHero);
 public:
+    int moving = 0;
+    int isEnemy = 0;
     bool isAnimationPlaying = false;
     float percentage;//ÑªÁ¿
     float atk;

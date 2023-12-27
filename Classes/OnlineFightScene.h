@@ -83,7 +83,7 @@ public:
 
     //在战斗场景中每帧更新
     void update(float dt);
-
+    void enableMouseListener();
     void menuPlayCallback(Ref* pSender);
     void updateDead(float dt);
     void updateWin(float dt);
@@ -95,9 +95,11 @@ public:
     void onMessage(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::Data& data);
     void onClose(cocos2d::network::WebSocket* ws);
     void onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error);
+    void fightSceneOnMouseDown(Event* event);
     //void update(float dt);
     CREATE_FUNC(OnlineFightScene);
 private:
     cocos2d::network::WebSocket* webSocket_;
+    EventListenerMouse* prepareSceneMouseListener;
 };
 #endif

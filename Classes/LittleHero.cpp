@@ -1,8 +1,7 @@
 // LittleHero.cpp
 #include "LittleHero.h"
-
 USING_NS_CC;
-
+const int HURT_ACTION_TAG = 1;
 LittleHero* LittleHero::create(const std::string& filename,int id)
 {
     LittleHero* sprite = new LittleHero();
@@ -39,6 +38,8 @@ void LittleHero::attack(LittleHero* enemy)
 {
     if (isAnimationPlaying)
         return;
+    enemy->moving = 0;
+    enemy->stopAllActions();
     cocos2d::Vec2 spritePosition = this->getPosition();
     Vec2 enemyPosition = enemy->getPosition();
     auto fireball = Sprite::create("fire2.png");
@@ -69,6 +70,7 @@ void LittleHero::gethurt(float atkval)
         Sequence::create(tintAction, resetColorAction, nullptr),
         nullptr
     );
+    damageSpawn->setTag(HURT_ACTION_TAG);
     // 运行动作组合
     this->runAction(damageSpawn);
     percentage -= atkval;
@@ -76,11 +78,31 @@ void LittleHero::gethurt(float atkval)
     if (percentage <= 0) {
         this->removeFromParentAndCleanup(true);
     }
+    this->moving = 1;
+}
+
+void LittleHero::setEnemey()
+{
+    isEnemy = 1;
+}
+
+void LittleHero::disableMoving()
+{
+    moving = 0;
+}
+
+void LittleHero::enableMoving()
+{
+    moving = 1;
 }
 
 void LittleHero::moveToClickLocation(EventMouse* event)
 {
     // 判断是否是右键点击
+    if (isEnemy)return;
+    if (!moving)return;
+    Action* hurtAction = getActionByTag(HURT_ACTION_TAG);
+    if (hurtAction)return;
     if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT)
     {
         this->stopAllActions();

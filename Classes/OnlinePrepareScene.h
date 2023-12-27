@@ -12,9 +12,15 @@
 #include "Store.h"
 #include "LittleHero.h"
 #include "OnlineFightScene.h"
+#include "json/rapidjson.h"
+#include "json/document.h"
+#include "json/writer.h"
+#include "json/stringbuffer.h"
+#include "network/WebSocket.h"
+#include "OnlinePrepareScene.h"
 
 USING_NS_CC;
-class OnlinePrepareScene: public cocos2d::Scene
+class OnlinePrepareScene: public cocos2d::Scene, public cocos2d::network::WebSocket::Delegate
 {
 public:
     Player* myPlayer;
@@ -99,6 +105,13 @@ public:
 
     void initPrepareLabel();
     void updateCountdownLabel(float dt);
+    void initWeb();
+    void onOpen(cocos2d::network::WebSocket* ws);
+    void onMessage(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::Data& data);
+    void onClose(cocos2d::network::WebSocket* ws);
+    void onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error);
+private:
+    cocos2d::network::WebSocket* webSocket_;
 };
 
 #endif // __PREPARE_SCENE_H__
