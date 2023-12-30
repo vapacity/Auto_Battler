@@ -74,8 +74,6 @@ bool PrepareScene::init()
     auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
     menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
     this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
-    // 这里可以添加初始化场景的代码
-    ///////////////////////////////////////////////////////////
 
     initPlayer();
 

@@ -15,7 +15,7 @@ bool GameOverScene::init()
     {
         return false;
     }
-
+    
     auto label = Label::createWithTTF("GameOver", "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
     // 设置Label的颜色（可选）

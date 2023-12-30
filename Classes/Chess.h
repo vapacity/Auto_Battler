@@ -93,19 +93,16 @@ public:
 	void deleteChess();
 
 	//获得棋子id
-	int getId();
+	int getId()const;
 
 	//获得棋子星级
-	int getStar();
+	int getStar()const;
 
 	//判断棋子是否在棋格
-	bool isInGrid();
+	bool isInGrid()const;
 
 	//判断棋子是否在备战席上
-	bool isAtSeat();
-
-	// 根据输入的id值创建一个棋子实例
-	static Chess* createById(int id);
+	bool isAtSeat()const;
 
 	// 根据输入的id值和星级创建一个棋子实例
 	static Chess* createByIdAndStar(int id, int star);
@@ -133,12 +130,6 @@ public:
 
 	//死亡函数
 	virtual void deadAction(GridMap* gridMap);
-
-	//移动函数
-	MoveTo* moveTo(Vec2 position);
-
-	//获得血条
-	void getBlood();
 
 	//掉血函数
 	virtual void getHurt(int ATK);

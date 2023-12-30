@@ -1,26 +1,4 @@
-/****************************************************************************
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
- http://www.cocos2d-x.org
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- ****************************************************************************/
 #include<iostream>
 #include "SetMenuScene.h"
 #include "SimpleAudioEngine.h"
@@ -82,9 +60,11 @@ bool SetMenu::init()
             case Widget::TouchEventType::ENDED:
                 // 获取滑动条的数值（假设范围是0.0到1.0）
                 // 设置背景音乐的音量,先暂停再设置
-                AudioManager::pauseBackgroundMusic();
-                AudioManager::setBackgroundMusicVolume(slider->getPercent() / 100.0f);//这个setBackgroundMusicVolume不起作用，尝试了设置为0，但音量不变
-                AudioManager::resumeBackgroundMusic();
+                // 暂停音乐
+                cocos2d::experimental::AudioEngine::pause(globalAudioId);
+                experimental::AudioEngine::setVolume(globalAudioId, slider->getPercent() / 100.0f);
+                // 恢复音乐
+                cocos2d::experimental::AudioEngine::resume(globalAudioId);
                 // 将滑动条的位置保存到全局变量中
                 cocos2d::UserDefault::getInstance()->setFloatForKey("backGroundMusicVolumn", slider->getPercent());//12.16 此处改动 BUG
                 break;

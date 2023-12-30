@@ -8,7 +8,7 @@ Bulbasaur* Bulbasaur::create(const std::string& filename)
         return bulbasaur;
     }
     CC_SAFE_DELETE(bulbasaur);
-    return nullptr;
+    return nullptr; 
 }
 
 bool Bulbasaur::init(const std::string& filename)

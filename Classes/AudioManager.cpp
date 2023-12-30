@@ -28,38 +28,8 @@ USING_NS_CC;
 
 
 bool isAudioEnabled = true;// 定义音效开关变量并初始化为开启状态
-void AudioManager::playBackgroundMusic()
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->playBackgroundMusic("bgmusic.mp3", true);
-}
 
-void AudioManager::stopBackgroundMusic()
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->stopBackgroundMusic();
-}
-void AudioManager::preloadBackgroundMusic()
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->preloadBackgroundMusic("bgMusic.mp3");
-}
-void AudioManager::setBackgroundMusicVolume(float volume)
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->setBackgroundMusicVolume(volume);
-}
-void AudioManager::pauseBackgroundMusic()
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->pauseBackgroundMusic();
-}
-void AudioManager::resumeBackgroundMusic()
-{
-    auto bgMusic = SimpleAudioEngine::getInstance();
-    bgMusic->resumeBackgroundMusic();
-}
-
+int globalAudioId = cocos2d::experimental::AudioEngine::INVALID_AUDIO_ID;  // 初始化为无效音频ID
 
 
 void AudioManager::preloadEffect()
@@ -90,10 +60,4 @@ void AudioManager::resumeAllEffects()
 {
     auto audio = SimpleAudioEngine::getInstance();
     audio->resumeAllEffects();
-}
-
-void AudioManager::setEffectsVolume(float volume)
-{
-    auto audio = SimpleAudioEngine::getInstance();
-    audio->setEffectsVolume(volume);
 }

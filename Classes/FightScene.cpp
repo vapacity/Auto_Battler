@@ -15,7 +15,7 @@ FiniteTimeAction* createSequenceFromVector(const Vector<FiniteTimeAction*>& acti
     else {
         // 递归地创建序列
         // 确保当前动作与递归返回的动作顺序正确
-        auto nextAction = createSequenceFromVector(actions, index + 1);
+        auto nextAction = createSequenceFromVector(actions, index + 1); 
         return Sequence::createWithTwoActions(actions.at(index), nextAction);
     }
 }
@@ -27,8 +27,9 @@ bool FightScene::init()
     {
         return false;
     }
-
-
+    experimental::AudioEngine::stop(globalAudioId);
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("battleMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
     initPlayer();
     initBackground();
     initGridMap();
@@ -267,25 +268,6 @@ void FightScene::updateWin(float dt)
 
 
         this->runAction(sequence);
-        //Vector<MenuItem*> MenuItems_fight;
-        ////回退
-        //auto backItem = MenuItemImage::create(
-        //    "backnormal.png",
-        //    "backselected.png",
-        //    CC_CALLBACK_1(FightScene::menuPlayCallback, this));
-
-        //if (!(backItem == nullptr ||
-        //    backItem->getContentSize().width <= 0 ||
-        //    backItem->getContentSize().height <= 0))
-        //{//退出菜单项有效，接下来会计算退出菜单项的位置
-        //    float x = origin.x + visibleSize.width / 2;
-        //    float y = origin.y + visibleSize.height / 7 * 3 - backItem->getContentSize().height * 20 / 13;
-        //    backItem->setPosition(Vec2(x, y));
-        //}
-        //MenuItems_fight.pushBack(backItem);
-        //auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
-        //menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
-        //this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
     }
 
 
@@ -299,14 +281,18 @@ void FightScene::menuPlayCallback(Ref* pSender) {
     //把原数据删除再离开场景
     PlayerManager::getInstance()->getPlayer(0)->deletePast();
     PlayerManager::getInstance()->getPlayer(1)->deletePast();
-
+    experimental::AudioEngine::stop(globalAudioId);
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
     Director::getInstance()->popScene(); // 切换到playscene场景
 }
 
 void FightScene::goToPrepareScene()
 {
     auto prepareScene = PrepareScene::create();
-
+    experimental::AudioEngine::stop(globalAudioId);
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
     cocos2d::Director::getInstance()->replaceScene(prepareScene);
 }
 
@@ -314,7 +300,8 @@ void FightScene::goToGameOverScene()
 {
     // 创建新的场景
     auto gameOverScene = GameOverScene::createScene();
-
+    experimental::AudioEngine::stop(globalAudioId);
+    //experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
     // 切换到新场景
     cocos2d::Director::getInstance()->replaceScene(gameOverScene);
 }

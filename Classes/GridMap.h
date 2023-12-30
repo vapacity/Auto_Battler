@@ -40,7 +40,7 @@ public:
 
 
 
-    bool isInBoard(Vec2 coor);
+    bool isInBoard(Vec2 coor)const;
 
     //获得游戏中坐标Vec2处对应的格子（方法为遍历查找与鼠标最靠近的格子中心）
     HexCell* mouseInWhichCell(const cocos2d::Vec2& position);

@@ -33,7 +33,7 @@ void Chess::deleteChess()
         this->removeFromParent();
 }
 
-int Chess::getId()
+int Chess::getId()const
 {
     if (this)
         return this->id;
@@ -41,19 +41,19 @@ int Chess::getId()
     return -1;
 }
 
-int Chess::getStar()
+int Chess::getStar()const
 {
     if (this)
         return this->star;
     return -1;
 }
 
-bool Chess::isInGrid()
+bool Chess::isInGrid()const
 {
     return (atGridPosition.x >= 0 && atGridPosition.y >= 0);
 }
 
-bool Chess::isAtSeat()
+bool Chess::isAtSeat() const
 {
     return atSeatPosition >= 0;
 }
@@ -266,12 +266,6 @@ void Chess::deadAction(GridMap* gridMap)
     //this->bluebar->runAction(fadeOut);
     gridMap->removeChessOfGrid(gridMap->getCellAtPosition(this->atGridPosition));
     //this->removeFromParentAndCleanup(true);
-}
-
-
-void Chess::getBlood()
-{
-
 }
 
 

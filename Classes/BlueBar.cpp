@@ -5,7 +5,7 @@ USING_NS_CC;
 
 BlueBar::BlueBar()
     : blueBar(nullptr)
-{
+{ 
 }
 
 BlueBar* BlueBar::create(const std::string& backgroundFilename, const std::string& barFilename, float initialPercentage)

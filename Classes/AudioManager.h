@@ -26,19 +26,15 @@
 #define __AUDIO_MANAGER_H__
 
 #include "cocos2d.h"
-#include "SimpleAudioEngine.h"
+#include "AudioEngine.h"
 #include "StartScene.h"
 extern bool isAudioEnabled;//记录是否选择音效
+
+extern int globalAudioId;  // 声明全局音频ID变量 
+
 class AudioManager
 {
 public:
-    //背景音乐
-    static void playBackgroundMusic();
-    static void stopBackgroundMusic();
-    static void preloadBackgroundMusic();
-    static void setBackgroundMusicVolume(float volume);
-    static void pauseBackgroundMusic();
-    static void resumeBackgroundMusic();
 
     //音效
     static void preloadEffect();
@@ -46,7 +42,7 @@ public:
     static void stopAllEffects();
     static void pauseAllEffects();
     static void resumeAllEffects();
-    static void setEffectsVolume(float volume);
+
 };
 
 #endif // __AUDIO_MANAGER_H__

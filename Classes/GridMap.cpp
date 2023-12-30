@@ -106,7 +106,7 @@ void GridMap::updateForPlayer()
 }
 
 
-bool GridMap::isInBoard(Vec2 coor) {
+bool GridMap::isInBoard(Vec2 coor)const {
     if (coor.x >= 0 && coor.x < NUM_COLUMN && coor.y >= 0 && coor.y < NUM_LINE)
         return 1;
     return 0;
