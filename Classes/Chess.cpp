@@ -253,13 +253,15 @@ void Chess::deadAction(GridMap* gridMap)
     auto sequence = Sequence::create(
         fadeOut,
         CallFunc::create([this, gridMap]() {
+            //this->bluebar->release();
+            //this->healthBar->release();
             this->removeFromParentAndCleanup(true); // 移除并执行清理操作
             }),
         nullptr
                 );
 
     // 对角色、血条和蓝条分别应用独立的Sequence动作
-    this->runAction(fadeOut);
+    this->runAction(sequence);
     //this->healthBar->runAction(fadeOut);
     //this->bluebar->runAction(fadeOut);
     gridMap->removeChessOfGrid(gridMap->getCellAtPosition(this->atGridPosition));

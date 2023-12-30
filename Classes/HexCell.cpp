@@ -43,9 +43,14 @@ bool HexCell::init() {
 void HexCell::turnToSelected() {
     if (this == nullptr)
         return;
-    hexSprite->setOpacity(150);
+    hexSprite->setOpacity(200);
 }
-
+void HexCell::turnToSeen()
+{
+    if (this == nullptr)
+        return;
+    hexSprite->setOpacity(100);
+}
 void HexCell::turnToNormal() {
     if (this == nullptr)
         return;

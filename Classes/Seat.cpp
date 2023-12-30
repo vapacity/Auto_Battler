@@ -40,7 +40,8 @@ void Seat::turnToNormal()
     if (this == nullptr)
         return;
     if (!this->chessInSeat)
-        seatImage->setOpacity(80);
+        if (seatImage)
+            seatImage->setOpacity(80);
 }
 
 

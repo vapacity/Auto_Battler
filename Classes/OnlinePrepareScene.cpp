@@ -346,6 +346,11 @@ void OnlinePrepareScene::chessOnMouseMove(Vec2 mousePosition)
     if (selectedChess)
         if (selectedChess->isDragging)
         {
+            for (auto iter : gridMap->nodeMap)
+            {
+                if ((!iter.second->isMine == myPlayer->playerNumber))
+                    iter.second->turnToSeen();
+            }
             selectedChess->setPosition(mousePosition);
         }
 }
@@ -372,7 +377,7 @@ void OnlinePrepareScene::chessOnMouseUp(Vec2 mousePosition)
         }
         //此处判断鼠标位置所处棋格是否存在
         //1 棋格存在且位置上无棋子,将棋子放置在新的位置上
-        else if (cell && !cell->chessInGrid && cell->isMine)
+        else if (cell && !cell->chessInGrid && (!cell->isMine == myPlayer->playerNumber))
         {
             CCLOG("PrepareScene:put Chess on Grid");
             gridMap->addChessToGrid(selectedChess, cell);
@@ -385,7 +390,7 @@ void OnlinePrepareScene::chessOnMouseUp(Vec2 mousePosition)
             myPlayer->addChess(selectedChess);
         }
         //2 棋格存在且位置上有棋子
-        else if (cell && cell->chessInGrid && cell->isMine)
+        else if (cell && cell->chessInGrid && (!cell->isMine==myPlayer->playerNumber))
         {
             CCLOG("PrepareScene:swap Cell and Something");
 
@@ -435,6 +440,11 @@ void OnlinePrepareScene::chessOnMouseUp(Vec2 mousePosition)
             gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
             myPlayer->addChess(selectedChess);
+        }
+        for (auto iter : gridMap->nodeMap)
+        {
+            if (iter.second->isMine)
+                iter.second->turnToNormal();
         }
         selectedChess = nullptr;
     }
@@ -546,6 +556,18 @@ void OnlinePrepareScene::updateCountdownLabel(float dt) {
 
     // 如果时间到，跳转到下一个场景
     if (remainingTime <= 0) {
+        gridMap->disableMouseListener();
+        //this->disableMouseListener();
+        if (selectedChess)
+        {
+            CCLOG("PrepareScene:swap failed");
+            gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
+            myPlayer->addChess(selectedChess);
+        }
+        for (auto iter : preSeats->seatsArray)
+            iter->turnToNormal();
+        selectedChess = nullptr;
         goToFightScene(0); // 这里的参数可以根据你的需要传递
     }
 }

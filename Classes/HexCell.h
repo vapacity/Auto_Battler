@@ -44,7 +44,7 @@ public:
     HexCell* preNode;
 
     //该棋格是否能放棋子
-    bool isMine=true;
+    bool isMine=false;
 
     //该棋格是否被预定为移动目标了
     bool isBooked = false;
@@ -60,7 +60,7 @@ public:
     void turnToSelected();
 
     void turnToNormal();
-
+    void turnToSeen();
     Vector<HexCell*> GetNeighbors();
 
     //棋子类型替换

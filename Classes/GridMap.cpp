@@ -49,9 +49,11 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
     //创建指定个数的棋格，并添加到棋盘的对应位置
     for (int y = 0; y < NUM_LINE; ++y) {
         for (int x = 0; x < NUM_COLUMN; ++x) {
+
             auto cell = HexCell::create();
             nodeMap.insert(std::make_pair(Vec2(x, y), cell));
-            
+            if (y < NUM_LINE / 2)
+                cell->isMine = true;
             cell->coordinateInBoard = Vec2(x, y);
             float posX = x * (cell->width + gapX) + (y % 2) * (cell->width / 2 + gapX / 2) + STARTX;
             float posY = y * (cell->length * 1.5 + gapY) + STARTY;

@@ -1,5 +1,5 @@
 ﻿#include "FightScene.h"
-#define enemyPosition Vec2(1050,650)
+#define enemyPosition Vec2(900,550)
 #define myPosition Vec2(40,265)
 cocos2d::Scene* FightScene::createScene()
 {
@@ -32,9 +32,9 @@ bool FightScene::init()
     initPlayer();
     initBackground();
     initGridMap();
-    initPreparationSeats();
+    //initPreparationSeats();
     initLittleHero();
-    initStore();
+    //initStore();
     //moveChess(gridMap->myChessMap[Vec2(1, 0)], gridMap->myChessMap[Vec2(1, 0)]->stopMoveFlag);
     //initChessExp();
     //findEnemyAndMove();
@@ -191,7 +191,44 @@ void FightScene::updateWin(float dt)
         else
             cntEnemy++;
     }
-    if (cntEnemy == 0|| cntMy == 0) {
+    if (cntEnemy == 0 && cntMy == 0)
+    {
+        std::string str = "Draw";
+        auto label = Label::createWithTTF(str, "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
+
+        // 设置Label的颜色（可选）
+        label->setColor(Color3B::WHITE);
+
+        // 获取场景的尺寸和中心坐标
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        Vec2 centerPosition = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+
+        // 设置Label的位置
+        label->setPosition(centerPosition);
+
+        // 将Label添加到当前场景
+        this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
+        auto delay = cocos2d::DelayTime::create(2);
+
+        auto callback = cocos2d::CallFunc::create([this]() {
+
+            if (myLittleHero->percentage <= 0 || enemyLittleHero->percentage <= 0)
+            {
+                FightScene::goToGameOverScene();
+            }
+            else {
+                FightScene::goToPrepareScene();
+            }
+            });
+
+        auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
+
+
+        this->runAction(sequence);
+        return;
+    }
+    else if (cntEnemy == 0|| cntMy == 0) {
         // 创建一个Label
         std::string str= cntEnemy == 0 ? "You Win" : "Enemy Win";
         if (cntEnemy == 0)
@@ -216,6 +253,7 @@ void FightScene::updateWin(float dt)
         auto delay = cocos2d::DelayTime::create(2);
 
         auto callback = cocos2d::CallFunc::create([this]() {
+            
             if (myLittleHero->percentage <= 0||enemyLittleHero->percentage<=0)
             {
                 FightScene::goToGameOverScene();

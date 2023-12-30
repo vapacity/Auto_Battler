@@ -43,13 +43,13 @@ void LittleHero::attack(LittleHero* enemy)
     enemy->stopAllActions();
     cocos2d::Vec2 spritePosition = this->getPosition();
     Vec2 enemyPosition = enemy->getPosition();
-    auto fireball = Sprite::create("fire2.png");
+    auto fireball = Sprite::create("kalaAttack.png");
+    fireball->setScale(0.05);
     fireball->setPosition(spritePosition);
     this->getParent()->addChild(fireball);
     auto moveTo = MoveTo::create(1.0f, enemyPosition);
     auto removeSelf = RemoveSelf::create();
     auto sequence = Sequence::create(moveTo, removeSelf, nullptr);
-    percentage -= atk;
     auto callFunc = CallFunc::create([=]() {
         enemy->gethurt(atk);
         });

@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "PrepareScene.h"
 USING_NS_CC;
-#define PREPARE_TIME 5.0f
+#define PREPARE_TIME 20.0f
 #define myPosition Vec2(40,265)
 void PrepareScene::noPopulationText()
 {
@@ -124,7 +124,7 @@ void PrepareScene::initPlayer()
 }
 void PrepareScene::initBackground()
 {
-    backgroundImg = Sprite::create("battle-background3.png");
+    backgroundImg = Sprite::create("battle-background2.png");
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     backgroundImg->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
@@ -340,6 +340,11 @@ void PrepareScene::chessOnMouseMove(Vec2 mousePosition)
     if (selectedChess)
         if (selectedChess->isDragging)
         {
+            for (auto iter : gridMap->nodeMap)
+            {
+                if (iter.second->isMine)
+                    iter.second->turnToSeen();
+            }
             selectedChess->setPosition(mousePosition);
         }
 }
@@ -430,6 +435,11 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
             myPlayer->addChess(selectedChess);
         }
+        for (auto iter : gridMap->nodeMap)
+        {
+            if (iter.second->isMine)
+                iter.second->turnToNormal();
+        }
         selectedChess = nullptr;
     }
 
@@ -502,7 +512,6 @@ void PrepareScene::goToFightScene(float dt)
 {
     // 创建新的场景
     auto fightScene = FightScene::create();
-
     // 切换到新场景
     cocos2d::Director::getInstance()->replaceScene(fightScene);
 }
@@ -540,6 +549,18 @@ void PrepareScene::updateCountdownLabel(float dt) {
 
     // 如果时间到，跳转到下一个场景
     if (remainingTime <= 0) {
+        gridMap->disableMouseListener();
+        //this->disableMouseListener();
+        if (selectedChess)
+        {
+            CCLOG("PrepareScene:swap failed");
+            gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
+            preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
+            myPlayer->addChess(selectedChess);
+        }
+        for (auto iter : preSeats->seatsArray)
+            iter->turnToNormal();
+        selectedChess = nullptr;
         goToFightScene(0); // 这里的参数可以根据你的需要传递
     }
 }
