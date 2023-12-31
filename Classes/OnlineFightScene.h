@@ -62,44 +62,49 @@ public:
     //创建商店
     void initStore();
 
-    //创建棋子样例
-    void initChessExp();
+    //创建棋子
     void createChessOnGrids();
-
-    //棋子移动函数
-    void moveChess(Chess* chessToMove, bool& stopMoveFlag);
-
-    //棋子判断是否有敌人进入了攻击范围
-    bool judgeAttack(Vector<HexCell*> movePath);
-
-    //一方的棋子死完之后，退出循环
-    bool judgeAllDead();
-
-    //对棋盘上的所有棋子遍历，开始索敌，直到有敌人进入了攻击范围
-    void findEnemyAndMove();
-
-    //对棋盘上的棋子进行遍历，已经完成了移动，判断自己周围是否有敌人，如有则触发attack
-    void locatdEnemyAndAttack(Chess* chess);
 
     //在战斗场景中每帧更新
     void update(float dt);
+
     void enableMouseListener();
-    void menuPlayCallback(Ref* pSender);
-    void updateDead(float dt);
+
+    //判定单场结果
     void updateWin(float dt);
+
+    //回到准备界面
     void goToPrepareScene();
+
+    //游戏结束界面
     void goToGameOverScene();
+
+    //初始化WebSocket连接
     void initWeb();
+
+    //发送棋子信息到服务器
     void sendChessInfoToServer();
+
+    //处理WebSocket连接打开时的事件
     void onOpen(cocos2d::network::WebSocket* ws);
+
+    //处理接收到WebSocket消息时的事件
     void onMessage(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::Data& data);
+    
+    //处理WebSocket连接关闭时的事件
     void onClose(cocos2d::network::WebSocket* ws);
+    
+    //处理WebSocket错误时的事件
     void onError(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::ErrorCode& error);
+    
+    //处理战斗场景中鼠标点击事件
     void fightSceneOnMouseDown(Event* event);
-    //void update(float dt);
+    
     CREATE_FUNC(OnlineFightScene);
 private:
-    cocos2d::network::WebSocket* webSocket_;
-    EventListenerMouse* prepareSceneMouseListener;
+    
+    cocos2d::network::WebSocket* webSocket_;//存储WebSocket连接的指针
+   
+    EventListenerMouse* prepareSceneMouseListener;//存储鼠标事件监听器的指针
 };
 #endif

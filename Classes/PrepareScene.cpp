@@ -4,37 +4,6 @@
 USING_NS_CC;
 #define PREPARE_TIME 20.0f
 #define myPosition Vec2(40,265)
-void PrepareScene::noPopulationText()
-{
-    unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
-    if (fadingText) {
-        fadingText->removeFromParentAndCleanup(true);
-        fadingText = nullptr;
-    }
-    fadingText = Label::createWithTTF("Level Is Not Enough", "fonts/arial.ttf", 36);
-    fadingText->setPosition(Vec2(600, 600));
-    this->addChild(fadingText);
-
-    elapsedTime = 0.0f;
-
-    schedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
-}
-
-void PrepareScene::updateText(float dt)
-{
-    elapsedTime += dt;
-
-    int opacity = 255 - static_cast<int>(elapsedTime * 150);
-
-    fadingText->setOpacity(opacity);
-
-    //完全透明后停止调度器
-    if (opacity <= 0) {
-        unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
-        fadingText->removeFromParentAndCleanup(true);
-        fadingText = nullptr;
-    }
-}
 
 Scene* PrepareScene::createScene()
 {
@@ -51,29 +20,8 @@ bool PrepareScene::init()
         return false;
     }
 
-
-    Vector<MenuItem*> MenuItems_fight;
-    //回退
-    auto backItem = MenuItemImage::create(
-        "smallbacknormal.png",
-        "smallbackselected.png",
-        CC_CALLBACK_1(PrepareScene::menuPlayCallback, this));
-
-    if (!(backItem == nullptr ||
-        backItem->getContentSize().width <= 0 ||
-        backItem->getContentSize().height <= 0))
-    {//退出菜单项有效，接下来会计算退出菜单项的位置
-        // 获取场景的尺寸和中心坐标
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        float x = origin.x + visibleSize.width * 17 / 18;
-        float y = origin.y + visibleSize.height * 14 / 15;
-        backItem->setPosition(Vec2(x, y));
-    }
-    MenuItems_fight.pushBack(backItem);
-    auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
-    menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
-    this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+    //回退按钮
+    initBack();
 
     initPlayer();
 
@@ -113,6 +61,32 @@ bool PrepareScene::init()
     return true;
 }
 
+void PrepareScene::initBack()
+{
+    Vector<MenuItem*> MenuItems_fight;
+    //回退
+    auto backItem = MenuItemImage::create(
+        "smallbacknormal.png",
+        "smallbackselected.png",
+        CC_CALLBACK_1(PrepareScene::menuPlayCallback, this));
+
+    if (!(backItem == nullptr ||
+        backItem->getContentSize().width <= 0 ||
+        backItem->getContentSize().height <= 0))
+    {//退出菜单项有效，接下来会计算退出菜单项的位置
+        // 获取场景的尺寸和中心坐标
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        float x = origin.x + visibleSize.width * 17 / 18;
+        float y = origin.y + visibleSize.height * 14 / 15;
+        backItem->setPosition(Vec2(x, y));
+    }
+    MenuItems_fight.pushBack(backItem);
+    auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
+    menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
+    this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+}
+
 void PrepareScene::initPlayer()
 {
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
@@ -146,7 +120,7 @@ void PrepareScene::initPreparationSeats()
     this->addChild(preSeats);
 }
 
-//待改
+
 void PrepareScene::initLittleHero()
 {
     //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
@@ -358,16 +332,14 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         selectedChess->isDragging = false;
 
 
-
+        //此处判断鼠标位置所处棋格是否存在
         if (gridMap->chessAmount >= myPlayer->myStore->level && cell && !cell->chessInGrid) {
-            noPopulationText();
+            createText("Level Is Not Enough");
             CCLOG("PrepareScene:swap failed");
             gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
-
             myPlayer->addChess(selectedChess);
         }
-        //此处判断鼠标位置所处棋格是否存在
         //1 棋格存在且位置上无棋子,将棋子放置在新的位置上
         else if (cell && !cell->chessInGrid && cell->isMine)
         {
@@ -417,7 +389,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
             preSeats->addChessToSeat(selectedChess, seat);
             myPlayer->addChess(selectedChess);
         }
-        //4 不存在棋格，但位于商店
+        //3 不存在棋格，但位于商店
         else if (mousePosition.y <= store->storeAreaHeight)
         {
             CCLOG("PrepareScene: chess to be sold");
@@ -428,10 +400,13 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         //让棋格退回原来位置
         else
         {
+            if (cell && !cell->chessInGrid && !cell->isMine)
+                createText("Cannot Put on the Opponent's Board");
             CCLOG("PrepareScene:swap failed");
             gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
             myPlayer->addChess(selectedChess);
+
         }
         for (auto iter : gridMap->nodeMap)
         {
@@ -560,5 +535,40 @@ void PrepareScene::updateCountdownLabel(float dt) {
             iter->turnToNormal();
         selectedChess = nullptr;
         goToFightScene(0); // 这里的参数可以根据你的需要传递
+    }
+}
+//输出随输入改变的提示，并在一段时间后自动移除
+void PrepareScene::createText(const std::string& textContent)
+{
+    unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
+    if (fadingText) {
+        fadingText->removeFromParentAndCleanup(true);
+        fadingText = nullptr;
+    }
+    fadingText = Label::createWithTTF(textContent, "fonts/arial.ttf", 36);
+    fadingText->setPosition(Vec2(600, 600));
+    this->addChild(fadingText);
+
+    elapsedTime = 0.0f;
+
+    schedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
+
+
+}
+
+//createText的调度器用，使提示逐渐淡出
+void PrepareScene::updateText(float dt)
+{
+    elapsedTime += dt;
+
+    int opacity = 255 - static_cast<int>(elapsedTime * 200);
+
+    fadingText->setOpacity(opacity);
+
+    //完全透明后停止调度器
+    if (opacity <= 0) {
+        unschedule(CC_SCHEDULE_SELECTOR(PrepareScene::updateText));
+        fadingText->removeFromParentAndCleanup(true);
+        fadingText = nullptr;
     }
 }

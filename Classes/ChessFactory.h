@@ -24,7 +24,7 @@ USING_NS_CC;
 class ChessFactory
 {
 public:
-	static Chess* createChessById(int id);
+	static Chess* createChessById(int id);//创建不同id的1星棋子
 };
 
 #endif

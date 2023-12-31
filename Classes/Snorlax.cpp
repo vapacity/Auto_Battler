@@ -1,19 +1,25 @@
 #include "Snorlax.h"
 Snorlax* Snorlax::create(const std::string& filename)
 {
-    Snorlax* snorlax = new (std::nothrow) Snorlax();
-    if (snorlax && snorlax->initWithFile(filename) && snorlax->init(filename)) {
-        snorlax->autorelease();
-        return snorlax;
+    try {
+        Snorlax* snorlax = new Snorlax();
+        if (snorlax && snorlax->initWithFile(filename) && snorlax->init(filename)) {
+            snorlax->autorelease();
+            return snorlax;
+        }
+        CC_SAFE_DELETE(snorlax);
     }
-    CC_SAFE_DELETE(snorlax);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Snorlax::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Snorlax initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR3_GRADE1;

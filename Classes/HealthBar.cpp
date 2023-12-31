@@ -10,24 +10,25 @@ HealthBar::HealthBar()
 
 HealthBar* HealthBar::create(const std::string& backgroundFilename, const std::string& barFilename, float initialPercentage)
 {
-    HealthBar* healthBar = new (std::nothrow) HealthBar();
-    if (healthBar && healthBar->init(backgroundFilename, barFilename, initialPercentage))
-    {
-        healthBar->autorelease();
-        return healthBar;
+    try {
+        HealthBar* healthBar = new  HealthBar();
+        if (healthBar && healthBar->init(backgroundFilename, barFilename, initialPercentage))
+        {
+            healthBar->autorelease();
+            return healthBar;
+        }
     }
-    else
-    {
-        delete healthBar;
-        return nullptr;
+    catch (const std::exception& e) {
+        CCLOG("Exception caught: %s", e.what());
     }
+    return nullptr;
 }
 
 bool HealthBar::init(const std::string& backgroundFilename, const std::string& barFilename, float initialPercentage)
 {
     if (!Node::init())
     {
-        return false;
+        throw std::runtime_error("HealthBar initialization failed: Node initialization failed");
     }
 
     // ´´½¨±³¾° Sprite

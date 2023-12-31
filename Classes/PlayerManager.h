@@ -5,11 +5,10 @@ class PlayerManager
 public:
     static PlayerManager* getInstance();
 
-    void addPlayer(Player* player);
+    void addPlayer(Player* player);//添加玩家
 
-    Player* getPlayer(int index);
+    Player* getPlayer(int index);//根据编号返回玩家信息
 
-    // 其他管理方法...
 
 private:
     std::vector<Player*> players;

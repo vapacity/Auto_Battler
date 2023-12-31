@@ -12,6 +12,7 @@ public:
 	int layerId;//当前卡槽的棋子id
 
 	Sprite* layerImage;//卡槽所显示的图像
+
 	Label* costLabel;//显示当前棋子费用的标签
 
 
@@ -21,6 +22,7 @@ public:
 
 	static StoreLayer* create(int id);
 
+	//获取可点击范围
 	Rect getBoundingBox() const override;
 
 	virtual bool init(int id);//初始化

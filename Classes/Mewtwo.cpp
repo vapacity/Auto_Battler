@@ -1,19 +1,25 @@
 #include "Mewtwo.h"
 Mewtwo* Mewtwo::create(const std::string& filename)
 {
-    Mewtwo* mewtwo = new (std::nothrow) Mewtwo();
-    if (mewtwo && mewtwo->initWithFile(filename) && mewtwo->init(filename)) {
-        mewtwo->autorelease();
-        return mewtwo;
+    try {
+        Mewtwo* mewtwo = new Mewtwo();
+        if (mewtwo && mewtwo->initWithFile(filename) && mewtwo->init(filename)) {
+            mewtwo->autorelease();
+            return mewtwo;
+        }
+        CC_SAFE_DELETE(mewtwo);
     }
-    CC_SAFE_DELETE(mewtwo);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Mewtwo::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Mewtwo initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR3_GRADE1;
@@ -43,7 +49,7 @@ void Mewtwo::useSkill()
         ATK = 300 * star;
     }
     if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
-        ATK = 100;
+        ATK = 100+(star-1)*growATK;
         enable_skill = false;
         currentBlueBar = 0;
         bluebar->setPercentage(0);

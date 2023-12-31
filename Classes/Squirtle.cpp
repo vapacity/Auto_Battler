@@ -2,19 +2,25 @@
 //Squirtle1 等级1
 Squirtle* Squirtle::create(const std::string& filename)
 {
-    Squirtle* squirtle = new (std::nothrow) Squirtle();
-    if (squirtle && squirtle->initWithFile(filename) && squirtle->init(filename)) {
-        squirtle->autorelease();
-        return squirtle;
+    try {
+        Squirtle* squirtle = new Squirtle();
+        if (squirtle && squirtle->initWithFile(filename) && squirtle->init(filename)) {
+            squirtle->autorelease();
+            return squirtle;
+        }
+        CC_SAFE_DELETE(squirtle);
     }
-    CC_SAFE_DELETE(squirtle);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Squirtle::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Squirtle initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     this->price = PRICE_STAR2_GRADE1;
@@ -44,7 +50,7 @@ void Squirtle::useSkill()
         ATK = 200 * star;
     }
     if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
-        ATK = 80;
+        ATK = 80+(star-1)*growATK;
         enable_skill = false;
         currentBlueBar = 0;
         bluebar->setPercentage(0);

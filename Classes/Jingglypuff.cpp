@@ -3,19 +3,25 @@
 
 Jingglypuff* Jingglypuff::create(const std::string& filename)
 {
-    Jingglypuff* jingglypuff = new (std::nothrow) Jingglypuff();
-    if (jingglypuff && jingglypuff->initWithFile(filename) && jingglypuff->init(filename)) {
-        jingglypuff->autorelease();
-        return jingglypuff;
+    try {
+        Jingglypuff* jingglypuff = new Jingglypuff();
+        if (jingglypuff && jingglypuff->initWithFile(filename) && jingglypuff->init(filename)) {
+            jingglypuff->autorelease();
+            return jingglypuff;
+        }
+        CC_SAFE_DELETE(jingglypuff);
     }
-    CC_SAFE_DELETE(jingglypuff);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Jingglypuff::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Jingglypuff initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR1_GRADE1;
@@ -35,14 +41,14 @@ bool Jingglypuff::init(const std::string& filename)
     moveSpeed = 1;
     return true;
 }
-
+ 
 //回血50%
 void Jingglypuff::useSkill()
 {
     skillCount++;
     if (skillCount == 1)//第一次用技能时更新数值，之后不动
     {
-        health = health + maxHP / 2 > maxHP ? maxHP : health + maxHP / 2;
+        health = (health + maxHP / 2) > maxHP ? maxHP : health + maxHP / 2;
         float percentage_health = 100.0 * health / maxHP;
         healthBar->setPercentage(percentage_health);
     }

@@ -52,11 +52,11 @@ public://此处放属性变量
 
 	float moveSpeed = 1.0;//移动速度
 
-	int health = CHESS_HEALTH;//生命值
+	int health = CHESS_HEALTH;//生命值，初始化100
 
-	int maxHP;
+	int maxHP;//生命上限
 
-	int blueBar;//大写的Bar是蓝条上限
+	int blueBar;//大写的Bar是蓝条上限，小写的bar是当前蓝条值
 
 	int currentBlueBar = 0;//当前蓝条
 
@@ -80,8 +80,8 @@ public://此处放属性变量
 
 	bool isAnimationPlaying = false;//是否正在播放动画
 
-	HealthBar* healthBar;
-	BlueBar* bluebar;
+	HealthBar* healthBar;//血条
+	BlueBar* bluebar;//蓝条
 public:
 	//初始化棋子
 	static Chess* create();

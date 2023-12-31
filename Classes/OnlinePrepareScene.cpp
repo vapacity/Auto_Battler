@@ -6,38 +6,6 @@
 USING_NS_CC;
 #define PREPARE_TIME 20.0f
 
-void OnlinePrepareScene::noPopulationText()
-{
-    unschedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
-    if (fadingText) {
-        fadingText->removeFromParentAndCleanup(true);
-        fadingText = nullptr;
-    }
-    fadingText = Label::createWithTTF("Level Is Not Enough", "fonts/arial.ttf", 36);
-    fadingText->setPosition(Vec2(600, 600));
-    this->addChild(fadingText);
-
-    elapsedTime = 0.0f;
-
-    schedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
-}
-
-void OnlinePrepareScene::updateText(float dt)
-{
-    elapsedTime += dt;
-
-    int opacity = 255 - static_cast<int>(elapsedTime * 150);
-
-    fadingText->setOpacity(opacity);
-
-    //完全透明后停止调度器
-    if (opacity <= 0) {
-        unschedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
-        fadingText->removeFromParentAndCleanup(true);
-        fadingText = nullptr;
-    }
-}
-
 Scene* OnlinePrepareScene::createScene()
 {
     // 创建一个场景对象，该对象将由自动释放池自动释放
@@ -54,31 +22,8 @@ bool OnlinePrepareScene::init()
     }
 
 
-    Vector<MenuItem*> MenuItems_fight;
-    //回退
-    auto backItem = MenuItemImage::create(
-        "smallbacknormal.png",
-        "smallbackselected.png",
-        CC_CALLBACK_1(OnlinePrepareScene::menuPlayCallback, this));
-
-    if (!(backItem == nullptr ||
-        backItem->getContentSize().width <= 0 ||
-        backItem->getContentSize().height <= 0))
-    {//退出菜单项有效，接下来会计算退出菜单项的位置
-        // 获取场景的尺寸和中心坐标
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        float x = origin.x + visibleSize.width * 17 / 18;
-        float y = origin.y + visibleSize.height * 14 / 15;
-        backItem->setPosition(Vec2(x, y));
-    }
-    MenuItems_fight.pushBack(backItem);
-    auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
-    menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
-    this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
-    // 这里可以添加初始化场景的代码
-    ///////////////////////////////////////////////////////////
-
+    //回退按钮
+    initBack();
 
     initPlayer();
 
@@ -115,7 +60,31 @@ bool OnlinePrepareScene::init()
 
     return true;
 }
+void OnlinePrepareScene::initBack()
+{
+    Vector<MenuItem*> MenuItems_fight;
+    //回退
+    auto backItem = MenuItemImage::create(
+        "smallbacknormal.png",
+        "smallbackselected.png",
+        CC_CALLBACK_1(OnlinePrepareScene::menuPlayCallback, this));
 
+    if (!(backItem == nullptr ||
+        backItem->getContentSize().width <= 0 ||
+        backItem->getContentSize().height <= 0))
+    {//退出菜单项有效，接下来会计算退出菜单项的位置
+        // 获取场景的尺寸和中心坐标
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+        float x = origin.x + visibleSize.width * 17 / 18;
+        float y = origin.y + visibleSize.height * 14 / 15;
+        backItem->setPosition(Vec2(x, y));
+    }
+    MenuItems_fight.pushBack(backItem);
+    auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
+    menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
+    this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+}
 void OnlinePrepareScene::initPlayer()
 {
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
@@ -368,7 +337,7 @@ void OnlinePrepareScene::chessOnMouseUp(Vec2 mousePosition)
 
 
         if (gridMap->chessAmount >= myPlayer->myStore->level && cell && !cell->chessInGrid) {
-            noPopulationText();
+            createText("Level Is Not Enough");
             CCLOG("PrepareScene:swap failed");
             gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
@@ -571,4 +540,38 @@ void OnlinePrepareScene::updateCountdownLabel(float dt) {
         goToFightScene(0); // 这里的参数可以根据你的需要传递
     }
 }
+//输出随输入改变的提示，并在一段时间后自动移除
+void OnlinePrepareScene::createText(const std::string& textContent)
+{
+    unschedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
+    if (fadingText) {
+        fadingText->removeFromParentAndCleanup(true);
+        fadingText = nullptr;
+    }
+    fadingText = Label::createWithTTF(textContent, "fonts/arial.ttf", 36);
+    fadingText->setPosition(Vec2(600, 600));
+    this->addChild(fadingText);
 
+    elapsedTime = 0.0f;
+
+    schedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
+
+
+}
+
+//createText的调度器用，使提示逐渐淡出
+void OnlinePrepareScene::updateText(float dt)
+{
+    elapsedTime += dt;
+
+    int opacity = 255 - static_cast<int>(elapsedTime * 200);
+
+    fadingText->setOpacity(opacity);
+
+    //完全透明后停止调度器
+    if (opacity <= 0) {
+        unschedule(CC_SCHEDULE_SELECTOR(OnlinePrepareScene::updateText));
+        fadingText->removeFromParentAndCleanup(true);
+        fadingText = nullptr;
+    }
+}

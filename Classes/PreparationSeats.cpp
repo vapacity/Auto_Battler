@@ -3,7 +3,7 @@ USING_NS_CC;
 
 //显示mySeats中棋子
 void PreparationSeats::updateForPlayer()
-{
+{//把我方备战席上的棋子坐标设置为备战席的坐标
     for (int i = 0; i < SEATS_NUM; i++) {
         if (mySeats[i]) {
             mySeats[i]->setPosition(seatsArray.at(i)->getPosition());
@@ -15,18 +15,22 @@ void PreparationSeats::updateForPlayer()
 
 PreparationSeats* PreparationSeats::create(Chess* playerSeats[SEATS_NUM])
 {
-    PreparationSeats* p = new (std::nothrow) PreparationSeats();
-    if (p && p->init(playerSeats)) {
-        p->autorelease();
-        return p;
+    try {
+        PreparationSeats* p = new PreparationSeats();
+        if (p && p->init(playerSeats)) {
+            p->autorelease();
+            return p;
+        }
+        CC_SAFE_DELETE(p);
     }
-    CC_SAFE_DELETE(p);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
-//加个出售鼠标拿起的棋子
-
-//放棋子,更新最左侧的空位位置
+//放棋子
 void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
 {
     if (!chess || !seat)
@@ -40,7 +44,7 @@ void PreparationSeats::addChessToSeat(Chess* chess, Seat* seat)
     mySeats[seat->number] = chess;
 }
 
-//拿走棋子,更新最左侧的空位位置
+//拿走棋子
 void PreparationSeats::removeChessOfSeat( Seat* seat)
 {
     if (!seat)
@@ -50,7 +54,7 @@ void PreparationSeats::removeChessOfSeat( Seat* seat)
     seat->turnToNormal();
 }
 
-
+//更新最左侧棋子
 void PreparationSeats::renewLatestSeat()
 {
     if (seatsArray.size() <= 0)
@@ -129,13 +133,13 @@ Seat* PreparationSeats::mouseInWhichSeat(const cocos2d::Vec2& position)
 bool PreparationSeats::init(Chess* playerSeats[SEATS_NUM])
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("PreparationSeats initialization failed: Node initialization failed");
     }
 
     //读取playerSeats
     mySeats = playerSeats;
 
-
+    //依次创建8个备战席
     for (int i = 0; i < SEATS_NUM; i++) {
         Seat* s = Seat::create();
         float x = SEAT_STARTX + i * (s->width + seatGap);

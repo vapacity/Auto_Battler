@@ -9,9 +9,12 @@ public:
 	Player* myPlayer = PlayerManager::getInstance()->getPlayer(0);
 	Player* enemyPlayer=PlayerManager::getInstance()->getPlayer(1);
 public:
+
 	static cocos2d::Scene* createScene();
 	// 初始化场景的方法
 	virtual bool init() override;
+
+	//回到初始界面
 	void goToStartScene();
 	CREATE_FUNC(GameOverScene);
 };

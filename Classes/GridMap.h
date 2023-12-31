@@ -7,11 +7,12 @@
 #include <algorithm>
 #include "map"
 
-#define NUM_COLUMN 14
-#define NUM_LINE 8
+#define NUM_COLUMN 14//棋盘列数
+#define NUM_LINE 8//行数
 
 class Vec2Compare {
 public:
+    //比较两个棋格的前后顺序
     bool operator()(const Vec2& v1, const Vec2& v2) const {
         return (v1.x < v2.x) || (v1.x == v2.x && v1.y < v2.y);
     }
@@ -19,7 +20,7 @@ public:
 
 class GridMap : public cocos2d::Node {
 private:
-    HexCell* lastCell = nullptr;
+    HexCell* lastCell = nullptr;//上一个选中的棋格
 public:
     int chessAmount=0;//记录棋子总数
 
@@ -33,20 +34,20 @@ public:
     void updateForPlayer();
     // 启动或停止 schedule
     void selectSchedule(bool select);
+
+    //创建棋盘
     static GridMap* create(std::map<Vec2, Chess*, Vec2Compare>myChessMap);
 
     //初始化棋格，行数列数
     virtual bool init(std::map<Vec2, Chess*, Vec2Compare>myChessMap);
 
-
-
+    //是否在棋盘范围
     bool isInBoard(Vec2 coor)const;
 
     //获得游戏中坐标Vec2处对应的格子（方法为遍历查找与鼠标最靠近的格子中心）
     HexCell* mouseInWhichCell(const cocos2d::Vec2& position);
 
-
-
+    //选中棋格高亮显示
     void selectGrid(Event* event);
 
     // 禁用和启用鼠标监听器的方法
@@ -59,6 +60,7 @@ public:
     //
     HexCell* FindBattle(Chess* InActor, HexCell* FromNode);
 
+    //获取一定步数范围内的所有相邻棋格
     Vector<HexCell*> GetNodeNeighbors(HexCell* inNode, int stepRange);
 
     //添加一个棋子到棋格上

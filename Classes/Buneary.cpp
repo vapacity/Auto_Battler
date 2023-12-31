@@ -3,19 +3,25 @@
 
 Buneary* Buneary::create(const std::string& filename)
 {
-    Buneary* buneary = new (std::nothrow) Buneary();
-    if (buneary && buneary->initWithFile(filename) && buneary->init(filename)) {
-        buneary->autorelease();
-        return buneary;
+    try {
+        Buneary* buneary = new Buneary();
+        if (buneary && buneary->initWithFile(filename) && buneary->init(filename)) {
+            buneary->autorelease();
+            return buneary;
+        }
+        CC_SAFE_DELETE(buneary);
     }
-    CC_SAFE_DELETE(buneary);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Buneary::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Buneary initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR1_GRADE1;

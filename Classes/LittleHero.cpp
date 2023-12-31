@@ -4,30 +4,39 @@ USING_NS_CC;
 const int HURT_ACTION_TAG = 1;
 LittleHero* LittleHero::create(const std::string& filename,int id)
 {
-    LittleHero* sprite = new LittleHero();
-    if (sprite && sprite->initWithFile(filename,id))
-    {
-        sprite->setContentSize(Size(150, 150));
-        sprite->autorelease();
-        //sprite->setContentSize(Size(100, 150));
-        return sprite;
+    try {
+        LittleHero* sprite = new LittleHero();
+        if (sprite && sprite->initWithFile(filename, id))
+        {
+            sprite->setContentSize(Size(150, 150));
+            sprite->autorelease();
+            return sprite;
+        }
+        CC_SAFE_DELETE(sprite);
     }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
+    return nullptr; 
 }
 bool LittleHero::initWithFile(const std::string& filename,int id)
 {
     if (!Sprite::initWithFile(filename))
     {
-        return false;
+        throw std::runtime_error("LittleHero initialization failed: Sprite initialization with file failed");
     }
     atk = 10.0f;
     percentage = 100.0f;
     enemy = id;
+
+    //添加血条
     healthBar = HealthBar::create("Blood1.png", "Blood2.png", 100.0f);
     healthBar->setPosition(Vec2(25, 150));
     this->addChild(healthBar);
-    if (enemy)return true;
+
+    if (enemy)//如果当前有敌人，直接返回，不能控制角色移动
+        return true;
     auto mouseListener = EventListenerMouse::create();
     mouseListener->onMouseDown = CC_CALLBACK_1(LittleHero::moveToClickLocation, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
@@ -36,23 +45,35 @@ bool LittleHero::initWithFile(const std::string& filename,int id)
 
 void LittleHero::attack(LittleHero* enemy)
 {
+    //检查是否正在播放动画，如果是，则直接返回，避免重复触发攻击
     if (isAnimationPlaying)
         return;
+
+    //攻击前停止其他动作
     this->stopAllActions();
     enemy->moving = 0;
     enemy->stopAllActions();
+
+    //获取角色和敌人的位置
     cocos2d::Vec2 spritePosition = this->getPosition();
     Vec2 enemyPosition = enemy->getPosition();
+
+    //创建攻击物
     auto fireball = Sprite::create("kalaAttack.png");
     fireball->setScale(0.05);
     fireball->setPosition(spritePosition);
     this->getParent()->addChild(fireball);
+
+    //创建一个移动到敌人位置的动作，然后将火球自身从场景中移除
     auto moveTo = MoveTo::create(1.0f, enemyPosition);
     auto removeSelf = RemoveSelf::create();
     auto sequence = Sequence::create(moveTo, removeSelf, nullptr);
+
+    //火球到达敌人位置后调用敌人的gethurt
     auto callFunc = CallFunc::create([=]() {
         enemy->gethurt(atk);
         });
+
     auto sequence1 = Sequence::create(sequence, callFunc, nullptr);
     fireball->runAction(sequence1);
     isAnimationPlaying = true;
@@ -60,9 +81,10 @@ void LittleHero::attack(LittleHero* enemy)
 
 void LittleHero::gethurt(float atkval)
 {
+    //受伤动作
     auto moveBackAction = MoveBy::create(0.25f, Vec2(-20, 0));  // 后退一步
     auto moveBackReverseAction = moveBackAction->reverse();  // 移回原始位置
-    // 创建变色动作
+    
     auto tintAction = TintTo::create(0.2f, 255, 0, 0);  // 变红色
     auto resetColorAction = TintTo::create(0.2f, 255, 255, 255);
     // 创建一个同时执行的动作组合
@@ -71,9 +93,10 @@ void LittleHero::gethurt(float atkval)
         Sequence::create(tintAction, resetColorAction, nullptr),
         nullptr
     );
-    damageSpawn->setTag(HURT_ACTION_TAG);
-    // 运行动作组合
-    this->runAction(damageSpawn);
+    damageSpawn->setTag(HURT_ACTION_TAG);//命名为受伤动作
+    this->runAction(damageSpawn); // 运行动作组合
+
+    //血量减少
     percentage -= atkval;
     healthBar->setPercentage(percentage);
     if (percentage <= 0) {
@@ -82,31 +105,18 @@ void LittleHero::gethurt(float atkval)
     this->moving = 1;
 }
 
-void LittleHero::setEnemey()
-{
-    isEnemy = 1;
-}
-
-void LittleHero::disableMoving()
-{
-    moving = 0;
-}
-
-void LittleHero::enableMoving()
-{
-    moving = 1;
-}
-
 void LittleHero::moveToClickLocation(EventMouse* event)
 {
-    // 判断是否是右键点击
-    if (isEnemy)return;
-    if (!moving)return;
+    if (isEnemy)return;//如果存在敌人，不能移动
+    if (!moving)return;//如果moving状态为0，不能移动
     Action* hurtAction = getActionByTag(HURT_ACTION_TAG);
-    if (hurtAction)return;
+    if (hurtAction)return;//如果正在完成受伤动作，不能移动
+
+    // 判断是否是右键点击
     if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT)
     {
         this->stopAllActions();
+
         // 创建一个MoveTo动作，移动到点击位置
         Vec2 currentPosition = this->getPosition();
 

@@ -2,25 +2,27 @@
 
 #include "Store.h"
 
-
-
 StoreAttribute* StoreAttribute::create()
 {
-    StoreAttribute* s = new (std::nothrow) StoreAttribute();
-    if (s && s->init()) {
-        s->retain(); // 需要增加 retain，这是 player 的成员变量，不能被随意释放
-        s->autorelease();
-        return s;
+    try {
+        StoreAttribute* s = new StoreAttribute();
+        if (s && s->init()) {
+            s->retain(); // 需要增加 retain，这是 player 的成员变量，不能被随意释放
+            s->autorelease();
+            return s;
+        }
+        CC_SAFE_DELETE(s);
     }
-    CC_SAFE_DELETE(s);
-    return nullptr;
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
 }
-
 
 bool StoreAttribute::init()
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("StoreAttribute initialization failed: Node initialization failed");
     }
     money = INIT_MONEY;
     exp = INIT_EXP;
@@ -35,12 +37,18 @@ bool StoreAttribute::init()
 //创建商店
 Store* Store::create(StoreAttribute* st)
 {
-    Store* s = new (std::nothrow) Store();
-    if (s && s->init(st)) {
-        s->autorelease();
-        return s;
+    try {
+        Store* s = new Store();
+        if (s && s->init(st)) {
+            s->autorelease();
+            return s;
+        }
+        CC_SAFE_DELETE(s);
     }
-    CC_SAFE_DELETE(s);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
@@ -48,7 +56,7 @@ Store* Store::create(StoreAttribute* st)
 bool Store::init(StoreAttribute* st)
 {
     if (!Node::init())
-        return false;
+        throw std::runtime_error("Store initialization failed: Node initialization failed");
 
     this->playerStore = st;
 
@@ -71,7 +79,7 @@ bool Store::init(StoreAttribute* st)
         this->addChild(storeLayers[i]);
     }
 
-    chessIdHaveBought = -1;
+    chessIdHaveBought = -1;//初始化购买的棋子id为-1
 
     // 显示金钱数
     gold = Sprite::create("Gold.png");
@@ -135,8 +143,8 @@ void Store::updateLevelLabel()
 // 根据玩家信息更新商店显示
 void Store::updateForPlayer()
 {
-    updateMoneyLabel();
-    updateLevelLabel();
+    updateMoneyLabel();//更新金钱显示
+    updateLevelLabel();//更新等级和经验显示
 
     // 更新卡槽显示
     for (int i = 0; i < 5; i++) {
@@ -151,7 +159,7 @@ void Store::refreshStore()
         int costPointer = rand() % 100;
         switch (whichCost(costPointer)) {
             case -2:
-                playerStore->idInStore[i] = -2;
+                playerStore->idInStore[i] = -2;//捕获失败
                 break;
             case 1:
                 playerStore->idInStore[i] = 11 + rand() % COST1_AMOUNT;
@@ -168,9 +176,9 @@ void Store::refreshStore()
         }
     }
     return;
-}
+} 
 
-// 传入随机出的数据，返回在当前人物等级下，对应的棋子初始费用
+// 传入随机出的数据概率，返回在当前人物等级下，对应的棋子初始费用
 int Store::whichCost(int pointer)
 {
     if (pointer <= cardPercent[playerStore->level - 1][0])
@@ -184,17 +192,6 @@ int Store::whichCost(int pointer)
     return -1;
 }
 
-// 购买经验
-void Store::buyExp()
-{
-    playerStore->money -= 4;
-    playerStore->exp += EXP_FOR_UPGRADE;
-    if (playerStore->exp >= levelExp[playerStore->level - 1]) {
-        playerStore->exp -= levelExp[playerStore->level - 1];
-        playerStore->level++;
-    }
-    renewInterest();
-}
 
 // 用于在money变更后，更新playerStore中的利润
 void Store::renewInterest()
@@ -231,17 +228,23 @@ void Store::refresh()
 void Store::buyCard(int choice)
 {
     int id = playerStore->idInStore[choice];
+    //卡牌已购买或捕获失败，无法买
     if (id == -1 || id == -2)
         return;
+
     playerStore->money -= StoreLayer::calCostFromId(id);
+    //钱不够不能买
     if (playerStore->money < 0) {
         createText("You Have No Money");
         playerStore->money += StoreLayer::calCostFromId(id);
         chessIdHaveBought = -1;
         return;
     }
+
+    //买后卡槽的卡牌id置-1，表示已购买
     playerStore->idInStore[choice] = -1;
-    chessIdHaveBought = id;
+    chessIdHaveBought = id;//获取买的id
+
     renewInterest();
 }
 
@@ -254,7 +257,7 @@ void Store::sellCard(int sellCardId, int star)
     renewInterest();
 }
 
-// 升级，修改了金钱，经验，等级
+// 买经验升级，修改了金钱，经验，等级
 void Store::upgrade()
 {
 
@@ -270,7 +273,13 @@ void Store::upgrade()
     upGrade->setTexture("Upgrade0.png");
     upGrade->setContentSize(Size(70, 70));
     this->scheduleOnce([=](float dt) {
-        buyExp();
+        playerStore->money -= 4;
+        playerStore->exp += EXP_FOR_UPGRADE;
+        if (playerStore->exp >= levelExp[playerStore->level - 1]) {
+            playerStore->exp -= levelExp[playerStore->level - 1];
+            playerStore->level++;
+        }
+        renewInterest();
         upGrade->setTexture("Upgrade1.png");
         upGrade->setContentSize(Size(70, 70));
         }, 0.1f, "upgradeTimer");
@@ -280,9 +289,13 @@ void Store::upgrade()
 // 判断点击事件并执行
 void Store::selectStore(Event* event, Vec2 mousePosition, bool isFull)
 {
+    //刷新按钮
     Rect spriteRectA = reFresh->getBoundingBox();
+
+    //升级按钮
     Rect spriteRectB = upGrade->getBoundingBox();
 
+    //五个卡槽按钮
     Rect spriteRect0 = storeLayers[0]->getBoundingBox();
     Rect spriteRect1 = storeLayers[1]->getBoundingBox();
     Rect spriteRect2 = storeLayers[2]->getBoundingBox();
@@ -293,7 +306,7 @@ void Store::selectStore(Event* event, Vec2 mousePosition, bool isFull)
         refresh();
     if (spriteRectB.containsPoint(mousePosition))
         upgrade();
-    if (!isFull) {
+    if (!isFull) {//备战席满了不能买
         if (spriteRect0.containsPoint(mousePosition))
             buyCard(0);
         if (spriteRect1.containsPoint(mousePosition))
@@ -304,6 +317,9 @@ void Store::selectStore(Event* event, Vec2 mousePosition, bool isFull)
             buyCard(3);
         if (spriteRect4.containsPoint(mousePosition))
             buyCard(4);
+    }
+    else {
+        createText("Your Seats Are Full");
     }
 }
 

@@ -5,19 +5,25 @@ USING_NS_CC;
 
 
 HexCell* HexCell::create() {
-    HexCell* cell = new (std::nothrow) HexCell();
-    if (cell && cell->init()) {
-        cell->autorelease();
-        return cell;
+    try {
+        HexCell* cell = new HexCell();
+        if (cell && cell->init()) {
+            cell->autorelease();
+            return cell;
+        }
+        CC_SAFE_DELETE(cell);
     }
-    CC_SAFE_DELETE(cell);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 
 bool HexCell::init() {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("HexCell initialization failed: Node initialization failed");
     }
 
     hexSprite = Sprite::create("hex.png"); // 替换为六边形图片路径
@@ -31,11 +37,6 @@ bool HexCell::init() {
     width = hexSprite->getContentSize().width * SCALE;
     height = hexSprite->getContentSize().height * SCALE;
     length = width / 2;
-
-
-
-
-
     return true;
 }
 
@@ -93,21 +94,17 @@ Vector<HexCell*> HexCell::GetNeighbors() {
         }
 
     }
-
-
-
-
-
     return tmp;
 }
 
 bool HexCell::CanPass(Chess* InActor) const {
     if (chessInGrid && InActor) {
+        //如果棋格上的棋子就是要经过的棋子，可以通行
         if (chessInGrid == InActor)
             return true;
-        else
+        else//如果棋格上的棋子不是要经过的棋子，不可以通行
             return false;
     }
-    return true;
+    return true;//棋格上没有棋子，可通行
 }
 

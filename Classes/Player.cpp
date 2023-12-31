@@ -64,7 +64,7 @@ bool Player::init()
     myStore->retain();
     //test
     for (int i = 0; i < 5; i++) {
-        myStore->idInStore[i] = 1;
+        myStore->idInStore[i] = -1;
     }
     //初始化备战席
     for (int i = 0; i < SEATS_NUM; i++) {
@@ -349,11 +349,9 @@ void Player::placeChessToBoard()
 //判断是否要出售1费棋子,若要,则执行出售
 void Player::sellOneCost()
 {
-    //4��ǰ����1����
     if (myStore->level < 4)
         return;
 
-    //��¼�ϳ���1������
     Vector<Chess*> chessInBoard;
     for (auto a : myChessMap) {
         if (a.second->originalCost == 1) {
@@ -363,7 +361,6 @@ void Player::sellOneCost()
 
     for (auto a : mySeats) {
         if (a) {
-            //�����1��,��δ�ϳ�,�����
             if (a->originalCost == 1) {
                 if (chessInBoard.find(a) == chessInBoard.end()) {
                     myStore->money += a->price;
@@ -472,86 +469,86 @@ void Player::buyChess()
     //遍历商店的5个卡槽
     for (int i = 0; i < 5; i++) {
 
+        if(myStore->idInStore[i]!=-1&& myStore->idInStore[i]!=-2)
+        {
+            //会被释放吗
+            Chess* storeChess = ChessFactory::createChessById(myStore->idInStore[i]);
 
-        //会被释放吗
-        Chess* storeChess = ChessFactory::createChessById(myStore->idInStore[i]);
+
+            //若已达人口上限
+            //若当前卡槽的棋子买了后,不能合成,则不买
+            if (meleeAttacks.size() + rangedAttacks.size() >= myStore->level + SEATS_NUM - 1) {
+                if (!canMerge(storeChess, false))
+                    continue;
+            }
 
 
-        //若已达人口上限
-        //若当前卡槽的棋子买了后,不能合成,则不买
-        if (meleeAttacks.size() + rangedAttacks.size() >= myStore->level + SEATS_NUM - 1) {
-            if (!canMerge(storeChess, false))
+            //过渡阶段:等级小于3
+            //一费棋子只用来过渡,有二星就不用再买
+            if (storeChess->originalCost == 1 && myStore->level <= 3) {
+                bool isExist = 0;
+
+                for (Chess* c : meleeAttacks) {
+                    if (c->id == storeChess->id && c->star >= storeChess->star) {
+                        isExist = 1;
+                        break;
+                    }
+                }
+                for (Chess* c : rangedAttacks) {
+                    if (c->id == storeChess->id && c->star >= storeChess->star) {
+                        isExist = 1;
+                        break;
+                    }
+                }
+                if (isExist)
+                    continue;
+
+            }
+            //非过渡阶段,不买1费牌
+            else if (storeChess->originalCost == 1)
                 continue;
-        }
-
-
-        //过渡阶段:等级小于3
-        //一费棋子只用来过渡,有二星就不用再买
-        if (storeChess->originalCost == 1 && myStore->level <= 3) {
-            bool isExist = 0;
-
-            for (Chess* c : meleeAttacks) {
-                //������е�ǰ���������ӵĸ߽�
-                if (c->id == storeChess->id && c->star >= storeChess->star) {
-                    isExist = 1;
-                    break;
-                }
-            }
-            for (Chess* c : rangedAttacks) {
-                //������е�ǰ���������ӵĸ߽�
-                if (c->id == storeChess->id && c->star >= storeChess->star) {
-                    isExist = 1;
-                    break;
-                }
-            }
-            if (isExist)
+            //ai不买3费高级棋子
+            else if (storeChess->originalCost == 3) {
                 continue;
-
-        }
-        //非过渡阶段,不买1费牌
-        else if (storeChess->originalCost == 1)
-            continue;
-        //ai不买3费高级棋子
-        else if (storeChess->originalCost == 3) {
-            continue;
-        }
-        //判断二费棋子
-        else if (storeChess->originalCost == 2) {
-            //如果已有当前卡槽中棋子的三星,则不买
-            bool isExist = 0;
-            for (Chess* c : meleeAttacks) {
-                if (c->id == storeChess->id && c->star == 3) {
-                    isExist = 1;
-                    break;
-                }
             }
-            for (Chess* c : rangedAttacks) {
-                //如果已有当前卡槽中棋子的三星
-                if (c->id == storeChess->id && c->star == 3) {
-                    isExist = 1;
-                    break;
+            //判断二费棋子
+            else if (storeChess->originalCost == 2) {
+                //如果已有当前卡槽中棋子的三星,则不买
+                bool isExist = 0;
+                for (Chess* c : meleeAttacks) {
+                    if (c->id == storeChess->id && c->star == 3) {
+                        isExist = 1;
+                        break;
+                    }
                 }
+                for (Chess* c : rangedAttacks) {
+                    //如果已有当前卡槽中棋子的三星
+                    if (c->id == storeChess->id && c->star == 3) {
+                        isExist = 1;
+                        break;
+                    }
+                }
+                if (isExist)
+                    continue;
+
             }
-            if (isExist)
-                continue;
 
+            //买下当前卡槽的棋子
+            myStore->money -= storeChess->price;
+
+            //执行合成操作
+            canMerge(storeChess, true);
+
+            if (storeChess->isMelee)
+                insertWithPriority(storeChess, meleeAttacks);
+            else
+                insertWithPriority(storeChess, rangedAttacks);
+
+
+            //不影响存在数组里的数据,只影响数组,大概
+            myStore->idInStore[i] = -1;
+            //有隐患,若第一次判断的时候, placeChessToBoard未将棋盘放满,之后也不会把棋子放在棋盘上.暂时忽略
         }
-
-        //买下当前卡槽的棋子
-        myStore->money -= storeChess->price;
-
-        //执行合成操作
-        canMerge(storeChess, true);
-
-        if (storeChess->isMelee)
-            insertWithPriority(storeChess, meleeAttacks);
-        else
-            insertWithPriority(storeChess, rangedAttacks);
-
-
-        //不影响存在数组里的数据,只影响数组,大概
-        myStore->idInStore[i] = -1;
-        //有隐患,若第一次判断的时候, placeChessToBoard未将棋盘放满,之后也不会把棋子放在棋盘上.暂时忽略
     }
 }
 
@@ -631,9 +628,7 @@ bool Player::canMerge(Chess* c, bool isToMerge)
                 }
             }
 
-            //���ܺϳ�
             if (count == 2) {
-                //��Ҫִ�кϳɲ���
                 if (isToMerge) {
                     if (c->isMelee) {
 

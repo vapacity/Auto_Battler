@@ -1,6 +1,7 @@
 ﻿#include "FightScene.h"
 #define enemyPosition Vec2(900,550)
 #define myPosition Vec2(40,265)
+
 cocos2d::Scene* FightScene::createScene()
 {
     // 创建一个场景对象，该对象将由自动释放池自动释放
@@ -27,18 +28,17 @@ bool FightScene::init()
     {
         return false;
     }
+
+    //切换音乐
     experimental::AudioEngine::stop(globalAudioId);
     globalAudioId = cocos2d::experimental::AudioEngine::play2d("battleMusic.mp3", true);
     experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+
     initPlayer();
     initBackground();
     initGridMap();
-    //initPreparationSeats();
+    initPreparationSeats();
     initLittleHero();
-    //initStore();
-    //moveChess(gridMap->myChessMap[Vec2(1, 0)], gridMap->myChessMap[Vec2(1, 0)]->stopMoveFlag);
-    //initChessExp();
-    //findEnemyAndMove();
     gridMap->disableMouseListener();
     this->schedule([this](float dt) {this->update(dt); }, "update_key");
 
@@ -46,9 +46,9 @@ bool FightScene::init()
 
 void FightScene::initPlayer()
 {
-    myPlayer = PlayerManager::getInstance()->getPlayer(0);
-    enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
-    enemyPlayer->convertToEnemy();
+    myPlayer = PlayerManager::getInstance()->getPlayer(0);//获取我方玩家信息
+    enemyPlayer = PlayerManager::getInstance()->getPlayer(1);//敌方
+    enemyPlayer->convertToEnemy();//敌方位置要反转
 }
 
 void FightScene::initBackground()
@@ -61,51 +61,7 @@ void FightScene::initBackground()
     backgroundImg->setScaleY(visibleSize.height / backgroundImg->getContentSize().height);
     this->addChild(backgroundImg, -1);
 }
-void FightScene::initChessExp()
-{
-    //正在测试同时出现三个
-  /*  auto Yevee = ChessFactory::createChessById(0);
-    if (Yevee) {
-        Yevee->setScale(0.15);
 
-        gridMap->addChessToGrid(Yevee, gridMap->getCellAtPosition(Vec2(5, 5)));
-        myPlayer->addChess(Yevee);
-        Yevee->playerNumber = 1;
-        this->addChild(Yevee, 1);
-    }*/
-
-    /*auto charmander = ChessFactory::createChessById(31);
-    if (charmander) {
-        charmander->setScale(0.15);
-        gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
-        myPlayer->addChess(charmander);
-        charmander->reverseImg();
-        charmander->playerNumber = 1;
-
-        this->addChild(charmander, 1);
-    }
-    auto charmander2 = ChessFactory::createChessById(32);
-    if (charmander2) {
-        charmander2->setScale(0.15);
-        gridMap->addChessToGrid(charmander2, gridMap->getCellAtPosition(Vec2(10, 7)));
-        myPlayer->addChess(charmander2);
-        charmander2->reverseImg();
-        charmander2->playerNumber = 1;
-        this->addChild(charmander2, 1);
-    }*/
-    //auto charmander3 = ChessFactory::createChessById(31);
-    //if (charmander3) {
-    //    charmander3->initHealthBar();
-    //    charmander3->initBlueBar();
-    //    charmander3->maxHP = charmander3->health;
-    //    gridMap->addChessToGrid(charmander3, gridMap->getCellAtPosition(Vec2(10, 5)));
-    //    //myPlayer->addChess(charmander3);
-    //    charmander3->playerNumber = 1;
-    //    charmander3->reverseImg();
-    //    this->addChild(charmander3, 1);
-    //}
-
-}
 void FightScene::createChessOnGrids()
 {
     for (auto a : myPlayer->myChessMap) {
@@ -115,8 +71,8 @@ void FightScene::createChessOnGrids()
         gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
         gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
         this->addChild(newChess, 2);
-    }
-    for (auto a : enemyPlayer->transformedMap) {
+    } 
+    for (auto a : enemyPlayer->transformedMap) {//敌方反转
         int newChessId = a.second->id;
         int newChessStar = a.second->star;
         Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
@@ -143,18 +99,23 @@ void FightScene::initPreparationSeats()
 
 void FightScene::initLittleHero()
 {
+    //我方小小英雄
     myLittleHero = myPlayer->myHero;
     if (myLittleHero->getParent())
         myLittleHero->removeFromParent();
+
     myLittleHero->setPosition(myPosition);
     this->addChild(myLittleHero);
     myLittleHero->isAnimationPlaying = false;
     myLittleHero->enableMoving();
+
+    //敌方
     enemyLittleHero = enemyPlayer->myHero;
-    enemyLittleHero->setEnemey();
+    enemyLittleHero->setEnemey();//设成敌人
     if (enemyLittleHero->getParent())
         enemyLittleHero->removeFromParent();
-    enemyLittleHero->setColor(Color3B(180,180,180));
+
+    enemyLittleHero->setColor(Color3B(180,180,180));//用颜色区分敌我
     enemyLittleHero->setPosition(enemyPosition);
     this->addChild(enemyLittleHero);
     enemyLittleHero->isAnimationPlaying = false;
@@ -166,6 +127,7 @@ void FightScene::initStore()
     this->addChild(store, 2);
 }
 
+//提取出我方棋盘上的棋子，依次更新状态，判断是否决出胜负
 void FightScene::update(float dt)
 {
     Vector<Chess*> chesses;
@@ -254,45 +216,31 @@ void FightScene::updateWin(float dt)
         auto delay = cocos2d::DelayTime::create(2);
 
         auto callback = cocos2d::CallFunc::create([this]() {
-            
+            //有一方死了，结束游戏
             if (myLittleHero->percentage <= 0||enemyLittleHero->percentage<=0)
             {
                 FightScene::goToGameOverScene();
             }
-            else {
+            else {//没死继续
                 FightScene::goToPrepareScene();
             }
             });
 
         auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
-
-
         this->runAction(sequence);
     }
 
 
 }
 
-void FightScene::menuPlayCallback(Ref* pSender) {
-    if (isAudioEnabled)
-    {// 启用音效
-        AudioManager::playEffect();
-    }
-    //把原数据删除再离开场景
-    PlayerManager::getInstance()->getPlayer(0)->deletePast();
-    PlayerManager::getInstance()->getPlayer(1)->deletePast();
-    experimental::AudioEngine::stop(globalAudioId);
-    globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
-    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
-    Director::getInstance()->popScene(); // 切换到playscene场景
-}
-
 void FightScene::goToPrepareScene()
 {
     auto prepareScene = PrepareScene::create();
     experimental::AudioEngine::stop(globalAudioId);
+    //切换音乐
     globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
     experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+    //切换场景
     cocos2d::Director::getInstance()->replaceScene(prepareScene);
 }
 
@@ -300,8 +248,8 @@ void FightScene::goToGameOverScene()
 {
     // 创建新的场景
     auto gameOverScene = GameOverScene::createScene();
+    //停止音乐
     experimental::AudioEngine::stop(globalAudioId);
-    //experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
     // 切换到新场景
     cocos2d::Director::getInstance()->replaceScene(gameOverScene);
 }

@@ -41,7 +41,7 @@ Chess* ChessFactory::createChessById(int id)
 		chess = Rugia::create("Rugia-right-1.png");
 		break;
 	default:
-		chess = Chess::create("defualt.png");
+		chess = Chess::create(" ");
 		break;
 	}
 	return chess;

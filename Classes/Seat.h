@@ -28,7 +28,7 @@ public:
 
 	virtual bool init() override;
 
-	void turnToSelected();
+	void turnToSelected();//бЁжа
 
 	void turnToNormal();
 

@@ -22,18 +22,20 @@ const int cardPercent[MAX_LEVEL][4] = { {50, 100, 0, 0}, {25, 85, 100, 0}, {10, 
 // 升级所需经验(共四次升级)
 const int levelExp[4] = { 4, 8, 14, 20 };
 
+/* 个人玩家商店信息 */
 class StoreAttribute : public cocos2d::Node {
 public:
-    int money;
-    int level;
-    int exp;
-    int interest;
+    int money;//当前的钱
+    int level;//等级
+    int exp;//经验
+    int interest;//利润
     int idInStore[5];  // 5个卡槽
 
     static StoreAttribute* create();
     virtual bool init();
 };
 
+/* 商店管理 */
 class Store : public cocos2d::Node {
 public:
     int storeAreaHeight = STORE_HEIGHT;
@@ -44,6 +46,7 @@ public:
     Label* moneyLabel;
     Label* levelAndExpLabel;
     Label* fadingText;
+
     Sprite* backGround;
     Sprite* gold;
     Sprite* reFresh;
@@ -51,24 +54,45 @@ public:
     Sprite* leVel;
     float elapsedTime;
 
-    StoreLayer* storeLayers[5];
+    StoreLayer* storeLayers[5];//5个卡槽
 
-    int chessIdHaveBought;
+    int chessIdHaveBought;//买到的棋子id
 
     static Store* create(StoreAttribute* st);
     virtual bool init(StoreAttribute* st);
+
+    //更新钱的标签显示
     void updateMoneyLabel();
+
+    //更新等级和经验的标签显示
     void updateLevelLabel();
+
+    //更新玩家信息显示（金钱、等级、经验、卡槽）
     void updateForPlayer();
+
+    //刷新商店
     void refreshStore();
     int whichCost(int pointer);
-    void buyExp();
+
+    //刷新金钱、利润和卡槽内的id
     void refresh();
+
+    // 买经验升级，修改了金钱，经验，等级
     void upgrade();
+
+    //更新利润
     void renewInterest();
+
+    //买卡牌
     void buyCard(int choice);
+
+    //卖卡牌
     void sellCard(int sellCardId, int star);
+
+    //打印提示
     void createText(const std::string& textContent);
     void updateText(float dt);
+
+    // 判断点击事件并执行
     void selectStore(Event* event, Vec2 mousePosition, bool isFull);
 };

@@ -34,6 +34,8 @@ bool StartScene::init()
     //音乐开始播放
     globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
     experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+
+    //创建菜单
     Vector<MenuItem*> MenuItems;
 
     //开始游戏
@@ -41,7 +43,6 @@ bool StartScene::init()
         "playnormal.png",
         "playselected.png",
         CC_CALLBACK_1(StartScene::menuStartCallback, this));
-
     if (playItem == nullptr ||
         playItem->getContentSize().width <= 0 ||
         playItem->getContentSize().height <= 0)
@@ -95,30 +96,29 @@ bool StartScene::init()
         closeItem->setPosition(Vec2(x, y));
     }
     MenuItems.pushBack(closeItem);
-
-    auto menu = Menu::createWithArray(MenuItems);//创建菜单，并将刚刚的退出菜单项closeItem作为参数传入
+    
+    //创建菜单
+    auto menu = Menu::createWithArray(MenuItems);
     menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
     this->addChild(menu, 1);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
 
     
-    //创建了一个使用TrueType字体文件的标签，其中传入的参数分别是要显示的文本内容、字体文件路径和字体大小
+    //创建游戏标题
     auto label = Label::createWithTTF("Pokemon Chess", "fonts/Marker Felt.ttf", 24);
     if (label == nullptr)
-    {//检查标签，打印错误消息
+    {
         problemLoading("'fonts/Marker Felt.ttf'");
     }
     else
-    {//标签有效，接下来会设置标签的位置为屏幕中心上方
-        // position the label on the center of the screen
+    {
         label->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + visibleSize.height - label->getContentSize().height));
 
-        //将标签添加到当前图层中，层级参数为1，表示将标签放置在其他元素的上方
         this->addChild(label, 1);
     }
 
-
-    auto background = Sprite::create("background.png");//创建背景图片
+    //创建背景图片
+    auto background = Sprite::create("background.png");
     if (background == nullptr)
     {//检查是否成功创建了精灵对象
         problemLoading("'background.png'");
@@ -133,6 +133,8 @@ bool StartScene::init()
     }
     return true;
 }
+
+
 void StartScene::menuStartCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
@@ -141,6 +143,7 @@ void StartScene::menuStartCallback(Ref* pSender) {
     auto startScene = PlayMenu::createScene();
     Director::getInstance()->pushScene(startScene);
 }
+
 void StartScene::menuSetCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
@@ -149,8 +152,8 @@ void StartScene::menuSetCallback(Ref* pSender) {
     auto setScene = SetMenu::createScene();
     Director::getInstance()->pushScene(setScene);
 }
+
 void StartScene::menuCloseCallback(Ref* pSender)
 {
     Director::getInstance()->end();
-
 }

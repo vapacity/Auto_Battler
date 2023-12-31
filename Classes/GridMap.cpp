@@ -14,12 +14,18 @@ void GridMap::selectSchedule(bool select)
     }
 }
 GridMap* GridMap::create(std::map<Vec2, Chess*, Vec2Compare>myChessMap) {
-    GridMap* grid = new (std::nothrow) GridMap();
-    if (grid && grid->init(myChessMap)) {
-        grid->autorelease();
-        return grid;
+    try {
+        GridMap* grid = new GridMap();
+        if (grid &&  grid->init(myChessMap)) {
+            grid->autorelease();
+            return grid;
+        }
+        CC_SAFE_DELETE(grid);
     }
-    CC_SAFE_DELETE(grid);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
@@ -36,11 +42,11 @@ void GridMap::enableMouseListener() {
 //创建棋格对象并添加到棋盘的对应位置
 bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("GridMap initialization failed: Node initialization failed");
     }
 
     mouseListener = EventListenerMouse::create();
-    mouseListener->onMouseMove = CC_CALLBACK_1(GridMap::selectGrid, this);
+    mouseListener->onMouseMove = CC_CALLBACK_1(GridMap::selectGrid, this);//当鼠标移动时，将调用selectGrid 方法
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
     float gapX = 3.75f;//表示六边形之间的间隔
@@ -49,12 +55,17 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
     //创建指定个数的棋格，并添加到棋盘的对应位置
     for (int y = 0; y < NUM_LINE; ++y) {
         for (int x = 0; x < NUM_COLUMN; ++x) {
-
+            //创建一个棋格并加入整个棋盘nodemap
             auto cell = HexCell::create();
             nodeMap.insert(std::make_pair(Vec2(x, y), cell));
+
             if (y < NUM_LINE / 2)
-                cell->isMine = true;
+                cell->isMine = true;//我方棋盘
+
+            //棋格在棋盘上的相对位置
             cell->coordinateInBoard = Vec2(x, y);
+
+            //棋格在窗口的实际位置
             float posX = x * (cell->width + gapX) + (y % 2) * (cell->width / 2 + gapX / 2) + STARTX;
             float posY = y * (cell->length * 1.5 + gapY) + STARTY;
             cell->setPosition(posX, posY);
@@ -63,15 +74,15 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
         }
     }
 
-    //遍历棋格，存储棋格的相邻棋格信息
+    //遍历棋格，如果棋格存在相邻棋格，则存储相邻棋格信息
     for (auto tNode : nodeMap) {
         if (!tNode.second)
             continue;
-        bool isEvenLine = int((tNode.first).y) % 2 == 0;
+        bool isEvenLine = int((tNode.first).y) % 2 == 0;//是否是偶数行（从0开始，从下往上
 
-        Vec2 tRightUp = tNode.first + Vec2(!isEvenLine, 1);
+        Vec2 tRightUp = tNode.first + Vec2(!isEvenLine, 1);//偶数行的棋格的右上邻居跟它在同一列，!isEvenLine=0
         if (isInBoard(tRightUp))
-            tNode.second->RightUpNode = nodeMap.at(tRightUp);
+            tNode.second->RightUpNode = nodeMap.at(tRightUp);//map.at(key)查找键对应的值
 
         Vec2 tRight = tNode.first + Vec2(1, 0);
         if(isInBoard(tRight))
@@ -98,9 +109,9 @@ bool GridMap::init(std::map<Vec2, Chess*, Vec2Compare>playerChessMap) {
 
 //将myChessMap中的棋子显示出来
 void GridMap::updateForPlayer()
-{
+{   //遍历我方棋子
     for (auto a : myChessMap) {
-        a.second->setPosition(nodeMap.at(a.first)->getPosition());
+        a.second->setPosition(nodeMap.at(a.first)->getPosition()); // 棋子的位置即它所在棋格的位置
     }
 
 }
@@ -120,15 +131,19 @@ HexCell* GridMap::mouseInWhichCell(const cocos2d::Vec2& position)
     HexCell* closestCell = nullptr;
     float minDistance = std::numeric_limits<float>::max();//强制转换
 
-
+    //遍历棋格，找到和鼠标最接近的一个
     for (auto& node : nodeMap)
     {
         auto cell = node.second;
         //Node类型默认锚点居中
+        //计算鼠标位置与棋格的距离
         float distanceX = abs(cell->getPositionX() - position.x);
         float distanceY = abs(cell->getPositionY() - position.y);
+
+        //如果鼠标位置超出了棋格的边界，则跳过当前棋格
         if (distanceX > cell->length || distanceY > sqrt(3) * 0.5 * cell->length)
             continue;
+
         if (cell->length - distanceX > distanceY / sqrt(3))
         {
             closestCell = cell;
@@ -149,11 +164,9 @@ void GridMap::selectGrid(Event* event)
 
     // 获取鼠标位置
     Vec2 mousePosition = mouseEvent->getLocationInView();
-    //static HexCell* lastCell = nullptr;
     auto currentCell = mouseInWhichCell(mousePosition);
-    //log("%f,%f\n", currentCell->getPositionX(), currentCell->getPositionY());
 
-    if (currentCell != lastCell) {
+    if (currentCell != lastCell) {//若切换棋格
         if (currentCell) {
             currentCell->turnToSelected();// 新的棋格增加透明度
         }
@@ -161,10 +174,9 @@ void GridMap::selectGrid(Event* event)
         if (lastCell && !lastCell->isSelected) {
             lastCell->turnToNormal();// 前一个棋格恢复透明度
         }
-        lastCell = currentCell;
+        lastCell = currentCell;//更新上一个棋格
     }
 
-    //log("%f,%f\n", mousePosition.x, mousePosition.y);
 }
 
 bool GridMap::FindPath(Vector<HexCell*>& path, Chess* InActor, HexCell* FromNode, HexCell* ToNode, int StopSteps)
@@ -180,7 +192,7 @@ bool GridMap::FindPath(Vector<HexCell*>& path, Chess* InActor, HexCell* FromNode
     Vector<HexCell*> ToNodes = GetNodeNeighbors(ToNode, StopSteps);
     for (int i = ToNodes.size() - 1; i >= 0; i--)
     {
-        if (!ToNodes.at(i)->CanPass(InActor))
+        if (!ToNodes.at(i)->CanPass(InActor))//若某棋格不能通行，删去
             ToNodes.erase(i);
     }
     //判断起点终点是否存在
@@ -383,28 +395,26 @@ Vector<HexCell*> GridMap::GetNodeNeighbors(HexCell* inNode, int stepRange) {
 }
 
 
-
-
 void GridMap::addChessToGrid(Chess* Inchess, HexCell* Incell)
 {
     if (!Inchess ||!Incell)
         return;
-    chessAmount++;
-    Incell->chessInGrid = Inchess;
-    Inchess->atGridPosition = Incell->coordinateInBoard;
+    chessAmount++;//棋子总数+1
+    Incell->chessInGrid = Inchess;//把棋子添加到棋格上
+    Inchess->atGridPosition = Incell->coordinateInBoard;//棋子的棋盘坐标为棋格的棋盘坐标
 
-    Inchess->atSeatPosition = -1;
+    Inchess->atSeatPosition = -1;//棋子离开备战席
 
-    myChessMap.insert(std::make_pair(Incell->coordinateInBoard, Inchess));
+    myChessMap.insert(std::make_pair(Incell->coordinateInBoard, Inchess));//把棋子加入我的棋盘
 }
 
 void GridMap::removeChessOfGrid(HexCell* Incell)
 {
     if (!Incell)
         return;
-    Incell->chessInGrid = nullptr;
-    myChessMap.erase(Incell->coordinateInBoard);
-    chessAmount--;
+    Incell->chessInGrid = nullptr;//去掉棋格上的棋子
+    myChessMap.erase(Incell->coordinateInBoard);//把棋子从我的棋盘上去掉
+    chessAmount--;//棋子总数-1
 }
 
 HexCell* GridMap::getCellAtPosition(Vec2 position)

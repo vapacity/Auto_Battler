@@ -18,7 +18,6 @@ class PrepareScene : public cocos2d::Scene
 public:
     Player* myPlayer;
     Player* enemyPlayer;
-
     Sprite* backgroundImg;
     GridMap* gridMap;
     Chess* selectedChess;
@@ -33,11 +32,11 @@ public:
     Label* countdownLabel;
     float remainingTime;
 public:
-    //输出人口上限不足的提示，并在一段时间后自动移除
-    void noPopulationText();
+    
     float elapsedTime = 0.0f;
     Label* fadingText;
-    //noPopulationText的调度器用，使提示逐渐淡出
+    //打印提示
+    void createText(const std::string& textContent);
     void updateText(float dt);
 
     // 创建场景的静态方法
@@ -46,7 +45,11 @@ public:
     // 初始化场景的方法
     virtual bool init();
 
+    //回退按钮
+    void initBack();
+
     void initPlayer();
+
     //添加背景图片
     void initBackground();
 
@@ -64,6 +67,9 @@ public:
 
     //创建商店
     void initStore();
+
+    //创建时间进度条
+    void initPrepareLabel();
 
     void putChessOnGrids();
 
@@ -95,8 +101,10 @@ public:
     void goToFightScene(float dt);
     CREATE_FUNC(PrepareScene);
 
+    //回到上个界面
     void menuPlayCallback(Ref* pSender);
-    void initPrepareLabel();
+    
+    //倒计时
     void updateCountdownLabel(float dt);
 };
 

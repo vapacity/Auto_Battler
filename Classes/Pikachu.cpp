@@ -1,19 +1,25 @@
 #include "Pikachu.h"
 Pikachu* Pikachu::create(const std::string& filename)
 {
-    Pikachu* pikachu = new (std::nothrow) Pikachu();
-    if (pikachu && pikachu->initWithFile(filename) && pikachu->init(filename)) {
-        pikachu->autorelease();
-        return pikachu;
+    try {
+        Pikachu* pikachu = new Pikachu();
+        if (pikachu && pikachu->initWithFile(filename) && pikachu->init(filename)) {
+            pikachu->autorelease();
+            return pikachu;
+        }
+        CC_SAFE_DELETE(pikachu);
     }
-    CC_SAFE_DELETE(pikachu);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Pikachu::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Pikachu initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR2_GRADE1;

@@ -9,6 +9,7 @@ void StoreLayer::refreshWithId(int id)
 {
     layerId = id;
 
+    //捕获失败
     if (layerId == -2) {
         layerImage->setTexture("capture_failed.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
@@ -16,6 +17,8 @@ void StoreLayer::refreshWithId(int id)
         costLabel->setString(newLabel);
         return;
     }
+
+    //已购买
     if (layerId == -1) {
         layerImage->setTexture("03.jpg");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
@@ -24,7 +27,7 @@ void StoreLayer::refreshWithId(int id)
         return;
     }
 
-
+    //一费
     else if (layerId == 11) {
         layerImage->setTexture("Magikarp-card.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
@@ -38,6 +41,7 @@ void StoreLayer::refreshWithId(int id)
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
+    //二费
     else if (layerId == 21) {
         layerImage->setTexture("Yevee-card.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
@@ -59,6 +63,7 @@ void StoreLayer::refreshWithId(int id)
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
+    //三费
     else if (layerId == 31) {
         layerImage->setTexture("Snorlax-card.png");
         layerImage->setContentSize(Size(pictureSize, pictureSize));
@@ -72,9 +77,9 @@ void StoreLayer::refreshWithId(int id)
         layerImage->setContentSize(Size(pictureSize, pictureSize));
     }
 
-    
+    //价格标签
     std::string newLabel = "COST:" + std::to_string(calCostFromId(layerId));
-
+    //不同颜色区分费用
     if (layerId / 10 == 1)
         costLabel->setColor(Color3B::WHITE);
     else if (layerId / 10 == 2)
@@ -85,12 +90,18 @@ void StoreLayer::refreshWithId(int id)
 }
 
 StoreLayer* StoreLayer::create(int id) {
-	StoreLayer* layer = new (std::nothrow) StoreLayer();
-	if (layer && layer->init(id)) {
-		layer->autorelease();
-		return layer;
-	}
-	CC_SAFE_DELETE(layer);
+    try {
+        StoreLayer* layer = new StoreLayer();
+        if (layer && layer->init(id)) {
+            layer->autorelease();
+            return layer;
+        }
+        CC_SAFE_DELETE(layer);
+    }
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
 	return nullptr;
 }
 
@@ -109,20 +120,21 @@ bool StoreLayer::init(int id) {
 
 
     if (!Node::init())
-        return false;
+        throw std::runtime_error("StoreLayer initialization failed: Node initialization failed");
 
+    //卡槽
     layerImage = Sprite::create();
     layerImage->setPosition(pictureSize / 2, pictureSize / 2);
     this->addChild(layerImage);
 
-
+    //标签
     costLabel = Label::create();
     costLabel = Label::createWithTTF("", "fonts/arial.ttf", 24);
     costLabel->setColor(Color3B::BLACK);
     costLabel->setPosition(pictureSize / 2, pictureSize);
     this->addChild(costLabel);
 
-
+    //刷新卡槽显示
     refreshWithId(id);
 
 	return true;

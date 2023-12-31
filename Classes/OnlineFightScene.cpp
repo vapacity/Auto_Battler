@@ -3,24 +3,11 @@
 #define enemyPosition Vec2(1050,650)
 #define myPosition Vec2(40,265)
 cocos2d::Scene* OnlineFightScene::createScene()
-{
+{ 
     // 创建一个场景对象，该对象将由自动释放池自动释放
     auto scene = OnlineFightScene::create();
     return scene;
 }
-
-//FiniteTimeAction* createSequenceFromVector(const Vector<FiniteTimeAction*>& actions, int index) {
-//    if (index >= actions.size() - 1) {
-//         如果只剩一个动作或没有动作，直接返回该动作或 nullptr
-//        return index < actions.size() ? actions.at(index) : nullptr;
-//    }
-//    else {
-//         递归地创建序列
-//         确保当前动作与递归返回的动作顺序正确
-//        auto nextAction = createSequenceFromVector(actions, index + 1);
-//        return Sequence::createWithTwoActions(actions.at(index), nextAction);
-//    }
-//}
 
 bool OnlineFightScene::init()
 {
@@ -29,6 +16,11 @@ bool OnlineFightScene::init()
     {
         return false;
     }
+    //切换音乐
+    experimental::AudioEngine::stop(globalAudioId);
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("battleMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+
     initPlayer();
     initBackground();
     initWeb();
@@ -37,19 +29,15 @@ bool OnlineFightScene::init()
     initLittleHero();
     initStore();
     enableMouseListener();
-    //moveChess(gridMap->myChessMap[Vec2(1, 0)], gridMap->myChessMap[Vec2(1, 0)]->stopMoveFlag);
-    //initChessExp();
-    //findEnemyAndMove();
     gridMap->disableMouseListener();
-  //  this->schedule([this](float dt) {this->update(dt); }, "update_key");
 
 }
 
 void OnlineFightScene::initPlayer()
 {
-    myPlayer = PlayerManager::getInstance()->getPlayer(0);
-    enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
-    enemyPlayer->convertToEnemy();
+    myPlayer = PlayerManager::getInstance()->getPlayer(0);//获取我方玩家信息
+    enemyPlayer = PlayerManager::getInstance()->getPlayer(1);//敌方
+    enemyPlayer->convertToEnemy();//敌方位置要反转
 }
 
 void OnlineFightScene::initBackground()
@@ -62,51 +50,7 @@ void OnlineFightScene::initBackground()
     backgroundImg->setScaleY(visibleSize.height / backgroundImg->getContentSize().height);
     this->addChild(backgroundImg, -1);
 }
-void OnlineFightScene::initChessExp()
-{
-    //正在测试同时出现三个
-  /*  auto Yevee = ChessFactory::createChessById(0);
-    if (Yevee) {
-        Yevee->setScale(0.15);
 
-        gridMap->addChessToGrid(Yevee, gridMap->getCellAtPosition(Vec2(5, 5)));
-        myPlayer->addChess(Yevee);
-        Yevee->playerNumber = 1;
-        this->addChild(Yevee, 1);
-    }*/
-
-    /*auto charmander = ChessFactory::createChessById(31);
-    if (charmander) {
-        charmander->setScale(0.15);
-        gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
-        myPlayer->addChess(charmander);
-        charmander->reverseImg();
-        charmander->playerNumber = 1;
-
-        this->addChild(charmander, 1);
-    }
-    auto charmander2 = ChessFactory::createChessById(32);
-    if (charmander2) {
-        charmander2->setScale(0.15);
-        gridMap->addChessToGrid(charmander2, gridMap->getCellAtPosition(Vec2(10, 7)));
-        myPlayer->addChess(charmander2);
-        charmander2->reverseImg();
-        charmander2->playerNumber = 1;
-        this->addChild(charmander2, 1);
-    }*/
-    //auto charmander3 = ChessFactory::createChessById(31);
-    //if (charmander3) {
-    //    charmander3->initHealthBar();
-    //    charmander3->initBlueBar();
-    //    charmander3->maxHP = charmander3->health;
-    //    gridMap->addChessToGrid(charmander3, gridMap->getCellAtPosition(Vec2(10, 5)));
-    //    //myPlayer->addChess(charmander3);
-    //    charmander3->playerNumber = 1;
-    //    charmander3->reverseImg();
-    //    this->addChild(charmander3, 1);
-    //}
-
-}
 void OnlineFightScene::createChessOnGrids()
 {
     for (auto a : myPlayer->myChessMap) {
@@ -118,16 +62,6 @@ void OnlineFightScene::createChessOnGrids()
         newChess->playerNumber = myPlayer->playerNumber;
         this->addChild(newChess, 2);
     }
- /*   for (auto a : enemyPlayer->transformedMap) {
-        int newChessId = a.second->id;
-        int newChessStar = a.second->star;
-        Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
-        newChess->reverseImg();
-        newChess->playerNumber = 1 - myPlayer->playerNumber;
-        gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
-        gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
-        this->addChild(newChess, 2);
-    }*/
 }
 void OnlineFightScene::initGridMap()
 {
@@ -145,6 +79,7 @@ void OnlineFightScene::initPreparationSeats()
 
 void OnlineFightScene::initLittleHero()
 {
+    //初始化两方小小英雄
     myLittleHero = myPlayer->myHero;
     if (myLittleHero->getParent())
         myLittleHero->removeFromParent();
@@ -154,7 +89,8 @@ void OnlineFightScene::initLittleHero()
         enemyLittleHero->removeFromParent();
     enemyLittleHero->setColor(Color3B(180, 180, 180));
     enemyLittleHero->isAnimationPlaying = false;
-    //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
+
+    //根据编号确定位置
     if (myPlayer->playerNumber == 0) {
         myLittleHero->setPosition(myPosition);
         enemyLittleHero->setPosition(enemyPosition);
@@ -173,6 +109,7 @@ void OnlineFightScene::initStore()
     this->addChild(store, 2);
 }
 
+//提取出我方棋盘上的棋子，依次更新状态，判断是否决出胜负
 void OnlineFightScene::update(float dt)
 {
     Vector<Chess*> chesses;
@@ -232,10 +169,10 @@ void OnlineFightScene::updateWin(float dt)
 
         auto callback = cocos2d::CallFunc::create([this]() {
             if (myLittleHero->percentage <= 0 || enemyLittleHero->percentage <= 0)
-            {
+            {//有一方死了，结束游戏
                 OnlineFightScene::goToGameOverScene();
             }
-            else {
+            else {//没死继续
                 OnlineFightScene::goToPrepareScene();
             }
             });
@@ -244,41 +181,12 @@ void OnlineFightScene::updateWin(float dt)
 
 
         this->runAction(sequence);
-        //Vector<MenuItem*> MenuItems_fight;
-        ////回退
-        //auto backItem = MenuItemImage::create(
-        //    "backnormal.png",
-        //    "backselected.png",
-        //    CC_CALLBACK_1(FightScene::menuPlayCallback, this));
-
-        //if (!(backItem == nullptr ||
-        //    backItem->getContentSize().width <= 0 ||
-        //    backItem->getContentSize().height <= 0))
-        //{//退出菜单项有效，接下来会计算退出菜单项的位置
-        //    float x = origin.x + visibleSize.width / 2;
-        //    float y = origin.y + visibleSize.height / 7 * 3 - backItem->getContentSize().height * 20 / 13;
-        //    backItem->setPosition(Vec2(x, y));
-        //}
-        //MenuItems_fight.pushBack(backItem);
-        //auto menu = Menu::createWithArray(MenuItems_fight);//创建菜单
-        //menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
-        //this->addChild(menu, 2);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+        
     }
 
 
 }
 
-void OnlineFightScene::menuPlayCallback(Ref* pSender) {
-    if (isAudioEnabled)
-    {// 启用音效
-        AudioManager::playEffect();
-    }
-    //把原数据删除再离开场景
-    PlayerManager::getInstance()->getPlayer(0)->deletePast();
-    PlayerManager::getInstance()->getPlayer(1)->deletePast();
-
-    Director::getInstance()->popScene(); // 切换到playscene场景
-}
 
 void OnlineFightScene::goToPrepareScene()
 {
@@ -286,6 +194,10 @@ void OnlineFightScene::goToPrepareScene()
     {
         webSocket_->close();
     }
+    //切换音乐
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+
     auto prepareScene = OnlinePrepareScene::create();
     cocos2d::Director::getInstance()->replaceScene(prepareScene);
 }
@@ -298,7 +210,8 @@ void OnlineFightScene::goToGameOverScene()
         webSocket_->close();
     }
     auto gameOverScene = GameOverScene::createScene();
-
+    //停止音乐
+    experimental::AudioEngine::stop(globalAudioId);
     // 切换到新场景
     cocos2d::Director::getInstance()->replaceScene(gameOverScene);
 }

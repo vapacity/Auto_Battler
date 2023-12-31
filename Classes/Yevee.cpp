@@ -3,19 +3,25 @@
 //Yevee等级1
 Yevee* Yevee::create(const std::string& filename)
 {
-    Yevee* yevee = new (std::nothrow) Yevee();
-    if (yevee && yevee->initWithFile(filename) && yevee->init(filename)) {
-        yevee->autorelease();
-        return yevee;
+    try {
+        Yevee* yevee = new Yevee();
+        if (yevee && yevee->initWithFile(filename) && yevee->init(filename)) {
+            yevee->autorelease();
+            return yevee;
+        }
+        CC_SAFE_DELETE(yevee);
     }
-    CC_SAFE_DELETE(yevee);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Yevee::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Yevee initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR2_GRADE1;
@@ -57,17 +63,14 @@ void Yevee::getHurt(int ATK)
             percentage_health = 0;
         healthBar->setPercentage(percentage_health);
 
-        if (!enable_skill)
+        this->currentBlueBar += 5;
+        float percentage_blue = 100.0 * currentBlueBar / this->blueBar;
+        if (currentBlueBar > this->blueBar)
         {
-            this->currentBlueBar += 5;
-            float percentage_blue = 100.0 * currentBlueBar / this->blueBar;
-            if (currentBlueBar > this->blueBar)
-            {
-                this->enable_skill = true;
-                percentage_blue = 100.0f;
-            }
-            bluebar->setPercentage(percentage_blue);
+            this->enable_skill = true;
+            percentage_blue = 100.0f;
         }
+        bluebar->setPercentage(percentage_blue);
     }
 }
 

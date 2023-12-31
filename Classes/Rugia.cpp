@@ -1,19 +1,25 @@
 #include "Rugia.h"
 Rugia* Rugia::create(const std::string& filename)
 {
-    Rugia* rugia = new (std::nothrow) Rugia();
-    if (rugia && rugia->initWithFile(filename) && rugia->init(filename)) {
-        rugia->autorelease();
-        return rugia;
+    try {
+        Rugia* rugia = new Rugia();
+        if (rugia && rugia->initWithFile(filename) && rugia->init(filename)) {
+            rugia->autorelease();
+            return rugia;
+        }
+        CC_SAFE_DELETE(rugia);
     }
-    CC_SAFE_DELETE(rugia);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Rugia::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Rugia initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     price = PRICE_STAR3_GRADE1;
@@ -42,7 +48,7 @@ void Rugia::useSkill()
         ATK = 500 * star;
     }
     if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
-        ATK = 130;
+        ATK = 130+(star-1)*growATK;
         enable_skill = false;
         currentBlueBar = 0;
         bluebar->setPercentage(0);

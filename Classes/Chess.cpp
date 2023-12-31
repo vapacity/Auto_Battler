@@ -7,26 +7,46 @@ USING_NS_CC;
 #define ATTACK_MOVE 5
 Chess* Chess::create()
 {
-    Chess* chessExample = new (std::nothrow) Chess();
-    if (chessExample && chessExample->init()) {
-        chessExample->autorelease();
-        return chessExample;
+    try {//如果在 new Chess() 或 chessExample->init() 的过程中抛出异常，那么异常信息将被捕获并通过 CCLOG 输出。
+        Chess* chessExample = new Chess();
+        if (chessExample && chessExample->init()) {
+            chessExample->autorelease();
+            return chessExample;
+        }
+        CC_SAFE_DELETE(chessExample);
     }
-    CC_SAFE_DELETE(chessExample);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 Chess* Chess::create(const std::string& filename)
 {
-    Chess* chessExample = new (std::nothrow) Chess();
-    if (chessExample && chessExample->initWithFile(filename) && chessExample->init()) {
-        chessExample->autorelease();
-        return chessExample;
+    try {
+        Chess* chessExample = new Chess();
+        if (chessExample && chessExample->initWithFile(filename) && chessExample->init()) {
+            chessExample->autorelease();
+            return chessExample;
+        }
+        CC_SAFE_DELETE(chessExample);
     }
-    CC_SAFE_DELETE(chessExample);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
+bool Chess::init()
+{
+    if (!Node::init()) {
+        throw std::runtime_error("Chess initialization failed: Node initialization failed");
+        return false;
+    }
+    return true;
+}
 void Chess::deleteChess()
 {
     if (this)
@@ -58,13 +78,13 @@ bool Chess::isAtSeat() const
     return atSeatPosition >= 0;
 }
 
-Chess* Chess::createByIdAndStar(int id, int star)
+Chess* Chess::createByIdAndStar(int id, int star)//这里的star是形参，表示升级次数，它的变化不影响棋子实际星级
 {
-    Chess* chess = ChessFactory::createChessById(id);
-    while (star > 1)
+    Chess* chess = ChessFactory::createChessById(id);//此方法创建棋子，初始实际星级为1
+    while (star > 1)//若传入星级是2，升级一次；星级是3，升级两次
     {
         chess->upgrade();
-        star--;//////////////////////
+        star--;
     }
     chess->maxHP = chess->health;
     chess->initHealthBar();
@@ -72,30 +92,23 @@ Chess* Chess::createByIdAndStar(int id, int star)
     return chess;
 }
 
-bool Chess::init()
-{
-    if (!Node::init()) {
-        return false;
-    }
-    //this->initHealthBar();
-    //this->initBlueBar();
-    return true;
-}
-//这个函数用于寻找字符串中的一个字符串并将他删除
-//我想建一个tool.h和cpp，全局引用
+//这个函数用于寻找字符串中的一个字符串并将他替换
+//original是原字符串，toReplace是被替换的字符串，newString是替换后的字符串
 std::string replaceSubstring(const std::string& original, const std::string& toReplace, const std::string& newString) {
     std::string result = original;
     size_t pos = 0;
+    //若找到了toReplace字符串，进入循环
     while ((pos = result.find(toReplace, pos)) != std::string::npos) {
-        result.replace(pos, toReplace.length(), newString);
-        // 更新位置，前进新字符串的长度
-        pos += newString.length();
+        result.replace(pos, toReplace.length(), newString);//执行替换
+        
+        pos += newString.length();// 更新位置，前进新字符串的长度
     }
     return result;
 }
+
 void Chess::upgrade()
-{
-    if (this->star == 1)
+{   
+    if (this->star == 1)//这里的star是棋子实际星级
         upgradeToSecond(replaceSubstring(name, "1", "2"));
     else if (this->star == 2)
         upgradeToThird(replaceSubstring(name, "2", "3"));
@@ -112,7 +125,7 @@ void Chess::upgradeToSecond(const std::string& filename)
     star = 2;
     //在此处更新原先对象的各种数据
     ATK += growATK;
-    health += growHP;
+    maxHP += growHP;
 }
 
 void Chess::upgradeToThird(const std::string& filename)
@@ -124,7 +137,7 @@ void Chess::upgradeToThird(const std::string& filename)
     star = 3;
     //在此处更新原先对象的各种数据
     ATK += growATK;
-    health += growHP;
+    maxHP += growHP;
 }
 
 
@@ -145,10 +158,12 @@ void Chess::moveAction(GridMap* gridMap)
     //让开始的移动位置停止被预定，移动路上的棋子开始被预定
     fromCell->isBooked = false;
     movePath.at(0)->isBooked = true;
+
+    //以棋子当前位置为起点，目标位置为终点，持续时间为距离除以移动速度
     auto targetPosition = movePath.at(0)->getPosition();
     auto distance = targetPosition.distance(this->getPosition());
-
     auto move_Action = MoveTo::create(distance / (moveSpeed * 100), targetPosition);
+
     auto callback = CallFunc::create([=]() {
         // 动画完成后的回调,将棋子放置到新的位置
         gridMap->addChessToGrid(this, movePath.at(0));
@@ -168,7 +183,6 @@ void Chess::moveAction(GridMap* gridMap)
 void Chess::attackAction(GridMap* gridMap)
 {
     //先获得攻击对象
-            //HexCell* toCell = gridMap->FindBattle(this, gridMap->getCellAtPosition(atGridPosition));
     Vector<HexCell*>enemyChessAround;
     bool findEnemy = isEnemyInAttackRange(gridMap, enemyChessAround);
     int enemyChess = enemyChessAround.size();//enemyChessAround这是获得了所有的攻击范围内的敌方棋子
@@ -180,6 +194,7 @@ void Chess::attackAction(GridMap* gridMap)
         return;
     }
     Chess* attackObject = enemyChessAround.at(0)->chessInGrid;
+
     //当前能释放技能
     if (this->enable_skill) {
         useSkill();
@@ -211,6 +226,7 @@ void Chess::attackAction(GridMap* gridMap)
         });
     //回调函数对目标产生伤害
 
+    //近战攻击
     if(isMelee==1){
         //播放对攻击对象,设想是顶一下,远程目标需要修改
         Vec2 position = attackObject->getPosition() - this->getPosition();
@@ -222,6 +238,7 @@ void Chess::attackAction(GridMap* gridMap)
         auto sequence1 = Sequence::create(moveBackAction, moveBackReverseAction, callback, nullptr);
         this->runAction(sequence1);
     }
+    //远程攻击，发射星星
     else {
         auto bullet = Sprite::create();
         bullet->setTexture("SliderNode_Normal.png");
@@ -253,8 +270,6 @@ void Chess::deadAction(GridMap* gridMap)
     auto sequence = Sequence::create(
         fadeOut,
         CallFunc::create([this, gridMap]() {
-            //this->bluebar->release();
-            //this->healthBar->release();
             this->removeFromParentAndCleanup(true); // 移除并执行清理操作
             }),
         nullptr
@@ -271,12 +286,14 @@ void Chess::deadAction(GridMap* gridMap)
 
 void Chess::getHurt(int ATK)
 {
+    //血条处理
     this->health -= ATK;
     float percentage_health = 100.0 * health / maxHP;
     if (percentage_health < 0)
         percentage_health = 0;
     healthBar->setPercentage(percentage_health);
 
+    //蓝条处理
     if(!enable_skill)
     {
         this->currentBlueBar += 5;
@@ -296,43 +313,45 @@ void Chess::useSkill()
     CCLOG("USESKILL");
 
 }
-
+//dt是每一帧之间的时间差，实时更新状态
 void Chess::updateInBattle(float dt, GridMap* gridMap)
 {
     switch (currentState) {
-    case Idle: {
-        //检查是否有可攻击的敌人//////////////////
-        Vector<HexCell*>a;
-        if (isEnemyInAttackRange(gridMap, a))
-            // 如果有，切换到攻击状态
-            changeState(Attacking);
-        else
-            // 如果没有，尝试移动
-            changeState(Moving);
-        break;
-    }
-    case Moving: {
-        // 执行移动逻辑
-        // 到达目的地后，切换到空闲或攻击状态
-
-        if (!isAnimationPlaying) {//执行move逻辑的前提是不能播放动画
-            moveAction(gridMap);
+        case Idle: {
+            //检查是否有可攻击的敌人
+            Vector<HexCell*>a;
+            if (isEnemyInAttackRange(gridMap, a))
+                // 如果有，切换到攻击状态
+                changeState(Attacking);
+            else
+                // 如果没有，尝试移动
+                changeState(Moving);
+            break;
         }
-        break;
-    }
-    case Attacking: {
-        if (!isAnimationPlaying)//只有在非播放动画时调用
-        {
-            //攻击动作
-            attackAction(gridMap);
-        }
-        break;
-    }
-    case Dead: {
-        deadAction(gridMap);
+        case Moving: {
+            // 执行移动逻辑
+            // 到达目的地后，切换到空闲或攻击状态
 
-        break;
-    }
+            if (!isAnimationPlaying) {//执行move逻辑的前提是不能播放动画
+                moveAction(gridMap);
+            }
+            break;
+        }
+        case Attacking: {
+            if (!isAnimationPlaying)//只有在非播放动画时调用
+            {
+                //攻击动作
+                attackAction(gridMap);
+            }
+            break;
+        }
+        case Dead: {
+            deadAction(gridMap);
+
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -341,8 +360,11 @@ void Chess::changeState(State newState)
     if (currentState == newState) return; // 状态未改变
     currentState = newState;
 }
+
 Vector<HexCell*> getNeighbors(HexCell* cell, GridMap* gridMap) {
+    //创建相邻格子容器
     Vector<HexCell*> neighbors;
+    //目标格子位置
     int x = cell->coordinateInBoard.x;
     int y = cell->coordinateInBoard.y;
 
@@ -353,6 +375,7 @@ Vector<HexCell*> getNeighbors(HexCell* cell, GridMap* gridMap) {
     Vec2 oddOffsets[6] = { {+1,  0}, {+1, -1}, { 0, -1},
                            {-1,  0}, { 0, +1}, {+1, +1} };
 
+    //依次判断周围的六个格子是否在棋盘合法范围，并加入容器
     for (int i = 0; i < 6; ++i) {
         Vec2 offset = (y % 2 == 0) ? evenOffsets[i] : oddOffsets[i];
         Vec2 neighborCoord = Vec2(x + offset.x, y + offset.y);
@@ -363,6 +386,7 @@ Vector<HexCell*> getNeighbors(HexCell* cell, GridMap* gridMap) {
     return neighbors;
 }
 
+//enemyChessAround保存攻击范围的敌方棋子
 bool Chess::isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessAround) {
     std::set<Vec2> checkedCells; // 用于避免重复检查
     std::queue<Vec2> cellsToCheck; // 用于保存待检查的格子坐标
@@ -371,6 +395,7 @@ bool Chess::isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessA
 
     int boolFlag = 0;
     int currentRange = 1;
+    //广度优先搜索
     while (!cellsToCheck.empty() && currentRange <= attackRange) {
         int size = cellsToCheck.size();
         for (int i = 0; i < size; ++i) {
@@ -400,8 +425,8 @@ bool Chess::isEnemyInAttackRange(GridMap* gridMap, Vector<HexCell*>& enemyChessA
 void Chess::initHealthBar()
 {
     healthBar = HealthBar::create("Blood1.png", "Blood2.png", 100.0f);
-    healthBar->setScale(3);
-    healthBar->setPosition(Vec2(100, 450));
+    healthBar->setScale(3);//缩放
+    healthBar->setPosition(Vec2(100, 450));//位置
     this->addChild(healthBar);
 }
 

@@ -3,19 +3,25 @@
 //Charmandeer1 等级1
 Charmander* Charmander::create(const std::string& filename)
 {
-    Charmander* charmander = new (std::nothrow) Charmander();
-    if (charmander && charmander->initWithFile(filename) && charmander->init(filename)) {
-        charmander->autorelease();
-        return charmander;
+    try {
+        Charmander* charmander = new Charmander();
+        if (charmander && charmander->initWithFile(filename) && charmander->init(filename)) {
+            charmander->autorelease();
+            return charmander;
+        }
+        CC_SAFE_DELETE(charmander);
     }
-    CC_SAFE_DELETE(charmander);
+    catch (const std::exception& e) {
+        // 捕获到异常时的处理逻辑
+        CCLOG("Exception caught: %s", e.what());
+    }
     return nullptr;
 }
 
 bool Charmander::init(const std::string& filename)
 {
     if (!Node::init()) {
-        return false;
+        throw std::runtime_error("Charmander initialization failed: Node initialization failed");
     }
     this->setScale(SET_SCALE);
     this->price = PRICE_STAR2_GRADE1;
@@ -42,7 +48,7 @@ void Charmander::useSkill()
     if (skillCount == 1)//第一次用技能时更新数值，之后不动
         ATK = 100 * star;
     if (skillCount > 1) {//超过次恢复原值，技能停用，蓝条清零，技能使用次数清零
-        ATK = 60;
+        ATK = 60+ (star - 1) * growATK;
         enable_skill = false;
         currentBlueBar = 0;
         bluebar->setPercentage(0);
