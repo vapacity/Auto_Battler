@@ -121,6 +121,12 @@ void OnlinePrepareScene::initPlayer()
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
     enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
     myPlayer->myStore->money += myPlayer->myStore->interest + INIT_ADD_FOR_TURN;
+    myPlayer->myStore->exp += 2;
+    if(myPlayer->myStore->exp>= levelExp[myPlayer->myStore->level - 1]) {
+        myPlayer->myStore->exp -= levelExp[myPlayer->myStore->level - 1];
+        myPlayer->myStore->level++;
+    }
+
 }
 void OnlinePrepareScene::initBackground()
 {
