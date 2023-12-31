@@ -62,9 +62,6 @@ public:
     //创建小小英雄
     void initLittleHero();
 
-    //创建棋子样例
-    void initChessExp();
-
     //创建商店
     void initStore();
 

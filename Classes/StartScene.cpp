@@ -23,18 +23,25 @@ bool StartScene::init()
     {
         return false;
     }
-    //使用getVisibleSize()方法获取可见窗口的尺寸
-    //visibleSize变量被赋值为一个Size对象，该对象包含了宽度和高度信息
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-
-    //调用getVisibleOrigin()方法获取可见窗口的原点位置（左下角）
-    //origin变量被赋值为一个Vec2对象，该对象包含了原点的x和y坐标
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     //音乐开始播放
     globalAudioId = cocos2d::experimental::AudioEngine::play2d("prepareMusic.mp3", true);
     experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
 
+    //初始化菜单
+    initMenu();
+    //初始化标题
+    initTopic();
+    //初始化背景
+    initBackground();
+    
+    return true;
+}
+
+void StartScene::initMenu()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //创建菜单
     Vector<MenuItem*> MenuItems;
 
@@ -96,13 +103,16 @@ bool StartScene::init()
         closeItem->setPosition(Vec2(x, y));
     }
     MenuItems.pushBack(closeItem);
-    
+
     //创建菜单
     auto menu = Menu::createWithArray(MenuItems);
     menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
     this->addChild(menu, 1);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
-
-    
+}
+void StartScene::initTopic()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //创建游戏标题
     auto label = Label::createWithTTF("Pokemon Chess", "fonts/Marker Felt.ttf", 24);
     if (label == nullptr)
@@ -116,7 +126,11 @@ bool StartScene::init()
 
         this->addChild(label, 1);
     }
-
+}
+void StartScene::initBackground()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //创建背景图片
     auto background = Sprite::create("background.png");
     if (background == nullptr)
@@ -131,10 +145,7 @@ bool StartScene::init()
         //将精灵添加到当前图层中，层级参数为0，表示将精灵放置在其他元素的下方
         this->addChild(background, -1);
     }
-    return true;
 }
-
-
 void StartScene::menuStartCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效

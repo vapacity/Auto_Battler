@@ -45,8 +45,6 @@ bool PrepareScene::init()
     //初始化倒计时
     initPrepareLabel();
 
-    //测试棋子用函数，一般注释掉
-    //initChessExp();
 
     //启用鼠标监听器
     this->enableMouseListener();
@@ -123,7 +121,6 @@ void PrepareScene::initPreparationSeats()
 
 void PrepareScene::initLittleHero()
 {
-    //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
     littleHero = myPlayer->myHero;
     if (littleHero->getParent())
         littleHero->removeFromParent();
@@ -132,29 +129,6 @@ void PrepareScene::initLittleHero()
     littleHero->setPosition(myPosition);
 }
 
-void PrepareScene::initChessExp()
-{
-    ////正在测试同时出现三个
-    //auto Yevee = ChessFactory::createChessById(0);
-    //if (Yevee) {
-    //    Yevee->setScale(0.15);
-
-    //    gridMap->addChessToGrid(Yevee, gridMap->getCellAtPosition(Vec2(1, 1)));
-    //    myPlayer->addChess(Yevee);
-    //    Yevee->playerNumber = 1;
-    //    this->addChild(Yevee, 1);
-    //}
-
-    //auto charmander = ChessFactory::createChessById(1);
-    //if (charmander) {
-    //    charmander->setScale(0.15);
-    //    gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
-    //    myPlayer->addChess(charmander);
-    //    charmander->playerNumber = 2;
-    //    this->addChild(charmander, 1);
-    //}
-
-}
 
 void PrepareScene::initStore()
 {
@@ -286,7 +260,6 @@ void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
     if (cell && cell->chessInGrid)
     {
         selectedChess = cell->chessInGrid;
-        //selectedChess->atGridPosition = cell;
         selectedChess->isDragging = true;
 
         gridMap->removeChessOfGrid(cell);
@@ -294,10 +267,10 @@ void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
 
 
     }
+    //实现判断单击时是否有备战席，且席位上是否存在棋子
     if (seat && seat->chessInSeat)
     {
         selectedChess = seat->chessInSeat;
-        //selectedChess->atSeat = seat;
         selectedChess->isDragging = true;
 
         preSeats->removeChessOfSeat(seat);

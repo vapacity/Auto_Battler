@@ -24,16 +24,21 @@ bool SetMenu::init()
     {
         return false;
     }
+    initMusic();
+    initAudio();
+    initBack();
+    initTopic();
+    initBackground();
+    return true;
+}
+void SetMenu::initMusic()
+{
     auto visibleSize = Director::getInstance()->getVisibleSize();
-
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    //创建菜单
-    Vector<MenuItem*> MenuItems_Set;
 
     //音量滑动条
     auto slider = Slider::create();
-    slider->loadBarTexture("Slider_Back.png"); 
+    slider->loadBarTexture("Slider_Back.png");
     slider->loadSlidBallTextures("SliderNode_Normal.png", "SliderNode_Press.png", "SliderNode_Disable.png");
     slider->loadProgressBarTexture("Slider_PressBar.png");
     //位置
@@ -72,6 +77,11 @@ bool SetMenu::init()
             origin.y + visibleSize.height - 4 * slider->getContentSize().height));
         this->addChild(label_volume, 1);
     }
+}
+void SetMenu::initAudio()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     //音效复选框
     auto checkbox = CheckBox::create("check_box_normal.png",
@@ -81,7 +91,7 @@ bool SetMenu::init()
         "check_box_active_disable.png");
     checkbox->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height - 4 * checkbox->getContentSize().height));
-    checkbox->setSelected(cocos2d::UserDefault::getInstance()->getBoolForKey("lastCheckBoxState",1 ));
+    checkbox->setSelected(cocos2d::UserDefault::getInstance()->getBoolForKey("lastCheckBoxState", 1));
     checkbox->addTouchEventListener([=](Ref* sender, Widget::TouchEventType type) {
         switch (type)
         {
@@ -119,6 +129,14 @@ bool SetMenu::init()
             origin.y + visibleSize.height - 4 * checkbox->getContentSize().height));
         this->addChild(label_audio, 1);
     }
+}
+void SetMenu::initBack()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    //创建菜单
+    Vector<MenuItem*> MenuItems_Set;
 
     //回退
     auto backItem = MenuItemImage::create(
@@ -144,6 +162,11 @@ bool SetMenu::init()
     auto menu = Menu::createWithArray(MenuItems_Set);
     menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
     this->addChild(menu, 1);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+}
+void SetMenu::initTopic()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     //设置页面的标题
     auto label = Label::createWithTTF("SET", "fonts/Marker Felt.ttf", 24);
@@ -157,6 +180,11 @@ bool SetMenu::init()
             origin.y + visibleSize.height - label->getContentSize().height));
         this->addChild(label, 1);
     }
+}
+void SetMenu::initBackground()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     //背景
     auto background = Sprite::create("background_play.png");
@@ -170,9 +198,7 @@ bool SetMenu::init()
         background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
         this->addChild(background, -1);
     }
-    return true;
 }
-
 void SetMenu::menuFirstCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效

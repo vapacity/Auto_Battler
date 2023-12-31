@@ -20,15 +20,19 @@ bool PlayMenu::init()
     {
         return false;
     }
-    //通过调用Director::getInstance()获取Director类的实例
-    //然后使用getVisibleSize()方法获取可见窗口的尺寸
-    //visibleSize变量被赋值为一个Size对象，该对象包含了宽度和高度信息
+
+    initMenu();
+    initTopic();
+    initBackground();
+
+    
+    return true;
+}
+
+void PlayMenu::initMenu()
+{
     auto visibleSize = Director::getInstance()->getVisibleSize();
-
-    //调用getVisibleOrigin()方法获取可见窗口的原点位置（左下角）
-    //origin变量被赋值为一个Vec2对象，该对象包含了原点的x和y坐标
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
     //创建菜单
     Vector<MenuItem*> MenuItems_play;
 
@@ -96,7 +100,12 @@ bool PlayMenu::init()
     auto menu = Menu::createWithArray(MenuItems_play);
     menu->setPosition(Vec2::ZERO);//将菜单的位置设置为(0, 0)，即左下角
     this->addChild(menu, 1);//将菜单添加到当前的图层中，层级参数为1，表示将菜单放置在图层的最上方
+}
 
+void PlayMenu::initTopic()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //标题
     auto label = Label::createWithTTF("START", "fonts/Marker Felt.ttf", 24);
     if (label == nullptr)
@@ -109,7 +118,11 @@ bool PlayMenu::init()
             origin.y + visibleSize.height - label->getContentSize().height));
         this->addChild(label, 1);
     }
-
+}
+void PlayMenu::initBackground()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //背景
     auto background = Sprite::create("background_play.png");
     if (background == nullptr)
@@ -122,7 +135,6 @@ bool PlayMenu::init()
         background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
         this->addChild(background, -1);
     }
-    return true;
 }
 
 void PlayMenu::menuMachinePlayCallback(Ref* pSender) {
