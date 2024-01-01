@@ -25,7 +25,7 @@ bool PlayMenu::init()
     initTopic();
     initBackground();
 
-    
+
     return true;
 }
 
@@ -140,7 +140,7 @@ void PlayMenu::initBackground()
 void PlayMenu::menuMachinePlayCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     auto machinePrepareScene = PrepareScene::createScene();
     //过场淡入淡出
@@ -152,7 +152,7 @@ void PlayMenu::menuMachinePlayCallback(Ref* pSender) {
 void PlayMenu::menuMultiPlayCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     auto WaitingScene = WaitingRoomScene::create();
     Director::getInstance()->pushScene(WaitingScene);
@@ -161,7 +161,7 @@ void PlayMenu::menuMultiPlayCallback(Ref* pSender) {
 void PlayMenu::menuFirstCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     Director::getInstance()->popScene(); // 切换到startscene场景
 }

@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "HealthBar.h"
 #include "BlueBar.h"
+#include"AudioEngine.h"
 class GridMap;
 class HexCell;
 class Seat;

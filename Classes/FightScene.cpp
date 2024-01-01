@@ -1,6 +1,6 @@
 ﻿#include "FightScene.h"
-#define enemyPosition Vec2(900,550)
-#define myPosition Vec2(40,265)
+#define enemyPosition Vec2(1060,600)
+#define myPosition Vec2(60,265)
 
 cocos2d::Scene* FightScene::createScene()
 {
@@ -29,17 +29,11 @@ bool FightScene::init()
         return false;
     }
 
-    //切换音乐
-    experimental::AudioEngine::stop(globalAudioId);
-    globalAudioId = cocos2d::experimental::AudioEngine::play2d("battleMusic.mp3", true);
-    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
-
     initPlayer();
     initBackground();
     initGridMap();
-    initPreparationSeats();
     initLittleHero();
-    gridMap->disableMouseListener();
+    gridMap->disableMouseListener();//鼠标不能和棋盘交互
     this->schedule([this](float dt) {this->update(dt); }, "update_key");
 
 }
@@ -62,33 +56,47 @@ void FightScene::initBackground()
     this->addChild(backgroundImg, -1);
 }
 
+void FightScene::initGridMap()
+{
+    gridMap = GridMap::create(myPlayer->myChessMap);
+    createChessOnGrids();//创建棋盘上的棋子
+    this->addChild(gridMap, 0);
+    gridMap->selectSchedule(0);
+}
+
 void FightScene::createChessOnGrids()
 {
+    //把棋盘上的棋子依次显示出来
     for (auto a : myPlayer->myChessMap) {
+        //创建棋子实例
         int newChessId = a.second->id;
         int newChessStar = a.second->star;
         Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
+
+        //图像反转
+        newChess->reverseImg();
+
+        //录入棋格上的棋子信息
         gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
+        //把棋子放在棋盘上
         gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
+        //加入场景
         this->addChild(newChess, 2);
     } 
+
     for (auto a : enemyPlayer->transformedMap) {//敌方反转
+
         int newChessId = a.second->id;
         int newChessStar = a.second->star;
         Chess* newChess = Chess::createByIdAndStar(newChessId, newChessStar);
-        newChess->reverseImg();
+
+        //棋子所属玩家编号
         newChess->playerNumber = 1 - myPlayer->playerNumber;
+
         gridMap->nodeMap.at(a.first)->chessInGrid = newChess;
         gridMap->addChessToGrid(newChess, gridMap->getCellAtPosition(a.first));
         this->addChild(newChess, 2);
     }
-}
-void FightScene::initGridMap()
-{
-    gridMap = GridMap::create(myPlayer->myChessMap);
-    createChessOnGrids();
-    this->addChild(gridMap, 0);
-    gridMap->selectSchedule(0);
 }
 
 void FightScene::initPreparationSeats()
@@ -107,7 +115,7 @@ void FightScene::initLittleHero()
     myLittleHero->setPosition(myPosition);
     this->addChild(myLittleHero);
     myLittleHero->isAnimationPlaying = false;
-    myLittleHero->disableMoving();
+    myLittleHero->enableMoving();
 
     //敌方
     enemyLittleHero = enemyPlayer->myHero;
@@ -119,6 +127,7 @@ void FightScene::initLittleHero()
     enemyLittleHero->setPosition(enemyPosition);
     this->addChild(enemyLittleHero);
     enemyLittleHero->isAnimationPlaying = false;
+    enemyLittleHero->disableMoving();//防止我方能控制对方英雄
 }
 
 void FightScene::initStore()
@@ -127,7 +136,7 @@ void FightScene::initStore()
     this->addChild(store, 2);
 }
 
-//提取出我方棋盘上的棋子，依次更新状态，判断是否决出胜负
+//提取出我方棋盘上的棋子，依次更新战斗状态，判断是否决出胜负
 void FightScene::update(float dt)
 {
     Vector<Chess*> chesses;
@@ -145,59 +154,29 @@ void FightScene::update(float dt)
 
 void FightScene::updateWin(float dt)
 {
+    //统计双方棋子数量
     int cntMy = 0;
     int cntEnemy = 0;
     for (auto& iter : gridMap->myChessMap)
     {
+        //根据棋子所属玩家编号区分
         if (iter.second->playerNumber == myPlayer->playerNumber)
             cntMy++;
         else
             cntEnemy++;
     }
-    if (cntEnemy == 0 && cntMy == 0)
-    {
-        std::string str = "Draw";
-        auto label = Label::createWithTTF(str, "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
-        // 设置Label的颜色（可选）
-        label->setColor(Color3B::WHITE);
-
-        // 获取场景的尺寸和中心坐标
-        auto visibleSize = Director::getInstance()->getVisibleSize();
-        Vec2 origin = Director::getInstance()->getVisibleOrigin();
-        Vec2 centerPosition = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
-
-        // 设置Label的位置
-        label->setPosition(centerPosition);
-
-        // 将Label添加到当前场景
-        this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
-        auto delay = cocos2d::DelayTime::create(2);
-
-        auto callback = cocos2d::CallFunc::create([this]() {
-
-            if (myLittleHero->percentage <= 0 || enemyLittleHero->percentage <= 0)
-            {
-                FightScene::goToGameOverScene();
-            }
-            else {
-                FightScene::goToPrepareScene();
-            }
-            });
-
-        auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
-
-
-        this->runAction(sequence);
-        return;
-    }
-    else if (cntEnemy == 0|| cntMy == 0) {
+    if (cntEnemy == 0|| cntMy == 0) {
         // 创建一个Label
         std::string str= cntEnemy == 0 ? "You Win" : "Enemy Win";
         if (cntEnemy == 0)
+        {
             myLittleHero->attack(enemyLittleHero);
+        }
         else
+        {
             enemyLittleHero->attack(myLittleHero);
+        }
         auto label = Label::createWithTTF(str, "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
         // 设置Label的颜色（可选）
@@ -213,8 +192,8 @@ void FightScene::updateWin(float dt)
 
         // 将Label添加到当前场景
         this->addChild(label, 2); // 第二个参数是z-order，可以根据需要调整
-        auto delay = cocos2d::DelayTime::create(2);
 
+        auto delay = cocos2d::DelayTime::create(2);
         auto callback = cocos2d::CallFunc::create([this]() {
             //有一方死了，结束游戏
             if (myLittleHero->percentage <= 0||enemyLittleHero->percentage<=0)
@@ -229,7 +208,6 @@ void FightScene::updateWin(float dt)
         auto sequence = cocos2d::Sequence::create(delay, callback, nullptr);
         this->runAction(sequence);
     }
-
 
 }
 

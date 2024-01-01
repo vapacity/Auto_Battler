@@ -20,7 +20,7 @@ public:
 
     void menuStartCallback(Ref* pSender);//切换到Play场景
     void menuSetCallback(Ref* pSender);//切换到set场景
-    
+
     void menuCloseCallback(cocos2d::Ref* pSender);//关闭
 
     CREATE_FUNC(StartScene);

@@ -91,7 +91,11 @@ void SetMenu::initAudio()
         "check_box_active_disable.png");
     checkbox->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height - 4 * checkbox->getContentSize().height));
-    checkbox->setSelected(cocos2d::UserDefault::getInstance()->getBoolForKey("lastCheckBoxState", 1));
+    //保留音效状态
+    if(isAudioEnabled)
+        checkbox->setSelected(1);
+    else
+        checkbox->setSelected(0);
     checkbox->addTouchEventListener([=](Ref* sender, Widget::TouchEventType type) {
         switch (type)
         {
@@ -103,14 +107,8 @@ void SetMenu::initAudio()
                 // 根据音效开关变量的值启用或禁用音效
                 if (isAudioEnabled)
                 {// 启用音效
-                    AudioManager::stopAllEffects();
+                    playSoundEffect("myEffect.mp3");
                 }
-                else
-                {// 禁用音效
-                    AudioManager::playEffect();
-                }
-                // 保存上一次复选框的选择状态
-                cocos2d::UserDefault::getInstance()->setBoolForKey("lastCheckBoxState", checkbox->isSelected());
                 break;
             default:
                 break;
@@ -201,8 +199,8 @@ void SetMenu::initBackground()
 }
 void SetMenu::menuFirstCallback(Ref* pSender) {
     if (isAudioEnabled)
-    {// 启用音效
-        AudioManager::playEffect();
+    {// 启用音效 
+        playSoundEffect("myEffect.mp3");
     }
     Director::getInstance()->popScene(); // 切换到startscene场景
 }

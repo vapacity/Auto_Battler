@@ -72,6 +72,7 @@ void LittleHero::attack(LittleHero* enemy)
     //火球到达敌人位置后调用敌人的gethurt
     auto callFunc = CallFunc::create([=]() {
         enemy->gethurt(atk);
+        cocos2d::experimental::AudioEngine::play2d("attackEffect.mp3", false);
         });
 
     auto sequence1 = Sequence::create(sequence, callFunc, nullptr);

@@ -114,6 +114,7 @@ void Chess::upgrade()
         upgradeToThird(replaceSubstring(name, "2", "3"));
     else
         return;
+    
 }
 
 void Chess::upgradeToSecond(const std::string& filename)

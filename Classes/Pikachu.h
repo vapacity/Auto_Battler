@@ -1,7 +1,6 @@
 #pragma once
 #include"cocos2d.h"
 #include"Chess.h"
-
 USING_NS_CC;
 
 class Pikachu :public Chess

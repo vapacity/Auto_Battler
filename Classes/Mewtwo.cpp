@@ -55,4 +55,6 @@ void Mewtwo::useSkill()
         bluebar->setPercentage(0);
         skillCount = 0;
     }
+    else
+        cocos2d::experimental::AudioEngine::play2d("mewtwoEffect.mp3", false);
 }

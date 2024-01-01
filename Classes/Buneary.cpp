@@ -47,7 +47,9 @@ void Buneary::useSkill()
 {
     skillCount++;
     if (skillCount == 1)//第一次用技能时更新数值，之后不动
+    {
         ATK *= 1.2;
+    }
     if (skillCount > 3) {//超过三次恢复原值，技能停用，蓝条清零，技能使用次数清零
         ATK /= 1.2;
         enable_skill = false;

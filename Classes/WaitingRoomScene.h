@@ -51,7 +51,7 @@ private:
     Player* myPlayer;       // 玩家对象
     Player* enemyPlayer;    // 敌方玩家对象
     cocos2d::network::WebSocket* webSocket_;  // WebSocket连接对象
-    int isPlayer1 = 0;      // 玩家身份标识，0表示未确定，1表示玩家1，2表示玩家2
+    int isPlayer1 = 0;      // 1表示玩家1已存在
     Sprite* backGround;     // 背景精灵
 };
 

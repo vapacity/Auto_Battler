@@ -1,10 +1,10 @@
 // PrepareScene.cpp
 #include "cocos2d.h"
 #include "OnlinePrepareScene.h"
-#define enemyPosition Vec2(1050,650)
-#define myPosition Vec2(40,265)
+#define enemyPosition Vec2(1060,600)
+#define myPosition Vec2(60,265)
 USING_NS_CC;
-#define PREPARE_TIME 20.0f
+#define PREPARE_TIME 10.0f
 
 Scene* OnlinePrepareScene::createScene()
 {
@@ -90,6 +90,15 @@ void OnlinePrepareScene::initPlayer()
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
     enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
     myPlayer->myStore->money += myPlayer->myStore->interest + INIT_ADD_FOR_TURN;
+    if (myPlayer->myStore->level < 5)
+    {
+        myPlayer->myStore->exp += 2;
+        if (myPlayer->myStore->exp >= levelExp[myPlayer->myStore->level - 1]) {
+            myPlayer->myStore->exp -= levelExp[myPlayer->myStore->level - 1];
+            myPlayer->myStore->level++;
+        }
+    }
+
 }
 void OnlinePrepareScene::initBackground()
 {
@@ -117,7 +126,7 @@ void OnlinePrepareScene::initPreparationSeats()
     this->addChild(preSeats);
 }
 
-//待改
+
 void OnlinePrepareScene::initLittleHero()
 {
     //littleHero = LittleHero::create("kalakala-littlehero-left.png", 0);
@@ -135,29 +144,6 @@ void OnlinePrepareScene::initLittleHero()
     this->addChild(littleHero);
 }
 
-void OnlinePrepareScene::initChessExp()
-{
-    ////正在测试同时出现三个
-    //auto Yevee = ChessFactory::createChessById(0);
-    //if (Yevee) {
-    //    Yevee->setScale(0.15);
-
-    //    gridMap->addChessToGrid(Yevee, gridMap->getCellAtPosition(Vec2(1, 1)));
-    //    myPlayer->addChess(Yevee);
-    //    Yevee->playerNumber = 1;
-    //    this->addChild(Yevee, 1);
-    //}
-
-    //auto charmander = ChessFactory::createChessById(1);
-    //if (charmander) {
-    //    charmander->setScale(0.15);
-    //    gridMap->addChessToGrid(charmander, gridMap->getCellAtPosition(Vec2(4, 4)));
-    //    myPlayer->addChess(charmander);
-    //    charmander->playerNumber = 2;
-    //    this->addChild(charmander, 1);
-    //}
-
-}
 
 void OnlinePrepareScene::initStore()
 {
@@ -478,6 +464,7 @@ Chess* OnlinePrepareScene::upgradeChess(int id, int star)
         }
     }
     //根据star，决定是进化成star2还是star3
+    cocos2d::experimental::AudioEngine::play2d("upgradeEffect.mp3", false);
     upgradeChess->upgrade();
     myPlayer->addChess(upgradeChess);
     return upgradeChess;
@@ -495,7 +482,7 @@ void OnlinePrepareScene::goToFightScene(float dt)
 void OnlinePrepareScene::menuPlayCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     //把原数据删除再离开场景
     PlayerManager::getInstance()->getPlayer(0)->deletePast();

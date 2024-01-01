@@ -56,4 +56,6 @@ void Squirtle::useSkill()
         bluebar->setPercentage(0);
         skillCount = 0;
     }
+    else
+        cocos2d::experimental::AudioEngine::play2d("squirtleEffect.mp3", false);
 }

@@ -1,4 +1,5 @@
 #include "Pikachu.h"
+
 Pikachu* Pikachu::create(const std::string& filename)
 {
     try {
@@ -55,4 +56,6 @@ void Pikachu::useSkill()
         bluebar->setPercentage(0);
         skillCount = 0;
     }
+    else
+        cocos2d::experimental::AudioEngine::play2d("pikaEffect.mp3", false);
 }

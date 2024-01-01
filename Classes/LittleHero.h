@@ -4,7 +4,7 @@
 
 #include "cocos2d.h"
 #include "HealthBar.h"
-
+#include"AudioEngine.h"
 class LittleHero : public cocos2d::Sprite
 {
 public:

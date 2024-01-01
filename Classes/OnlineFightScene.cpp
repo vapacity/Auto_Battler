@@ -220,8 +220,11 @@ void OnlineFightScene::initWeb()
     webSocket_ = new cocos2d::network::WebSocket();
     webSocket_->init(*this, "ws://192.168.43.182:3000");
 }
+
+//棋子信息发送到服务器
 void OnlineFightScene::sendChessInfoToServer()
 {
+    //创建JSON 文档
     rapidjson::Document document;
     document.SetObject();
 
@@ -231,10 +234,10 @@ void OnlineFightScene::sendChessInfoToServer()
     // 遍历棋子数组，将信息存储到 JSON 数组中
     for (const auto& Node : myPlayer->myChessMap) {
         rapidjson::Value chessObject(rapidjson::kObjectType);
-        auto chess = Node.second;
-        auto location = Node.first;
+        auto chess = Node.second;//棋子
+        auto location = Node.first;//位置
+        //添加id，星级，位置，玩家编号成员
         chessObject.AddMember("id", chess->getId(), document.GetAllocator());
-        //chessObject.AddMember("playerNumber", chess->playerNumber, document.GetAllocator());
         chessObject.AddMember("star", chess->getStar(), document.GetAllocator());
         chessObject.AddMember("x", location.x, document.GetAllocator());
         chessObject.AddMember("y", location.y, document.GetAllocator());
@@ -254,24 +257,25 @@ void OnlineFightScene::sendChessInfoToServer()
     std::string jsonString = buffer.GetString();
     webSocket_->send(jsonString);
 }
+
 void OnlineFightScene::onOpen(cocos2d::network::WebSocket* ws)
 {
     CCLOG("WebSocket connected");
 }
 void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d::network::WebSocket::Data& data)
 {
-    //CCLOG("Received message: %s", data.bytes);
+    //将消息数据转换为字符串
     std::string message(data.bytes, data.len);
-    //std::string cleanMessage(message);
     CCLOG("Received message: %s", message.c_str());
+
     if (message == "Player1") {
         return;
     }
-    if (message == "STARTGAME") {
+    if (message == "STARTGAME") {//开始游戏，把玩家的棋子信息发送给服务器
         sendChessInfoToServer();
         return;
-        //CCLOG("1");
     }
+
     // 在这里解析 JSON 数据，更新棋子状态等
     rapidjson::Document document;
     document.Parse(message.c_str());
@@ -282,7 +286,7 @@ void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
             for (rapidjson::SizeType i = 0; i < chessArray.Size(); i++) {
                 const rapidjson::Value& chessObject = chessArray[i];
 
-                // 获取棋子信息
+                // 获取对手棋子信息
                 int id = chessObject["id"].GetInt();
                 int star = chessObject["star"].GetInt();
                 float x = chessObject["x"].GetFloat();
@@ -299,13 +303,15 @@ void OnlineFightScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
             gridMap->updateForPlayer();
             this->schedule([this](float dt) {this->update(dt); }, "update_key");
         }
+        // JSON 数据中存在 "type" 键且对应值为字符串 "position_update"，位置更新
         if (document.HasMember("type") && document["type"].IsString() && document["type"] == "position_update") {
             // 确保 JSON 中有 x 和 y 属性
             if (document.HasMember("x") && document.HasMember("y") && document["x"].IsFloat() && document["y"].IsFloat()) {
                 // 从 JSON 中读取属性并更新 LittleHero 的位置
                 float x = document["x"].GetFloat();
                 float y = document["y"].GetFloat();
-                // 假设 LittleHero 有 setPosition 方法
+
+                // 小小英雄移动
                 enemyLittleHero->stopAllActions();
                 float speed = 500.0f;
                 Vec2 currentposition = enemyLittleHero->getPosition();
@@ -334,26 +340,27 @@ void OnlineFightScene::onError(cocos2d::network::WebSocket* ws, const cocos2d::n
 void OnlineFightScene::fightSceneOnMouseDown(Event* event)
 {
     EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
+    //右键控制小小英雄
     if (mouseEvent->getMouseButton() == EventMouse::MouseButton::BUTTON_RIGHT) {
 
         myLittleHero->stopAllActions();
-        // 创建一个MoveTo动作，移动到点击位置
-        Vec2 currentPosition = myLittleHero->getPosition();
 
+        // 创建一个MoveTo动作，移动到点击位置
         // 计算鼠标点击位置相对于当前位置的相对位移
+        Vec2 currentPosition = myLittleHero->getPosition();
         Vec2 targetPosition = mouseEvent->getLocationInView();
         Vec2 moveDelta = targetPosition - currentPosition;
-
         float distance = moveDelta.length();
 
         // 计算匀速移动的时间（假设速度为300像素/秒）
         float speed = 300.0f;
         float duration = distance / speed;
 
-        // 创建MoveBy动作，匀速移动到相对位移位置
+        // 创建动作，匀速移动到相对位移位置
         auto moveTo = MoveTo::create(duration, targetPosition);
-
         myLittleHero->runAction(moveTo);
+
+        //创建 JSON 数据表示位置更新
         rapidjson::Document doc;
         doc.SetObject();
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();

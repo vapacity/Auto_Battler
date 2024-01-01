@@ -8,14 +8,16 @@ cocos2d::Scene* GameOverScene::createScene()
     auto scene = GameOverScene::create();
     return scene;
 }
-bool GameOverScene::init()
+bool GameOverScene::init() 
 { 
     // 首先调用基类的init方法
     if (!Scene::init())
     {
         return false;
     }
-    
+    //音效
+    cocos2d::experimental::AudioEngine::play2d("youwinEffect.mp3", false);
+
     auto label = Label::createWithTTF("GameOver", "fonts/Marker Felt.ttf", 80); // 字体文件需要存在
 
     // 设置Label的颜色（可选）

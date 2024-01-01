@@ -34,7 +34,7 @@ bool Magikarp::init(const std::string& filename)
     health = 300;
     growHP = 500;
     blueBar = 40;
-    attackSpeed = 1.1;
+    attackSpeed = 0.6;
     attackRange = 3;
     moveSpeed = 0.7;
     return true;

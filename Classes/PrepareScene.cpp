@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "PrepareScene.h"
 USING_NS_CC;
-#define PREPARE_TIME 20.0f
+#define PREPARE_TIME 10.0f
 #define myPosition Vec2(40,265)
 
 Scene* PrepareScene::createScene()
@@ -53,7 +53,7 @@ bool PrepareScene::init()
     /*Vector<HexCell*> path;
     HexCell* toNode=nullptr;
     gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid->moveTo(gridMap->FindBattle(gridMap->getCellAtPosition(Vec2(1, 1))->chessInGrid, gridMap->getCellAtPosition(Vec2(1, 1)))->getPosition());*/
-    
+
     this->schedule(schedule_selector(PrepareScene::updateCountdownLabel), 0.01f);  // 每隔1秒更新一次Label
 
     return true;
@@ -89,8 +89,8 @@ void PrepareScene::initPlayer()
 {
     myPlayer = PlayerManager::getInstance()->getPlayer(0);
     enemyPlayer = PlayerManager::getInstance()->getPlayer(1);
-    enemyPlayer->ai();
-    myPlayer->myStore->money += myPlayer->myStore->interest + INIT_ADD_FOR_TURN;
+    enemyPlayer->ai();//人机对战，对手是ai功能
+    myPlayer->myStore->money += myPlayer->myStore->interest + INIT_ADD_FOR_TURN;//玩家金钱
 }
 void PrepareScene::initBackground()
 {
@@ -159,7 +159,7 @@ void PrepareScene::putChessOnGrids()
         gridMap->nodeMap.at(a.first)->chessInGrid = a.second;
         gridMap->addChessToGrid(a.second, gridMap->getCellAtPosition(a.first));
         this->addChild(a.second, 2);
-        a.second->setOpacity(255);
+        a.second->setOpacity(255);//不透明
     }
 }
 void PrepareScene::putChessOnSeats()
@@ -199,21 +199,20 @@ void PrepareScene::prepareSceneOnMouseDown(Event* event)
         /*此部分为对拖拽棋子的判断*/
         chessOnMouseDown(mousePosition);
 
-        /*此部分为对点击图片的判断*/
+        /*此部分为对点击卡牌的判断*/
         store->selectStore(event, mousePosition, preSeats->isFull());//store监听函数
-        if (store->chessIdHaveBought != -1)
+        if (store->chessIdHaveBought != -1)//成功购买
         {
-            Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);
+            Chess* chess = ChessFactory::createChessById(store->chessIdHaveBought);//生成棋子实例
             chess->maxHP = chess->health;
-            if (chess)
+            if (chess)//棋子存在
             {
-                //检查新增的这个是否能合成
-                preSeats->addChessToSeat(chess, preSeats->latestSeat);
-                myPlayer->addChess(chess);
+                preSeats->addChessToSeat(chess, preSeats->latestSeat);//放置备战席
+                myPlayer->addChess(chess);//加入玩家队伍
                 this->addChild(chess, 1);
-                checkAndMerge(chess);
+                checkAndMerge(chess);//检查新增的这个是否能合成
             }
-            store->chessIdHaveBought = -1;
+            store->chessIdHaveBought = -1;//重置
         }
     }
 }
@@ -253,27 +252,25 @@ void PrepareScene::prepareSceneOnMouseUp(Event* event)
 void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
 {
 
-    //实现判断单击时是否有棋格，且棋格上是否存在棋子
+    //实现判断单击时是否有棋格或备战席
     HexCell* cell = gridMap->mouseInWhichCell(mousePosition);
     Seat* seat = preSeats->mouseInWhichSeat(mousePosition);
-
+    //如果棋格存在且有棋子
     if (cell && cell->chessInGrid)
     {
         selectedChess = cell->chessInGrid;
         selectedChess->isDragging = true;
 
-        gridMap->removeChessOfGrid(cell);
+        gridMap->removeChessOfGrid(cell);//从棋格上移除
         myPlayer->removeChess(selectedChess);
-
-
     }
-    //实现判断单击时是否有备战席，且席位上是否存在棋子
+    //有备战席，且席位上存在棋子
     if (seat && seat->chessInSeat)
     {
         selectedChess = seat->chessInSeat;
         selectedChess->isDragging = true;
 
-        preSeats->removeChessOfSeat(seat);
+        preSeats->removeChessOfSeat(seat);//移除
         myPlayer->removeChess(selectedChess);
 
     }
@@ -282,14 +279,16 @@ void PrepareScene::chessOnMouseDown(Vec2 mousePosition)
 //鼠标移动
 void PrepareScene::chessOnMouseMove(Vec2 mousePosition)
 {
-    if (selectedChess)
-        if (selectedChess->isDragging)
+    if (selectedChess)//有选中棋子
+        if (selectedChess->isDragging)//棋子正在被拖动
         {
+            //我方棋盘高亮
             for (auto iter : gridMap->nodeMap)
             {
                 if (iter.second->isMine)
                     iter.second->turnToSeen();
             }
+            //棋子跟随鼠标位置
             selectedChess->setPosition(mousePosition);
         }
 }
@@ -306,6 +305,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
 
 
         //此处判断鼠标位置所处棋格是否存在
+        //1 有效但超出人口范围
         if (gridMap->chessAmount >= myPlayer->myStore->level && cell && !cell->chessInGrid) {
             createText("Level Is Not Enough");
             CCLOG("PrepareScene:swap failed");
@@ -313,7 +313,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
             preSeats->addChessToSeat(selectedChess, preSeats->getSeatAtPosition(selectedChess->atSeatPosition));
             myPlayer->addChess(selectedChess);
         }
-        //1 棋格存在且位置上无棋子,将棋子放置在新的位置上
+        //2 棋格存在且位置上无棋子,将棋子放置在新的位置上
         else if (cell && !cell->chessInGrid && cell->isMine)
         {
             CCLOG("PrepareScene:put Chess on Grid");
@@ -326,7 +326,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
             preSeats->addChessToSeat(selectedChess, seat);
             myPlayer->addChess(selectedChess);
         }
-        //2 棋格存在且位置上有棋子
+        //3 棋格存在且位置上有棋子
         else if (cell && cell->chessInGrid && cell->isMine)
         {
             CCLOG("PrepareScene:swap Cell and Something");
@@ -362,7 +362,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
             preSeats->addChessToSeat(selectedChess, seat);
             myPlayer->addChess(selectedChess);
         }
-        //3 不存在棋格，但位于商店
+        //4 不存在棋格，但位于商店
         else if (mousePosition.y <= store->storeAreaHeight)
         {
             CCLOG("PrepareScene: chess to be sold");
@@ -373,7 +373,7 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
         //让棋格退回原来位置
         else
         {
-            if (cell && !cell->chessInGrid && !cell->isMine)
+            if (cell && !cell->chessInGrid && !cell->isMine)//在敌方棋盘放置
                 createText("Cannot Put on the Opponent's Board");
             CCLOG("PrepareScene:swap failed");
             gridMap->addChessToGrid(selectedChess, gridMap->getCellAtPosition(selectedChess->atGridPosition));
@@ -393,7 +393,6 @@ void PrepareScene::chessOnMouseUp(Vec2 mousePosition)
 
 void PrepareScene::checkAndMerge(Chess* chess)
 {
-    int chessId = chess->getId();
     if (myPlayer->chessCount[std::make_pair(chess->getId(), chess->getStar())] >= 3)
     {
         //此处需要注意有连续进化的可能，用递归形式容易理解
@@ -405,27 +404,35 @@ void PrepareScene::checkAndMerge(Chess* chess)
     }
 }
 
+//进化原来是id和star的棋子
+//棋子三合一进化，在第一个棋子的基础上进化，删除剩下两个棋子
+//棋子可能出现在备战席和棋盘上
 Chess* PrepareScene::upgradeChess(int id, int star)
 {
     //upgradeChess用于保存第一个检测到的棋子，将基于他进化
     Chess* upgradeChess = nullptr;
+
+    //逐个检查备战席上的棋子
     for (int i = 0; i < SEATS_NUM; i++)
     {
         if (preSeats->mySeats[i]->getId() == id && preSeats->mySeats[i]->getStar() == star)
         {
-            auto chessRemove = preSeats->mySeats[i];
+            auto chessRemove = preSeats->mySeats[i];//指向要删除的棋子
+            //保留第一个棋子
             if (upgradeChess == nullptr) {
                 upgradeChess = chessRemove;
-                myPlayer->removeChess(chessRemove);
+                myPlayer->removeChess(chessRemove);//从玩家棋子中删除原星级的棋子
             }
             else {
-                myPlayer->removeChess(chessRemove);
-                preSeats->removeChessOfSeat(preSeats->getSeatAtPosition(chessRemove->atSeatPosition));
-                chessRemove->deleteChess();
+                myPlayer->removeChess(chessRemove);//从玩家棋子中删除原星级的棋子
+                preSeats->removeChessOfSeat(preSeats->getSeatAtPosition(chessRemove->atSeatPosition));//删除原星级的棋子的席位
+                chessRemove->deleteChess();//把棋子删除
             }
         }
     }
-    //先保存与传入值相同的棋盘上的棋子key值
+
+    //逐个检查棋盘上的棋子
+    //保存棋盘上所有这个id和star的棋子
     std::vector<Vec2> keysToRemove;
     for (auto pair : myPlayer->myChessMap)
     {
@@ -434,7 +441,7 @@ Chess* PrepareScene::upgradeChess(int id, int star)
             keysToRemove.push_back(pair.first);
         }
     }
-    //再依次处理
+    //再依次处理同上
     for (const auto& key : keysToRemove)
     {
         auto chessRemove = myPlayer->myChessMap[key];
@@ -449,6 +456,7 @@ Chess* PrepareScene::upgradeChess(int id, int star)
         }
     }
     //根据star，决定是进化成star2还是star3
+    cocos2d::experimental::AudioEngine::play2d("upgradeEffect.mp3", false);
     upgradeChess->upgrade();
     myPlayer->addChess(upgradeChess);
     return upgradeChess;
@@ -458,6 +466,11 @@ void PrepareScene::goToFightScene(float dt)
 {
     // 创建新的场景
     auto fightScene = FightScene::create();
+    //切换音乐
+    experimental::AudioEngine::stop(globalAudioId);
+    globalAudioId = cocos2d::experimental::AudioEngine::play2d("battleMusic.mp3", true);
+    experimental::AudioEngine::setVolume(globalAudioId, UserDefault::getInstance()->getFloatForKey("backGroundMusicVolumn", 50) / 100.0f);
+
     // 切换到新场景
     cocos2d::Director::getInstance()->replaceScene(fightScene);
 }
@@ -465,7 +478,7 @@ void PrepareScene::goToFightScene(float dt)
 void PrepareScene::menuPlayCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     //把原数据删除再离开场景
     PlayerManager::getInstance()->getPlayer(0)->deletePast();
@@ -475,6 +488,7 @@ void PrepareScene::menuPlayCallback(Ref* pSender) {
 }
 
 void PrepareScene::updateCountdownLabel(float dt) {
+    //剩余时间的整数秒数
     remainingTime -= dt;
     int seconds = static_cast<int>(remainingTime) + 1;
 
@@ -496,7 +510,7 @@ void PrepareScene::updateCountdownLabel(float dt) {
     // 如果时间到，跳转到下一个场景
     if (remainingTime <= 0) {
         gridMap->disableMouseListener();
-        //this->disableMouseListener();
+        //如果鼠标还在拖动棋子，棋子恢复原位
         if (selectedChess)
         {
             CCLOG("PrepareScene:swap failed");
@@ -507,7 +521,7 @@ void PrepareScene::updateCountdownLabel(float dt) {
         for (auto iter : preSeats->seatsArray)
             iter->turnToNormal();
         selectedChess = nullptr;
-        goToFightScene(0); // 这里的参数可以根据你的需要传递
+        goToFightScene(0);
     }
 }
 //输出随输入改变的提示，并在一段时间后自动移除

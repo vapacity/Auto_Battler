@@ -28,10 +28,12 @@ void WaitingRoomScene::onMessage(cocos2d::network::WebSocket* ws, const cocos2d:
         return;
     }
     if (message == "Player2") {
+        //若玩家1存在，初始化玩家2就返回
         if (isPlayer1 == 1) {
             initPlayer2();
             return;
         }
+        //不存在，初始化两个
         myPlayer->playerNumber = 1;
         enemyPlayer->playerNumber = 0;
         initPlayer2();
@@ -77,10 +79,12 @@ bool WaitingRoomScene::init()
 void WaitingRoomScene::initWeb()
 {
     webSocket_ = new cocos2d::network::WebSocket();
-    webSocket_->init(*this, "ws://192.168.43.182:3000");
+
+    //连接到服务器
+    webSocket_->init(*this, "ws://192.168.43.182:3000");//ws://your_server_address:your_port
 }
 
-// 初始化按钮
+// 初始化准备按钮
 void WaitingRoomScene::initButton()
 {
     auto readyButton = cocos2d::MenuItemLabel::create(
@@ -124,6 +128,10 @@ void WaitingRoomScene::initPlayer2()
 // 准备按钮点击回调函数
 void WaitingRoomScene::onReadyButtonClick(cocos2d::Ref* sender)
 {
+    if (isAudioEnabled)
+    {// 启用音效
+        playSoundEffect("myEffect.mp3");
+    }
     if (webSocket_)
     {
         webSocket_->send("READY");
@@ -133,6 +141,7 @@ void WaitingRoomScene::onReadyButtonClick(cocos2d::Ref* sender)
 // 切换到准备场景
 void WaitingRoomScene::goToPreparScne()
 {
+    //用户离开时执行，以确保正确地关闭网络连接
     if (webSocket_ && webSocket_->getReadyState() == cocos2d::network::WebSocket::State::OPEN)
     {
         webSocket_->close();

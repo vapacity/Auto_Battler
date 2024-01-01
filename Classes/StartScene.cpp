@@ -34,7 +34,7 @@ bool StartScene::init()
     initTopic();
     //初始化背景
     initBackground();
-    
+
     return true;
 }
 
@@ -149,7 +149,7 @@ void StartScene::initBackground()
 void StartScene::menuStartCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     auto startScene = PlayMenu::createScene();
     Director::getInstance()->pushScene(startScene);
@@ -158,7 +158,7 @@ void StartScene::menuStartCallback(Ref* pSender) {
 void StartScene::menuSetCallback(Ref* pSender) {
     if (isAudioEnabled)
     {// 启用音效
-        AudioManager::playEffect();
+        playSoundEffect("myEffect.mp3");
     }
     auto setScene = SetMenu::createScene();
     Director::getInstance()->pushScene(setScene);
